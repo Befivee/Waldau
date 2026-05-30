@@ -1,0 +1,33 @@
+name: Deploy WaldauCastle
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Publish project
+      run: dotnet publish WaldauCastle/WaldauCastle.csproj -c Release -o publish
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to server
+      run: |
+        scp -r publish/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/waldau
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "systemctl restart waldau"
