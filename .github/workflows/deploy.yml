@@ -18,7 +18,7 @@ jobs:
         dotnet-version: 10.0.x
 
     - name: Publish project
-      run: dotnet publish WaldauCastle/WaldauCastle.csproj -c Release -o publish
+      run: dotnet publish WaldauCastle.csproj -c Release -o publish
 
     - name: Setup SSH
       run: |
