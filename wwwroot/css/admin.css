@@ -1,0 +1,28 @@
+.page-admin .admin-table {
+  margin-top: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.page-admin .table {
+  margin-bottom: 0;
+}
+
+.page-admin .form-control,
+.page-admin .form-label {
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.page-admin .admin-table__thumb {
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.page-admin .admin-event-preview__img {
+  max-width: 240px;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}

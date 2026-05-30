@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Контакты";
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="page-title">
+    <div class="page-hero__bg page-hero__bg--contacts"></div>
+    <div class="container-xl page-hero__content reveal">
+        <h1 id="page-title" class="page-hero__title">Контакты</h1>
+        <p class="page-hero__lead">Свяжитесь с нами или запишитесь на экскурсию</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container-xl">
+        <div class="contacts-grid">
+            <div class="contacts-info reveal">
+                <div class="contact-block">
+                    <h2>Телефон</h2>
+                    <a href="tel:+740120000000" class="contact-block__value">@SiteInfo.Phone</a>
+                </div>
+                <div class="contact-block">
+                    <h2>Email</h2>
+                    <a href="mailto:@SiteInfo.Email" class="contact-block__value">@SiteInfo.Email</a>
+                </div>
+                <div class="contact-block">
+                    <h2>Адрес</h2>
+                    <p class="contact-block__value">@SiteInfo.Address</p>
+                </div>
+                <div class="contact-block">
+                    <h2>Режим работы</h2>
+                    <p class="contact-block__value">@SiteInfo.WorkingHours</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
+            </div>
+            <div class="contacts-map reveal">
+                <div class="map-placeholder map-placeholder--lg" role="img" aria-label="Карта — замок Вальдау">
+                    <div class="map-placeholder__pin"></div>
+                </div>
+                <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="link-arrow">Открыть в Яндекс.Картах</a>
+            </div>
+        </div>
+    </div>
+</section>

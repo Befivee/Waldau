@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Ошибка";
+    ViewData["BodyClass"] = "page-error";
+    var statusCode = ViewData["StatusCode"] as int?;
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="error-title">
+    <div class="page-hero__bg"></div>
+    <div class="container-xl page-hero__content reveal">
+        @if (statusCode.HasValue)
+        {
+            <p class="error-page__code" aria-hidden="true">@statusCode</p>
+        }
+        <h1 id="error-title" class="page-hero__title">Произошла ошибка</h1>
+        <p class="page-hero__lead">Попробуйте вернуться на главную или повторить действие позже.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">Вернуться на главную</a>
+    </div>
+</section>

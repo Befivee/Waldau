@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Ошибка сервера";
+    ViewData["BodyClass"] = "page-error";
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="error-title">
+    <div class="page-hero__bg"></div>
+    <div class="container-xl page-hero__content reveal">
+        <p class="error-page__code" aria-hidden="true">500</p>
+        <h1 id="error-title" class="page-hero__title">Что-то пошло не так</h1>
+        <p class="page-hero__lead">На сервере произошла ошибка. Мы уже работаем над её устранением.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">Вернуться на главную</a>
+    </div>
+</section>

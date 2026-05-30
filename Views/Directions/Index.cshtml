@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Как добраться";
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="page-title">
+    <div class="page-hero__bg page-hero__bg--directions"></div>
+    <div class="container-xl page-hero__content reveal">
+        <h1 id="page-title" class="page-hero__title">Как добраться</h1>
+        <p class="page-hero__lead">@SiteInfo.DistanceFromKg · @SiteInfo.TravelTime</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container-xl">
+        <div class="directions-layout">
+            <div class="directions-layout__map reveal">
+                <div class="map-placeholder map-placeholder--xl" role="img" aria-label="Карта проезда к замку Вальдау, пос. Низовье">
+                    <div class="map-placeholder__pin"></div>
+                    <span>Замок Вальдау · Низовье</span>
+                </div>
+                <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="btn btn-primary btn-block">Открыть маршрут</a>
+            </div>
+
+            <div class="directions-layout__info">
+                <article class="route-card reveal">
+                    <span class="route-card__icon" aria-hidden="true">🚍</span>
+                    <div>
+                        <h2>@SiteInfo.BusRoute</h2>
+                        <p>Отправление от автовокзала Калининграда. Остановка «Низовье» — 5 минут пешком до замка.</p>
+                        <p class="route-card__meta">@SiteInfo.TravelTime · ~35 км</p>
+                    </div>
+                </article>
+
+                <article class="route-card reveal">
+                    <span class="route-card__icon" aria-hidden="true">🚗</span>
+                    <div>
+                        <h2>На автомобиле</h2>
+                        <p>По трассе в сторону пос. Низовье. Указатели на замок есть на подъезде к поселку.</p>
+                        <p class="route-card__meta">Парковка у входа</p>
+                    </div>
+                </article>
+
+                <article class="route-card reveal">
+                    <span class="route-card__icon" aria-hidden="true">📍</span>
+                    <div>
+                        <h2>Адрес</h2>
+                        <p>@SiteInfo.Address</p>
+                    </div>
+                </article>
+
+                <div class="route-steps reveal">
+                    <h3>Маршрут на автобусе</h3>
+                    <ol>
+                        <li>Автовокзал Калининграда → садимся на №110</li>
+                        <li>Едем ~45 мин до остановки «Низовье»</li>
+                        <li>5 минут пешком по указателям к замку</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

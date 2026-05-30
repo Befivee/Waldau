@@ -1,0 +1,32 @@
+<header class="site-header" id="site-header">
+    <div class="container-xl site-header__inner">
+        <a class="site-logo" asp-controller="Home" asp-action="Index" aria-label="@SiteInfo.CastleName — на главную">
+            <span class="site-logo__icon" aria-hidden="true">⬡</span>
+            <span class="site-logo__text">
+                <span class="site-logo__name">Вальдау</span>
+                <span class="site-logo__sub">XIII век</span>
+            </span>
+        </a>
+
+        <nav class="site-nav" id="site-nav" aria-label="Основная навигация">
+            <ul class="site-nav__list">
+                <li><a asp-controller="Excursion" asp-action="Index" class="site-nav__link">Экскурсии</a></li>
+                <li><a asp-controller="Event" asp-action="Index" class="site-nav__link">Мероприятия</a></li>
+                <li><a asp-controller="About" asp-action="Index" class="site-nav__link">О замке</a></li>
+                <li><a asp-controller="Directions" asp-action="Index" class="site-nav__link">Как добраться</a></li>
+                <li><a asp-controller="Contacts" asp-action="Index" class="site-nav__link">Контакты</a></li>
+            </ul>
+        </nav>
+
+        <button type="button" class="btn btn-primary btn-book" data-booking-open aria-label="Записаться на экскурсию">
+            Записаться
+        </button>
+
+        <button type="button" class="burger" id="burger" aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
+            <span class="burger__line"></span>
+            <span class="burger__line"></span>
+            <span class="burger__line"></span>
+        </button>
+    </div>
+    <div class="nav-overlay" id="nav-overlay" hidden></div>
+</header>

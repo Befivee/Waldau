@@ -1,0 +1,230 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.site-footer {
+  background: $color-graphite;
+  color: rgba(#fff, 0.85);
+  padding: $space-xl 0 $space-lg;
+
+  a {
+    color: rgba(#fff, 0.85);
+    &:hover { color: #fff; }
+  }
+
+  &__grid {
+    display: grid;
+    gap: $space-lg;
+    margin-bottom: $space-xl;
+
+    @include respond-to(md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @include respond-to(lg) {
+      grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+    }
+  }
+
+  &__heading {
+    font-family: $font-body;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(#fff, 0.5);
+    margin-bottom: $space-md;
+  }
+
+  &__tagline {
+    font-size: 0.875rem;
+    color: rgba(#fff, 0.6);
+    margin-top: $space-sm;
+  }
+
+  &__nav ul,
+  &__contacts ul {
+    list-style: none;
+
+    li { margin-bottom: 0.5rem; }
+  }
+
+  &__social {
+    display: flex;
+    gap: $space-sm;
+    margin-top: $space-md;
+  }
+
+  &__bottom {
+    padding-top: $space-lg;
+    border-top: 1px solid rgba(#fff, 0.1);
+    font-size: 0.8125rem;
+    color: rgba(#fff, 0.45);
+    text-align: center;
+  }
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(#fff, 0.25);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover {
+    background: $color-burgundy;
+    border-color: $color-burgundy;
+    color: #fff;
+  }
+}
+
+// Page-specific
+.about-split {
+  display: grid;
+  gap: $space-lg;
+  margin-bottom: $space-xl;
+  align-items: center;
+
+  @include respond-to(lg) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  &__image {
+    min-height: 320px;
+    border-radius: $radius-lg;
+    @include image-cover;
+
+    &--castle {
+      background-image: url('/images/about-castle.svg'), linear-gradient(135deg, $color-green, $color-burgundy);
+    }
+  }
+
+  &__text {
+    h2 { margin-bottom: $space-md; }
+    p { color: $color-text-muted; }
+  }
+}
+
+.about-features {
+  display: grid;
+  gap: $space-md;
+  margin-bottom: $space-xl;
+
+  @include respond-to(md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.about-feature {
+  padding: $space-lg;
+  background: $color-surface;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+
+  h3 { color: $color-green; }
+  p { font-size: 0.9375rem; color: $color-text-muted; margin: 0; }
+}
+
+.directions-layout {
+  display: grid;
+  gap: $space-xl;
+
+  @include respond-to(lg) {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+
+.route-card {
+  display: flex;
+  gap: $space-md;
+  padding: $space-lg;
+  background: $color-surface;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+  margin-bottom: $space-md;
+
+  &__icon { font-size: 1.75rem; flex-shrink: 0; }
+  &__meta {
+    font-size: 0.875rem;
+    color: $color-green;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  h2 { font-size: 1.25rem; margin-bottom: $space-xs; }
+  p { font-size: 0.9375rem; color: $color-text-muted; margin: 0 0 $space-xs; }
+}
+
+.route-steps {
+  padding: $space-lg;
+  background: $color-bg-alt;
+  border-radius: $radius-md;
+
+  h3 { margin-bottom: $space-md; }
+  ol {
+    padding-left: 1.25rem;
+    li {
+      margin-bottom: $space-xs;
+      color: $color-text-muted;
+    }
+  }
+}
+
+.contacts-grid {
+  display: grid;
+  gap: $space-xl;
+
+  @include respond-to(lg) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.contact-block {
+  margin-bottom: $space-lg;
+
+  h2 {
+    font-family: $font-body;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $color-text-muted;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  &__value {
+    font-size: 1.25rem;
+    font-family: $font-display;
+    color: $color-graphite;
+    text-decoration: none;
+
+    &:hover { color: $color-burgundy; }
+  }
+}
+
+.content-narrow {
+  max-width: 640px;
+}
+
+.lead-text {
+  font-size: 1.25rem;
+  font-family: $font-display;
+  line-height: 1.5;
+  margin-bottom: $space-md;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-sm;
+  margin-top: $space-lg;
+}
+
+.empty-state {
+  text-align: center;
+  color: $color-text-muted;
+  padding: $space-xl;
+}

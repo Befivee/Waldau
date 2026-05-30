@@ -1,0 +1,25 @@
+@model Event
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="page-title">
+    <div class="page-hero__bg" style="background-image: url('@Model.DisplayImagePath')"></div>
+    <div class="container-xl page-hero__content reveal">
+        <time class="event-detail__date" datetime="@Model.EventDate.ToString("yyyy-MM-dd")">
+            @Model.EventDate.ToString("d MMMM yyyy", new System.Globalization.CultureInfo("ru-RU"))
+        </time>
+        <h1 id="page-title" class="page-hero__title">@Model.Title</h1>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container-xl content-narrow reveal">
+        <p class="lead-text">@Model.Description</p>
+        <p>Мероприятие проходит на территории замка Вальдау в пос. Низовье. Рекомендуем приезжать заранее — @SiteInfo.TravelTime от Калининграда на @SiteInfo.BusRoute.ToLower().</p>
+        <div class="detail-actions">
+            <button type="button" class="btn btn-primary" data-booking-open>Записаться</button>
+            <a asp-controller="Event" asp-action="Index" class="btn btn-outline">Все мероприятия</a>
+        </div>
+    </div>
+</section>

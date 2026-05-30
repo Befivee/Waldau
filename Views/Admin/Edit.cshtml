@@ -1,0 +1,16 @@
+@model EventEditViewModel
+@{
+    ViewData["Title"] = "Редактирование мероприятия";
+    ViewData["BodyClass"] = "page-admin";
+}
+
+<section class="section">
+    <div class="container-xl content-narrow reveal">
+        <h1 class="section-header__title">Редактирование</h1>
+        <partial name="_EventForm" model="Model" />
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,411 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-xs;
+  padding: 0.75rem 1.5rem;
+  font-family: $font-body;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: 2px solid transparent;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: all $transition-fast;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &-primary {
+    background: $color-burgundy;
+    color: #fff;
+    border-color: $color-burgundy;
+
+    &:hover {
+      background: $color-burgundy-dark;
+      border-color: $color-burgundy-dark;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+  }
+
+  &-outline {
+    background: transparent;
+    color: $color-burgundy;
+    border-color: $color-burgundy;
+
+    &:hover {
+      background: $color-burgundy;
+      color: #fff;
+    }
+
+    &--light {
+      color: #fff;
+      border-color: rgba(#fff, 0.7);
+
+      &:hover {
+        background: #fff;
+        color: $color-burgundy;
+      }
+    }
+  }
+
+  &-lg { padding: 1rem 2rem; font-size: 1rem; }
+  &-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+  &-block { width: 100%; }
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 500;
+  color: $color-burgundy;
+
+  &::after {
+    content: '→';
+    transition: transform $transition-fast;
+  }
+
+  &:hover::after {
+    transform: translateX(4px);
+  }
+}
+
+// Section
+.section {
+  padding: $space-xl 0;
+
+  @include respond-to(md) {
+    padding: $space-2xl 0;
+  }
+
+  &--why { background: $color-surface; }
+  &--events { background: $color-bg-alt; }
+  &--history { background: $color-surface; }
+}
+
+.section-header {
+  margin-bottom: $space-lg;
+  text-align: center;
+
+  &--row {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    text-align: left;
+
+    @include respond-to(md) {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+
+  &__title { margin-bottom: $space-xs; }
+  &__lead {
+    color: $color-text-muted;
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+}
+
+.cards-grid {
+  display: grid;
+  gap: $space-md;
+
+  &--2 {
+    @include respond-to(md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &--3 {
+    @include respond-to(sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @include respond-to(lg) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+// Info cards
+.info-card {
+  @include glass(0.9);
+  padding: $space-md;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+  text-align: center;
+  @include card-hover;
+
+  &__icon { font-size: 1.5rem; display: block; margin-bottom: $space-xs; }
+  &__title {
+    font-family: $font-body;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $color-green;
+    margin-bottom: 0.25rem;
+  }
+  &__text { font-size: 0.9375rem; color: $color-text-muted; margin: 0; }
+}
+
+.quick-info {
+  margin-top: -3rem;
+  position: relative;
+  z-index: 2;
+  padding-bottom: $space-lg;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $space-sm;
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(4, 1fr);
+      gap: $space-md;
+    }
+  }
+}
+
+// Why cards
+.why-grid {
+  display: grid;
+  gap: $space-md;
+
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @include respond-to(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.why-card {
+  padding: $space-lg $space-md;
+  border-radius: $radius-md;
+  background: $color-bg;
+  border: 1px solid $color-border;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: rgba($color-burgundy, 0.25);
+    background: $color-surface;
+  }
+
+  &__num {
+    display: block;
+    font-family: $font-display;
+    font-size: 2rem;
+    color: rgba($color-burgundy, 0.35);
+    margin-bottom: $space-sm;
+  }
+
+  h3 { font-size: 1.25rem; }
+  p { font-size: 0.9375rem; color: $color-text-muted; margin: 0; }
+}
+
+// Tour card
+.tour-card {
+  background: $color-surface;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid $color-border;
+  @include card-hover;
+
+  &__image {
+    height: 200px;
+    @include image-cover;
+    background-image: var(--card-bg), linear-gradient(135deg, $color-green 0%, $color-burgundy 100%);
+    position: relative;
+  }
+
+  &__price {
+    position: absolute;
+    top: $space-sm;
+    right: $space-sm;
+    @include glass(0.95);
+    padding: 0.35rem 0.75rem;
+    border-radius: $radius-sm;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: $color-burgundy;
+  }
+
+  &__body { padding: $space-md; }
+  &__title { font-size: 1.25rem; margin-bottom: $space-xs; }
+  &__desc {
+    font-size: 0.875rem;
+    color: $color-text-muted;
+    margin-bottom: $space-sm;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  &__meta { margin-bottom: $space-md; }
+  &__duration {
+    font-size: 0.8125rem;
+    color: $color-green;
+    font-weight: 500;
+  }
+}
+
+// Event card
+.event-card {
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  @include card-hover;
+
+  &__link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+
+    &:hover { color: inherit; }
+  }
+
+  &__image {
+    height: 220px;
+    @include image-cover;
+    background-image: var(--card-bg), linear-gradient(160deg, $color-burgundy 0%, $color-green-dark 100%);
+  }
+
+  &__body { padding: $space-md; }
+  &__date {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $color-green;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: $space-xs;
+  }
+  &__title { font-size: 1.35rem; margin-bottom: $space-sm; }
+
+  &__desc {
+    font-size: 0.9375rem;
+    color: $color-text-muted;
+    margin-bottom: $space-sm;
+    line-height: 1.5;
+  }
+}
+
+// Map placeholder
+.map-placeholder {
+  background: linear-gradient(145deg, #e8e4de 0%, #d4cfc6 100%);
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  color: $color-text-muted;
+  font-size: 0.875rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba($color-graphite, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba($color-graphite, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  &--sm { height: 140px; }
+  &--lg { min-height: 280px; }
+  &--xl { min-height: 400px; }
+
+  &__pin {
+    width: 24px;
+    height: 24px;
+    background: $color-burgundy;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    margin-bottom: $space-sm;
+    box-shadow: 0 4px 12px rgba($color-burgundy, 0.4);
+    position: relative;
+    z-index: 1;
+  }
+
+  span { position: relative; z-index: 1; }
+}
+
+// Filter
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-xs;
+  margin-bottom: $space-lg;
+}
+
+.filter-chip {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid $color-border;
+  background: $color-surface;
+  color: $color-text;
+  transition: all $transition-fast;
+
+  &:hover, &.is-active {
+    background: $color-burgundy;
+    border-color: $color-burgundy;
+    color: #fff;
+  }
+}
+
+// Forms
+.form-group {
+  margin-bottom: $space-md;
+
+  label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: $color-text-muted;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    font-size: 1rem;
+    background: $color-bg;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $color-burgundy;
+      box-shadow: 0 0 0 3px rgba($color-burgundy, 0.12);
+    }
+  }
+}
+
+.form-row {
+  display: grid;
+  gap: $space-md;
+  @include respond-to(sm) {
+    grid-template-columns: 1fr 120px;
+  }
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: $color-text-muted;
+}

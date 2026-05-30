@@ -1,0 +1,23 @@
+@model IReadOnlyList<Event>
+@{
+    ViewData["Title"] = "Мероприятия";
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="page-title">
+    <div class="page-hero__bg page-hero__bg--events"></div>
+    <div class="container-xl page-hero__content reveal">
+        <h1 id="page-title" class="page-hero__title">Мероприятия</h1>
+        <p class="page-hero__lead">Фестивали, концерты и события на территории замка</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container-xl">
+        <div class="cards-grid cards-grid--2">
+            @foreach (var evt in Model)
+            {
+                <partial name="Components/_EventCard" model="evt" />
+            }
+        </div>
+    </div>
+</section>

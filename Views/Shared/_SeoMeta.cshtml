@@ -1,0 +1,28 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<WaldauCastle.Options.SiteSettings> SiteOptions
+@{
+    var site = SiteOptions.Value;
+    var title = ViewData["Title"]?.ToString() ?? site.SiteName;
+    var description = ViewData["MetaDescription"]?.ToString()
+        ?? "Замок Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, музей.";
+    var keywords = ViewData["MetaKeywords"]?.ToString() ?? site.DefaultKeywords;
+    var ogType = ViewData["OgType"]?.ToString() ?? "website";
+    var ogImage = ViewData["OgImage"]?.ToString() ?? "/images/hero-castle.svg";
+    var canonical = site.BaseUrl.TrimEnd('/') + Context.Request.Path;
+}
+
+<meta name="description" content="@description" />
+<meta name="keywords" content="@keywords" />
+<link rel="canonical" href="@canonical" />
+
+<meta property="og:locale" content="ru_RU" />
+<meta property="og:type" content="@ogType" />
+<meta property="og:title" content="@title — @site.SiteName" />
+<meta property="og:description" content="@description" />
+<meta property="og:url" content="@canonical" />
+<meta property="og:site_name" content="@site.SiteName" />
+<meta property="og:image" content="@(site.BaseUrl.TrimEnd('/') + ogImage)" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="@title — @site.SiteName" />
+<meta name="twitter:description" content="@description" />

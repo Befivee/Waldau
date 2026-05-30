@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Заявка отправлена";
+}
+
+<section class="section section--success">
+    <div class="container-xl content-narrow text-center reveal">
+        <div class="booking-success booking-success--page">
+            <div class="booking-success__icon" aria-hidden="true">✓</div>
+            <h1 class="booking-success__title">Спасибо!</h1>
+            <p class="booking-success__text">
+                Ваша заявка успешно отправлена. Мы свяжемся с вами при необходимости.
+            </p>
+            <div class="detail-actions detail-actions--center">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Вернуться на главную</a>
+            </div>
+        </div>
+    </div>
+</section>

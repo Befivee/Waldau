@@ -1,0 +1,65 @@
+@model BookingCreateViewModel
+@{
+    ViewData["Title"] = "Запись на экскурсию";
+    ViewData["MetaDescription"] = "Онлайн-запись на экскурсию в замок Вальдау. Оставьте заявку — мы свяжемся для подтверждения.";
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="page-title">
+    <div class="page-hero__bg"></div>
+    <div class="container-xl page-hero__content reveal">
+        <h1 id="page-title" class="page-hero__title">Запись на экскурсию</h1>
+        <p class="page-hero__lead">Оставьте заявку — мы перезвоним для подтверждения</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container-xl content-narrow reveal">
+        <form asp-action="Create" method="post" class="booking-form booking-form--page" novalidate>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
+
+            <input type="hidden" asp-for="ExcursionId" />
+            <input type="hidden" asp-for="ExcursionTitle" />
+
+            @if (!string.IsNullOrEmpty(Model.ExcursionTitle))
+            {
+                <p class="booking-form__tour-label">Экскурсия: <strong>@Model.ExcursionTitle</strong></p>
+            }
+
+            <div class="form-group">
+                <label asp-for="FullName"></label>
+                <input asp-for="FullName" class="form-control" autocomplete="name" placeholder="Иванов Иван Иванович" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Phone"></label>
+                <input asp-for="Phone" type="tel" class="form-control js-phone-input" autocomplete="tel-national"
+                       placeholder="+7 (___) ___-__-__" pattern="\+7\d{10}" />
+                <span class="form-hint">+7 и 10 цифр номера</span>
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="VisitDate"></label>
+                    <input asp-for="VisitDate" type="date" class="form-control" />
+                    <span asp-validation-for="VisitDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PersonsCount"></label>
+                    <input asp-for="PersonsCount" type="number" class="form-control" min="1" max="30" />
+                    <span asp-validation-for="PersonsCount" class="text-danger"></span>
+                </div>
+            </div>
+
+            <partial name="_PersonalDataConsent" model="Model" />
+
+            <button type="submit" class="btn btn-primary btn-block">Отправить заявку</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <rect width="600" height="400" fill="#f0ebe4"/>
+  <path fill="#2d4a3e" opacity="0.5" d="M150 320 L220 180 L300 160 L380 180 L450 320 Z"/>
+  <text x="300" y="360" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#5c5c62">0;L40C</text>
+</svg>

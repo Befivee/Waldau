@@ -1,0 +1,176 @@
+@model HomeIndexViewModel
+@{
+    ViewData["Title"] = "Главная";
+    ViewData["BodyClass"] = "page-home";
+}
+
+<section class="hero" aria-label="Замок Вальдау">
+    <div class="hero__bg" data-parallax></div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content container-xl reveal">
+        <p class="hero__eyebrow">Калининградская область · пос. Низовье</p>
+        <h1 class="hero__title">@SiteInfo.CastleName</h1>
+        <p class="hero__subtitle">@SiteInfo.Tagline</p>
+        <div class="hero__actions">
+            <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
+            <a asp-controller="Directions" asp-action="Index" class="btn btn-outline btn-lg btn-outline--light">Как добраться</a>
+        </div>
+    </div>
+    <a href="#quick-info" class="hero__scroll" aria-label="Прокрутить вниз">
+        <span></span>
+    </a>
+</section>
+
+<section class="quick-info" id="quick-info" aria-label="Быстрая информация">
+    <div class="container-xl">
+        <div class="quick-info__grid">
+            <div class="info-card reveal">
+                <span class="info-card__icon" aria-hidden="true">📍</span>
+                <h3 class="info-card__title">Низовье</h3>
+                <p class="info-card__text">@SiteInfo.DistanceFromKg</p>
+            </div>
+            <div class="info-card reveal">
+                <span class="info-card__icon" aria-hidden="true">⏰</span>
+                <h3 class="info-card__title">Время работы</h3>
+                <p class="info-card__text">@SiteInfo.WorkingHours</p>
+            </div>
+            <div class="info-card reveal">
+                <span class="info-card__icon" aria-hidden="true">💰</span>
+                <h3 class="info-card__title">Стоимость</h3>
+                <p class="info-card__text">@SiteInfo.TicketPrice</p>
+            </div>
+            <div class="info-card reveal">
+                <span class="info-card__icon" aria-hidden="true">🚍</span>
+                <h3 class="info-card__title">@SiteInfo.BusRoute</h3>
+                <p class="info-card__text">@SiteInfo.TravelTime</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section--why" aria-labelledby="why-title">
+    <div class="container-xl">
+        <header class="section-header reveal">
+            <h2 id="why-title" class="section-header__title">Почему стоит посетить</h2>
+        </header>
+        <div class="why-grid">
+            <article class="why-card reveal">
+                <span class="why-card__num">01</span>
+                <h3>Настоящий замок XIII века</h3>
+                <p>Одна из старейших крепостей региона — руины и башни, сохранившие дух Средневековья.</p>
+            </article>
+            <article class="why-card reveal">
+                <span class="why-card__num">02</span>
+                <h3>Музей внутри</h3>
+                <p>Экспозиция о Тевтонском ордене, быте крестоносцев и истории Восточной Пруссии.</p>
+            </article>
+            <article class="why-card reveal">
+                <span class="why-card__num">03</span>
+                <h3>Экскурсии и мероприятия</h3>
+                <p>Живые программы для семей, туристов и любителей истории круглый год.</p>
+            </article>
+            <article class="why-card reveal">
+                <span class="why-card__num">04</span>
+                <h3>Атмосфера средневековья</h3>
+                <p>Фестивали, реконструкции и вечерние прогулки под открытым небом.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section section--tours" aria-labelledby="tours-title">
+    <div class="container-xl">
+        <header class="section-header section-header--row reveal">
+            <div>
+                <h2 id="tours-title" class="section-header__title">Экскурсии</h2>
+                <p class="section-header__lead">Выберите программу и запишитесь онлайн</p>
+            </div>
+            <a asp-controller="Excursion" asp-action="Index" class="link-arrow">Все экскурсии</a>
+        </header>
+        <div class="cards-grid cards-grid--3">
+            @foreach (var excursion in Model.UpcomingExcursions)
+            {
+                <partial name="Components/_ExcursionCard" model="excursion" />
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section section--events" aria-labelledby="events-title">
+    <div class="container-xl">
+        <header class="section-header section-header--row reveal">
+            <div>
+                <h2 id="events-title" class="section-header__title">Мероприятия</h2>
+                <p class="section-header__lead">События на территории замка</p>
+            </div>
+            <a asp-controller="Event" asp-action="Index" class="link-arrow">Все мероприятия</a>
+        </header>
+        <div class="cards-grid cards-grid--3">
+            @foreach (var evt in Model.UpcomingEvents)
+            {
+                <partial name="Components/_EventCard" model="evt" />
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section section--directions-preview" aria-labelledby="directions-preview-title">
+    <div class="container-xl">
+        <div class="directions-preview reveal">
+            <div class="directions-preview__content">
+                <h2 id="directions-preview-title" class="section-header__title">Как добраться</h2>
+                <ul class="directions-preview__list">
+                    <li><strong>@SiteInfo.BusRoute</strong> — от автовокзала Калининграда</li>
+                    <li><strong>@SiteInfo.DistanceFromKg</strong></li>
+                    <li><strong>@SiteInfo.TravelTime</strong></li>
+                </ul>
+                <div class="directions-preview__actions">
+                    <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="btn btn-primary">Построить маршрут</a>
+                    <a asp-controller="Directions" asp-action="Index" class="btn btn-outline">Подробнее</a>
+                </div>
+            </div>
+            <div class="map-placeholder map-placeholder--lg" role="img" aria-label="Схема проезда к замку Вальдау">
+                <div class="map-placeholder__pin"></div>
+                <span>54.742° N · 20.512° E</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section--history" aria-labelledby="history-title">
+    <div class="container-xl">
+        <header class="section-header reveal">
+            <h2 id="history-title" class="section-header__title">История в трёх строках</h2>
+        </header>
+        <div class="history-timeline">
+            <article class="history-step reveal">
+                <span class="history-step__year">1258</span>
+                <h3>Основание</h3>
+                <p>Крепость Вальдау заложена рыцарями Тевтонского ордена на месте прусского укрепления.</p>
+            </article>
+            <article class="history-step reveal">
+                <span class="history-step__year">XIV–XV</span>
+                <h3>Тевтонский орден</h3>
+                <p>Стратегический форпост ордена в земле Натангии — свидетель столетий рыцарской истории.</p>
+            </article>
+            <article class="history-step reveal">
+                <span class="history-step__year">Сегодня</span>
+                <h3>Музей и экскурсии</h3>
+                <p>После реконструкций замок открыт для гостей: музей, прогулки и культурные события.</p>
+            </article>
+        </div>
+        <div class="section-cta reveal">
+            <a asp-controller="About" asp-action="Index" class="link-arrow">Узнать больше о замке</a>
+        </div>
+    </div>
+</section>
+
+<section class="section section--cta-banner" aria-label="Запись на экскурсию">
+    <div class="container-xl">
+        <div class="cta-banner reveal">
+            <h2>Готовы к путешествию во времени?</h2>
+            <p>Запишитесь на экскурсию — места ограничены в сезон</p>
+            <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,28 @@
+@model IReadOnlyList<Excursion>
+@{
+    ViewData["Title"] = "Экскурсии";
+}
+
+<section class="page-hero page-hero--compact" aria-labelledby="page-title">
+    <div class="page-hero__bg"></div>
+    <div class="container-xl page-hero__content reveal">
+        <h1 id="page-title" class="page-hero__title">Экскурсии</h1>
+        <p class="page-hero__lead">Выберите программу и оставьте заявку на удобную дату</p>
+    </div>
+</section>
+
+<section class="section" aria-label="Список экскурсий">
+    <div class="container-xl">
+        <div class="cards-grid cards-grid--3">
+            @foreach (var excursion in Model)
+            {
+                <partial name="Components/_ExcursionCard" model="excursion" />
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p class="empty-state reveal">Экскурсии скоро появятся. Загляните позже.</p>
+        }
+    </div>
+</section>

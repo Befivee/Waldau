@@ -1,0 +1,19 @@
+@model Event
+@{
+    ViewData["Title"] = "Удаление мероприятия";
+    ViewData["BodyClass"] = "page-admin";
+}
+
+<section class="section">
+    <div class="container-xl content-narrow reveal">
+        <h1 class="section-header__title">Удалить мероприятие?</h1>
+        <p class="lead-text">@Model.Title — @Model.EventDate.ToString("d MMMM yyyy", new System.Globalization.CultureInfo("ru-RU"))</p>
+
+        <form asp-action="Delete" method="post" class="mt-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+        </form>
+    </div>
+</section>

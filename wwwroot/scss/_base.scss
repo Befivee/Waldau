@@ -1,0 +1,77 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: $font-body;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: $color-text;
+  background: $color-bg;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: $color-burgundy;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-burgundy-dark;
+  }
+}
+
+h1, h2, h3, h4 {
+  font-family: $font-display;
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 $space-sm;
+  color: $color-graphite;
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
+
+p { margin: 0 0 $space-sm; }
+
+ul, ol { margin: 0; padding: 0; }
+
+.container-xl {
+  width: 100%;
+  max-width: $container-max;
+  margin: 0 auto;
+  padding: 0 $space-md;
+
+  @include respond-to(lg) {
+    padding: 0 $space-lg;
+  }
+}
+
+main {
+  min-height: 50vh;
+}
+
+.page-home main {
+  padding-top: 0;
+}
+
+:not(.page-home) main {
+  padding-top: $header-height;
+}
