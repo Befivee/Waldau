@@ -1,0 +1,125 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.booking-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: $space-md;
+
+  &:not([hidden]),
+  &.is-open {
+    display: flex;
+  }
+
+  &[hidden] {
+    display: none !important;
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba($color-graphite, 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  &__panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    @include glass(0.98);
+    border-radius: $radius-lg;
+    padding: $space-lg;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+    animation: modal-in 0.35s $ease-out;
+  }
+
+  &__close {
+    position: absolute;
+    top: $space-sm;
+    right: $space-sm;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: $color-bg;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: $color-text-muted;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:hover {
+      background: $color-burgundy;
+      color: #fff;
+    }
+  }
+
+  &__title {
+    font-size: 1.75rem;
+    margin-bottom: $space-xs;
+    padding-right: $space-lg;
+  }
+
+  &__subtitle {
+    font-size: 0.9375rem;
+    color: $color-text-muted;
+    margin-bottom: $space-lg;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.booking-form__tour-label {
+  font-size: 0.875rem;
+  color: $color-green;
+  font-weight: 500;
+  padding: $space-xs $space-sm;
+  background: rgba($color-green, 0.08);
+  border-radius: $radius-sm;
+  margin-bottom: $space-md;
+}
+
+.booking-success {
+  text-align: center;
+  padding: $space-md 0;
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto $space-md;
+    background: $color-green;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    margin-bottom: $space-sm;
+  }
+
+  &__text {
+    color: $color-text-muted;
+    margin-bottom: $space-lg;
+  }
+}

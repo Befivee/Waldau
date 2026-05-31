@@ -1,0 +1,13 @@
+@model string
+
+@{
+    var size = string.IsNullOrWhiteSpace(Model) ? "lg" : Model;
+}
+
+<div class="yandex-map yandex-map--@size">
+    <iframe src="@SiteInfo.YandexMapEmbedUrl"
+            title="Замок Вальдау на карте"
+            allowfullscreen="true"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+</div>

@@ -6,3 +6,6 @@ publish/
 *.db-wal
 appsettings.Development.json
 .vs/
+
+# Не хранить медиа вне wwwroot (используйте wwwroot/images/)
+/images/

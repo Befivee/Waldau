@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /Admin
+Disallow: /admin
+Disallow: /Home/Error
+Disallow: /Home/ServerError
+Disallow: /Home/NotFound
+
+Sitemap: https://вальдау.рф/sitemap.xml

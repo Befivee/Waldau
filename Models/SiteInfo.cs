@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace WaldauCastle.Models;
 
 public static class SiteInfo
@@ -13,7 +15,12 @@ public static class SiteInfo
     public const string BusRoute = "Автобус №110";
     public const string DistanceFromKg = "~35 км от Калининграда";
     public const string TravelTime = "~45 мин на автобусе";
-    public const double Latitude = 54.742;
-    public const double Longitude = 20.512;
-    public const string YandexMapsUrl = "https://yandex.ru/maps/?pt=20.743124,54.700653&z=15&l=map";
+    public const double Latitude = 54.700653;
+    public const double Longitude = 20.743124;
+
+    public static string YandexMapsUrl =>
+        $"https://yandex.ru/maps/?pt={Longitude.ToString(CultureInfo.InvariantCulture)},{Latitude.ToString(CultureInfo.InvariantCulture)}&z=15&l=map";
+
+    public static string YandexMapEmbedUrl =>
+        $"https://yandex.ru/map-widget/v1/?ll={Longitude.ToString(CultureInfo.InvariantCulture)}%2C{Latitude.ToString(CultureInfo.InvariantCulture)}&z=15&l=map&pt={Longitude.ToString(CultureInfo.InvariantCulture)}%2C{Latitude.ToString(CultureInfo.InvariantCulture)}";
 }

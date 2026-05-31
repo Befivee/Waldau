@@ -209,12 +209,20 @@ main {
 }
 
 .page-home .site-header:not(.is-scrolled) {
-  background: linear-gradient(180deg, rgba(20, 14, 12, 0.72) 0%, rgba(20, 14, 12, 0.35) 55%, transparent 100%);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: none;
 }
 .page-home .site-header:not(.is-scrolled) .site-nav__link,
 .page-home .site-header:not(.is-scrolled) .site-logo {
   color: #fff;
+}
+.page-home .site-header:not(.is-scrolled) .site-nav__link:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+.page-home .site-header:not(.is-scrolled) .site-nav__link::after {
+  background: rgba(255, 255, 255, 0.9);
 }
 .page-home .site-header:not(.is-scrolled) .site-logo__sub {
   color: rgba(255, 255, 255, 0.75);
@@ -222,8 +230,22 @@ main {
 .page-home .site-header:not(.is-scrolled) .site-logo__icon {
   color: rgba(255, 255, 255, 0.95);
 }
+.page-home .site-header:not(.is-scrolled) .site-logo:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
 .page-home .site-header:not(.is-scrolled) .burger__line {
   background: #fff;
+}
+.page-home .site-header:not(.is-scrolled) .btn-book {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.85);
+}
+.page-home .site-header:not(.is-scrolled) .btn-book:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #fff;
+  color: #fff;
+  transform: translateY(-1px);
 }
 .site-nav__link {
   transition: color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -305,7 +327,8 @@ main {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-image: url("/images/hero-castle.svg"), linear-gradient(160deg, #1e3329 0%, #3d1420 50%, #2a2a2e 100%);
+  background-image: url("/images/hero/home-hero.jpg");
+  background-color: #1e3329;
   will-change: transform;
 }
 .hero__overlay {
@@ -934,6 +957,7 @@ main {
   margin-top: 1.5rem;
 }
 
+.map-placeholder {
   background: linear-gradient(145deg, #e8e4de 0%, #d4cfc6 100%);
   border-radius: 12px;
   border: 1px solid rgba(42, 42, 46, 0.1);
@@ -976,6 +1000,30 @@ main {
 .map-placeholder span {
   position: relative;
   z-index: 1;
+}
+
+.yandex-map {
+  border-radius: 12px;
+  border: 1px solid rgba(42, 42, 46, 0.1);
+  overflow: hidden;
+  background: #e8e4de;
+}
+.yandex-map iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.yandex-map--sm {
+  height: 140px;
+}
+.yandex-map--lg {
+  min-height: 280px;
+  height: 280px;
+}
+.yandex-map--xl {
+  min-height: 400px;
+  height: 400px;
 }
 
 .filter-bar {

@@ -33,9 +33,7 @@
                 <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
             </div>
             <div class="contacts-map reveal">
-                <div class="map-placeholder map-placeholder--lg" role="img" aria-label="Карта — замок Вальдау">
-                    <div class="map-placeholder__pin"></div>
-                </div>
+                <partial name="_YandexMap" model="lg" />
                 <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="link-arrow">Открыть в Яндекс.Картах</a>
             </div>
         </div>

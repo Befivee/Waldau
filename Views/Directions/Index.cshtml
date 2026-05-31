@@ -14,10 +14,7 @@
     <div class="container-xl">
         <div class="directions-layout">
             <div class="directions-layout__map reveal">
-                <div class="map-placeholder map-placeholder--xl" role="img" aria-label="Карта проезда к замку Вальдау, пос. Низовье">
-                    <div class="map-placeholder__pin"></div>
-                    <span>Замок Вальдау · Низовье</span>
-                </div>
+                <partial name="_YandexMap" model="xl" />
                 <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="btn btn-primary btn-block">Открыть маршрут</a>
             </div>
 

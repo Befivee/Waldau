@@ -14,7 +14,8 @@
     position: absolute;
     inset: -10% 0 0;
     @include image-cover;
-    background-image: url('/images/hero-castle.svg'), linear-gradient(160deg, #1e3329 0%, #3d1420 50%, #2a2a2e 100%);
+    background-image: url('/images/hero/home-hero.jpg');
+    background-color: #1e3329;
     will-change: transform;
   }
 
