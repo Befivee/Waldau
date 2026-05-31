@@ -105,6 +105,11 @@ namespace WaldauCastle.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
                         .HasColumnType("TEXT");

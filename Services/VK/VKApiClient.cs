@@ -22,6 +22,8 @@ public class VKApiClient(
         if (!_options.TryGetGroupId(out var groupId))
             throw new InvalidOperationException("VK GroupId is not configured.");
 
+        await EnsureLongPollSettingsAsync(groupId, cancellationToken);
+
         var query = new Dictionary<string, string?>
         {
             ["group_id"] = groupId.ToString(),
@@ -50,7 +52,14 @@ public class VKApiClient(
         return result;
     }
 
-    public async Task SendMessageAsync(long peerId, string message, CancellationToken cancellationToken)
+    public async Task SendMessageAsync(long peerId, string message, CancellationToken cancellationToken) =>
+        await SendMessageAsync(peerId, message, keyboardJson: null, cancellationToken);
+
+    public async Task SendMessageAsync(
+        long peerId,
+        string message,
+        string? keyboardJson,
+        CancellationToken cancellationToken)
     {
         var query = new Dictionary<string, string?>
         {
@@ -61,7 +70,55 @@ public class VKApiClient(
             ["v"] = _options.ApiVersion
         };
 
+        if (!string.IsNullOrWhiteSpace(keyboardJson))
+            query["keyboard"] = keyboardJson;
+
         await CallMethodAsync("messages.send", query, cancellationToken);
+    }
+
+    public async Task SendEventAnswerAsync(
+        string eventId,
+        long userId,
+        long peerId,
+        string? message = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new Dictionary<string, string?>
+        {
+            ["event_id"] = eventId,
+            ["user_id"] = userId.ToString(),
+            ["peer_id"] = peerId.ToString(),
+            ["access_token"] = _options.AccessToken,
+            ["v"] = _options.ApiVersion
+        };
+
+        if (!string.IsNullOrWhiteSpace(message))
+            query["event_data"] = JsonSerializer.Serialize(new { type = "show_snackbar", text = message });
+
+        await CallMethodAsync("messages.sendMessageEventAnswer", query, cancellationToken);
+    }
+
+    private async Task EnsureLongPollSettingsAsync(long groupId, CancellationToken cancellationToken)
+    {
+        var query = new Dictionary<string, string?>
+        {
+            ["group_id"] = groupId.ToString(),
+            ["enabled"] = "1",
+            ["api_version"] = _options.ApiVersion,
+            ["message_new"] = "1",
+            ["message_event"] = "1",
+            ["access_token"] = _options.AccessToken,
+            ["v"] = _options.ApiVersion
+        };
+
+        try
+        {
+            await CallMethodAsync("groups.setLongPollSettings", query, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Не удалось обновить Long Poll settings через API — проверьте настройки сообщества VK.");
+        }
     }
 
     private async Task<T> GetMethodAsync<T>(
@@ -90,8 +147,15 @@ public class VKApiClient(
         IReadOnlyDictionary<string, string?> query,
         CancellationToken cancellationToken)
     {
-        var uri = BuildMethodUri(method, query);
-        using var response = await httpClient.GetAsync(uri, cancellationToken);
+        using var body = new FormUrlEncodedContent(
+            query
+                .Where(p => !string.IsNullOrEmpty(p.Value))
+                .Select(p => new KeyValuePair<string, string>(p.Key, p.Value!)));
+
+        using var response = await httpClient.PostAsync(
+            $"https://api.vk.com/method/{method}",
+            body,
+            cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var envelope = await response.Content.ReadFromJsonAsync<VkApiResponse<T>>(JsonOptions, cancellationToken);
@@ -107,16 +171,6 @@ public class VKApiClient(
         }
 
         return envelope ?? throw new InvalidOperationException($"VK API {method} returned an empty response.");
-    }
-
-    private Uri BuildMethodUri(string method, IReadOnlyDictionary<string, string?> query)
-    {
-        var pairs = query
-            .Where(p => !string.IsNullOrEmpty(p.Value))
-            .Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value!)}");
-
-        var queryString = string.Join('&', pairs);
-        return new Uri($"https://api.vk.com/method/{method}?{queryString}");
     }
 
     private static Uri BuildLongPollUri(string server, string key, string ts, int waitSeconds)

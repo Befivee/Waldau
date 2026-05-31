@@ -7,7 +7,7 @@ public class Booking
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Укажите ФИО")]
-    [StringLength(200, MinimumLength = 2, ErrorMessage = "ФИО должно содержать от 2 до 200 символов")]
+    [StringLength(200, MinimumLength = 2, ErrorMessage = "ФИО может содержать от 2 до 200 символов")]
     [Display(Name = "ФИО")]
     public string FullName { get; set; } = string.Empty;
 

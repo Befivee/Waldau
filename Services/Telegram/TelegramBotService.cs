@@ -20,32 +20,51 @@ public class TelegramBotService(
             return;
         }
 
-        try
+        var receiverOptions = new ReceiverOptions
         {
-            var me = await botClient.GetMe(stoppingToken);
-            logger.LogInformation("Telegram CMS-бот @{BotUsername} запущен (фоновый сервис).", me.Username);
+            AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
+        };
 
-            var receiverOptions = new ReceiverOptions
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
             {
-                AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
-            };
+                try
+                {
+                    var me = await botClient.GetMe(stoppingToken);
+                    logger.LogInformation("Telegram CMS-бот @{BotUsername} запущен (фоновый сервис).", me.Username);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "GetMe не удался — polling всё равно будет запущен.");
+                }
 
-            botClient.StartReceiving(
-                updateHandler: commandHandler.HandleUpdateAsync,
-                errorHandler: commandHandler.HandleErrorAsync,
-                receiverOptions: receiverOptions,
-                cancellationToken: stoppingToken);
+                botClient.StartReceiving(
+                    updateHandler: commandHandler.HandleUpdateAsync,
+                    errorHandler: commandHandler.HandleErrorAsync,
+                    receiverOptions: receiverOptions,
+                    cancellationToken: stoppingToken);
 
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+                await Task.Delay(Timeout.Infinite, stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Telegram-бот остановлен из-за ошибки. Повтор через 15 секунд.");
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
         }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-        {
-            // graceful shutdown
-        }
-        catch (Exception ex)
-        {
-            // Do not crash the web host if Telegram API is unavailable.
-            logger.LogError(ex, "Telegram-бот остановлен из-за ошибки. Веб-сервер продолжает работу.");
-        }
+
+        logger.LogInformation("TelegramBotService остановлен.");
     }
 }

@@ -16,27 +16,25 @@ public class EventImageService(IWebHostEnvironment environment) : IEventImageSer
             [".webp"] = new(StringComparer.OrdinalIgnoreCase) { "image/webp" }
         };
 
-    private const string UploadFolder = "uploads/events";
-    private const string PublicPrefix = "/uploads/events/";
-
     public async Task<string> SaveAsync(IFormFile file, CancellationToken cancellationToken = default)
     {
         ValidateUpload(file.Length, file.FileName, file.ContentType);
 
         var extension = Path.GetExtension(file.FileName);
-        var uploadsDir = GetUploadsDirectory();
+        var uploadsDir = GetUploadsDirectory("events");
         var fileName = $"{Guid.NewGuid():N}{extension!.ToLowerInvariant()}";
         var physicalPath = Path.Combine(uploadsDir, fileName);
 
         await using var stream = File.Create(physicalPath);
         await file.CopyToAsync(stream, cancellationToken);
 
-        return PublicPrefix + fileName;
+        return BuildPublicPath("events", fileName);
     }
 
     public async Task<string> SaveFromStreamAsync(
         Stream stream,
         string extension,
+        string uploadSubfolder = "events",
         CancellationToken cancellationToken = default)
     {
         if (!extension.StartsWith('.'))
@@ -48,23 +46,27 @@ public class EventImageService(IWebHostEnvironment environment) : IEventImageSer
         if (stream.Length > MaxFileSizeBytes)
             throw new InvalidOperationException("Максимальный размер файла — 10 МБ.");
 
-        var uploadsDir = GetUploadsDirectory();
+        var folder = NormalizeUploadSubfolder(uploadSubfolder);
+        var uploadsDir = GetUploadsDirectory(folder);
         var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
         var physicalPath = Path.Combine(uploadsDir, fileName);
 
         await using var fileStream = File.Create(physicalPath);
         await stream.CopyToAsync(fileStream, cancellationToken);
 
-        return PublicPrefix + fileName;
+        return BuildPublicPath(folder, fileName);
     }
 
     public Task DeleteIfUploadedAsync(string? imagePath, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(imagePath) || !imagePath.StartsWith(PublicPrefix, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(imagePath) ||
+            !imagePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+        {
             return Task.CompletedTask;
+        }
 
-        var fileName = Path.GetFileName(imagePath);
-        var physicalPath = Path.Combine(GetUploadsDirectory(), fileName);
+        var relativePath = imagePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var physicalPath = Path.Combine(environment.WebRootPath, relativePath);
 
         if (File.Exists(physicalPath))
             File.Delete(physicalPath);
@@ -72,12 +74,29 @@ public class EventImageService(IWebHostEnvironment environment) : IEventImageSer
         return Task.CompletedTask;
     }
 
-    private string GetUploadsDirectory()
+    private string GetUploadsDirectory(string uploadSubfolder)
     {
-        var uploadsDir = Path.Combine(environment.WebRootPath, UploadFolder);
+        var uploadsDir = Path.Combine(environment.WebRootPath, "uploads", uploadSubfolder);
         Directory.CreateDirectory(uploadsDir);
         return uploadsDir;
     }
+
+    private static string NormalizeUploadSubfolder(string uploadSubfolder)
+    {
+        var folder = uploadSubfolder.Trim().Trim('/');
+        if (string.IsNullOrWhiteSpace(folder) ||
+            folder.Contains("..", StringComparison.Ordinal) ||
+            folder.Contains(Path.DirectorySeparatorChar) ||
+            folder.Contains('/'))
+        {
+            throw new InvalidOperationException("Недопустимая папка для загрузки изображения.");
+        }
+
+        return folder;
+    }
+
+    private static string BuildPublicPath(string uploadSubfolder, string fileName) =>
+        $"/uploads/{uploadSubfolder}/{fileName}";
 
     private static void ValidateUpload(long length, string fileName, string? contentType)
     {

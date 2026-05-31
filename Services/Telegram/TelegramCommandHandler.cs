@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using WaldauCastle.Options;
+using WaldauCastle.Services.Bot;
 
 namespace WaldauCastle.Services.Telegram;
 
@@ -54,7 +54,25 @@ public class TelegramCommandHandler(
 
         if (!IsAdmin(chatId))
         {
-            await botClient.SendMessage(chatId, "⛔ Доступ запрещён.", cancellationToken: cancellationToken);
+            if (IsStartCommand(message.Text))
+            {
+                await botClient.SendMessage(
+                    chatId,
+                    CastleAdminContentService.BuildPublicWelcomeText(GetSiteUrl()),
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            if (CastleAdminContentService.IsExcursionsRequest(message.Text))
+            {
+                await WithContent(c => SendPublicExcursionsAsync(botClient, chatId, c, cancellationToken), cancellationToken);
+                return;
+            }
+
+            await botClient.SendMessage(
+                chatId,
+                CastleAdminContentService.BuildPublicWelcomeText(GetSiteUrl()),
+                cancellationToken: cancellationToken);
             return;
         }
 
@@ -69,7 +87,8 @@ public class TelegramCommandHandler(
 
         if (message.Photo is { Length: > 0 })
         {
-            if (session.State is TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage)
+            if (session.State is TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage
+                or TelegramBotState.WaitingForExcursionImage or TelegramBotState.WaitingForNewExcursionImage)
             {
                 await WithManager(m => m.HandlePhotoMessageAsync(botClient, message, cancellationToken), cancellationToken);
                 return;
@@ -87,10 +106,7 @@ public class TelegramCommandHandler(
                 return;
             }
 
-            await botClient.SendMessage(
-                chatId,
-                "Используйте /start для открытия панели управления.",
-                cancellationToken: cancellationToken);
+            await WithManager(m => m.HandleMenuTextAsync(botClient, chatId, message.Text.Trim(), cancellationToken), cancellationToken);
         }
     }
 
@@ -112,51 +128,41 @@ public class TelegramCommandHandler(
         }
 
         var data = callback.Data ?? string.Empty;
-
-        await (data switch
-        {
-            TelegramCallbackData.MenuMain =>
-                WithManager(m => m.SendMainMenuAsync(botClient, chatId.Value, cancellationToken), cancellationToken),
-
-            TelegramCallbackData.MenuBookings =>
-                WithManager(m => m.SendBookingsAsync(botClient, chatId.Value, cancellationToken), cancellationToken),
-
-            TelegramCallbackData.MenuEvents or TelegramCallbackData.EventBackList =>
-                WithManager(m => m.SendEventsListAsync(botClient, chatId.Value, cancellationToken), cancellationToken),
-
-            TelegramCallbackData.MenuStats =>
-                WithManager(m => m.SendStatisticsAsync(botClient, chatId.Value, cancellationToken), cancellationToken),
-
-            TelegramCallbackData.EventAdd =>
-                WithManager(m => m.StartAddWizardAsync(botClient, chatId.Value, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:view:", out var viewId) =>
-                WithManager(m => m.SendEventDetailsAsync(botClient, chatId.Value, viewId, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:edit_title:", out var titleId) =>
-                WithManager(m => m.StartEditTitleAsync(botClient, chatId.Value, titleId, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:edit_desc:", out var descId) =>
-                WithManager(m => m.StartEditDescriptionAsync(botClient, chatId.Value, descId, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:edit_img:", out var imgId) =>
-                WithManager(m => m.StartEditImageAsync(botClient, chatId.Value, imgId, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:del:", out var delId) =>
-                WithManager(m => m.SendDeleteConfirmationAsync(botClient, chatId.Value, delId, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:del_yes:", out var delYesId) =>
-                WithManager(m => m.DeleteEventAsync(botClient, chatId.Value, delYesId, cancellationToken), cancellationToken),
-
-            _ when TelegramCallbackData.TryParseEventId(data, "evt:del_no:", out var delNoId) =>
-                WithManager(m => m.SendEventDetailsAsync(botClient, chatId.Value, delNoId, cancellationToken), cancellationToken),
-
-            _ => botClient.SendMessage(chatId.Value, "Неизвестная команда. /start", cancellationToken: cancellationToken)
-        });
+        await WithManager(m => m.HandleCallbackAsync(botClient, chatId.Value, data, cancellationToken), cancellationToken);
     }
 
-    private bool IsAdmin(long chatId) =>
-        options.Value.TryGetAdminChatId(out var adminId) && adminId == chatId;
+    private static bool IsStartCommand(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+
+        var command = text.Trim().Split([' ', '@'])[0];
+        return command.Equals("/start", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsAdmin(long chatId) => options.Value.IsAdminChat(chatId);
+
+    private async Task WithContent(Func<CastleAdminContentService, Task> action, CancellationToken cancellationToken)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var content = scope.ServiceProvider.GetRequiredService<CastleAdminContentService>();
+        await action(content);
+    }
+
+    private async Task SendPublicExcursionsAsync(
+        ITelegramBotClient botClient,
+        long chatId,
+        CastleAdminContentService content,
+        CancellationToken cancellationToken)
+    {
+        var text = await content.BuildExcursionsTextAsync(cancellationToken);
+        await botClient.SendMessage(
+            chatId,
+            text + $"\n\nЗапись: {GetSiteUrl()}",
+            cancellationToken: cancellationToken);
+    }
+
+    private string GetSiteUrl() => SiteSettings.DefaultBaseUrl;
 
     private async Task WithManager(Func<TelegramEventManager, Task> action, CancellationToken cancellationToken)
     {

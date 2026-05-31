@@ -19,21 +19,44 @@ public partial class TelegramBotOptions
 
     public string AdminChatId { get; set; } = string.Empty;
 
+    public string SecondAdminChatId { get; set; } = string.Empty;
+
     public bool HasValidBotToken =>
         !string.IsNullOrWhiteSpace(BotToken) &&
         !IsPlaceholder(BotToken) &&
         BotTokenRegex().IsMatch(BotToken);
 
     public bool IsConfigured =>
-        HasValidBotToken && TryGetAdminChatId(out _);
+        HasValidBotToken && GetAdminChatIds().Count > 0;
 
     public bool TryGetAdminChatId(out long chatId)
     {
         chatId = 0;
-        if (string.IsNullOrWhiteSpace(AdminChatId) || IsPlaceholder(AdminChatId))
+        var ids = GetAdminChatIds();
+        if (ids.Count == 0)
             return false;
 
-        return long.TryParse(AdminChatId, out chatId);
+        chatId = ids[0];
+        return true;
+    }
+
+    public IReadOnlyList<long> GetAdminChatIds()
+    {
+        var ids = new List<long>();
+        TryAddChatId(AdminChatId, ids);
+        TryAddChatId(SecondAdminChatId, ids);
+        return ids;
+    }
+
+    public bool IsAdminChat(long chatId) => GetAdminChatIds().Contains(chatId);
+
+    private static void TryAddChatId(string raw, ICollection<long> ids)
+    {
+        if (string.IsNullOrWhiteSpace(raw) || IsPlaceholder(raw))
+            return;
+
+        if (long.TryParse(raw.Trim(), out var chatId) && !ids.Contains(chatId))
+            ids.Add(chatId);
     }
 
     private static bool IsPlaceholder(string value) =>

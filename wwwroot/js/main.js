@@ -134,22 +134,215 @@
     return PHONE_PREFIX + digits;
   }
 
+  function getPhoneDigits(input) {
+    return input.dataset.phoneDigits || extractSubscriberDigits(input.value);
+  }
+
+  function updatePhoneHint(input, hintEl) {
+    if (!hintEl) return;
+    const digits = getPhoneDigits(input);
+    const incomplete = digits.length > 0 && digits.length < PHONE_DIGITS_LEN;
+    hintEl.textContent = incomplete
+      ? 'Введите 10 цифр номера после +7'
+      : '+7 и 10 цифр номера';
+    hintEl.classList.toggle('is-error', incomplete);
+  }
+
+  function setFieldError(span, message) {
+    if (!span) return;
+    span.textContent = message;
+    span.classList.remove('field-validation-valid');
+    span.classList.add('field-validation-error');
+  }
+
+  function clearFormErrors(form) {
+    form.querySelectorAll('[data-valmsg-for]').forEach((el) => {
+      el.textContent = '';
+      el.classList.add('field-validation-valid');
+      el.classList.remove('field-validation-error');
+    });
+    form.querySelectorAll('.validation-summary').forEach((el) => {
+      el.textContent = '';
+      el.hidden = true;
+    });
+    const hint = document.getElementById('booking-phone-hint');
+    if (hint) hint.hidden = false;
+  }
+
+  function applyFormErrors(form, errors) {
+    if (!errors) return;
+    Object.entries(errors).forEach(([field, messages]) => {
+      const span = form.querySelector(`[data-valmsg-for="${field}"]`);
+      if (span && messages?.length) {
+        setFieldError(span, messages[0]);
+        if (field === 'Phone') {
+          const hint = document.getElementById('booking-phone-hint');
+          if (hint) hint.hidden = true;
+        }
+      }
+    });
+  }
+
+  function validateBookingForm(form) {
+    let valid = true;
+
+    const nameInput = form.querySelector('#booking-name');
+    if (!nameInput?.value.trim()) {
+      setFieldError(form.querySelector('[data-valmsg-for="FullName"]'), 'Укажите ФИО');
+      valid = false;
+    }
+
+    const phoneInput = form.querySelector('#booking-phone');
+    const phoneError = form.querySelector('[data-valmsg-for="Phone"]');
+    const phoneHint = document.getElementById('booking-phone-hint');
+    const digits = phoneInput ? getPhoneDigits(phoneInput) : '';
+
+    if (digits.length === 0) {
+      setFieldError(phoneError, 'Укажите телефон');
+      if (phoneHint) phoneHint.hidden = true;
+      valid = false;
+    } else if (digits.length < PHONE_DIGITS_LEN) {
+      setFieldError(phoneError, 'Введите 10 цифр номера после +7');
+      if (phoneHint) phoneHint.hidden = true;
+      valid = false;
+    }
+
+    const dateInput = form.querySelector('#booking-date');
+    if (!dateInput?.value) {
+      setFieldError(form.querySelector('[data-valmsg-for="VisitDate"]'), 'Выберите дату визита');
+      valid = false;
+    }
+
+    const consentInput = form.querySelector('input[name="PersonalDataConsent"]');
+    if (!consentInput?.checked) {
+      setFieldError(
+        form.querySelector('[data-valmsg-for="PersonalDataConsent"]'),
+        'Необходимо дать согласие на обработку персональных данных'
+      );
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  function setSubmitLoading(button, loading) {
+    if (!button) return;
+    const spinner = button.querySelector('.btn__spinner');
+    button.disabled = loading;
+    button.classList.toggle('is-loading', loading);
+    if (spinner) spinner.hidden = !loading;
+  }
+
+  function resetBookingFormState() {
+    if (!bookingForm) return;
+    clearFormErrors(bookingForm);
+    setSubmitLoading(document.getElementById('booking-submit'), false);
+    const hint = document.getElementById('booking-phone-hint');
+    if (hint) {
+      hint.textContent = '+7 и 10 цифр номера';
+      hint.classList.remove('is-error');
+      hint.hidden = false;
+    }
+  }
+
+  function disableBookingFormUnobtrusive() {
+    if (!bookingForm || !window.jQuery?.fn?.validate) return;
+    const $form = window.jQuery(bookingForm);
+    if ($form.data('validator')) {
+      $form.data('validator').destroy();
+      $form.removeData('validator');
+    }
+    $form.removeData('unobtrusiveValidation');
+  }
+
+  document.addEventListener('DOMContentLoaded', disableBookingFormUnobtrusive);
+
   document.querySelectorAll('input[type="tel"], .js-phone-input').forEach(initPhoneInput);
 
   if (bookingForm) {
-    bookingForm.addEventListener('submit', (e) => {
-      const phoneInput = bookingForm.querySelector('input[type="tel"], .js-phone-input');
-      if (!phoneInput) return;
+    const phoneInput = bookingForm.querySelector('input[type="tel"], .js-phone-input');
+    const phoneHint = document.getElementById('booking-phone-hint');
+    const submitBtn = document.getElementById('booking-submit');
 
-      if (!validatePhoneInput(phoneInput)) {
-        e.preventDefault();
-        phoneInput.setCustomValidity('Введите 10 цифр номера после +7');
-        phoneInput.reportValidity();
-        return;
+    if (phoneInput) {
+      phoneInput.addEventListener('input', () => {
+        updatePhoneHint(phoneInput, phoneHint);
+        const phoneError = bookingForm.querySelector('[data-valmsg-for="Phone"]');
+        if (phoneError?.classList.contains('field-validation-error')) {
+          phoneError.textContent = '';
+          phoneError.classList.add('field-validation-valid');
+          phoneError.classList.remove('field-validation-error');
+          if (phoneHint) phoneHint.hidden = false;
+        }
+      });
+      phoneInput.addEventListener('blur', () => updatePhoneHint(phoneInput, phoneHint));
+    }
+
+    const consentInput = bookingForm.querySelector('input[name="PersonalDataConsent"]');
+    consentInput?.addEventListener('change', () => {
+      const consentError = bookingForm.querySelector('[data-valmsg-for="PersonalDataConsent"]');
+      if (consentInput.checked && consentError) {
+        consentError.textContent = '';
+        consentError.classList.add('field-validation-valid');
+        consentError.classList.remove('field-validation-error');
       }
-      phoneInput.setCustomValidity('');
-      phoneInput.value = phoneValueForSubmit(phoneInput);
     });
+
+    bookingForm.addEventListener(
+      'submit',
+      async (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        clearFormErrors(bookingForm);
+
+        if (!validateBookingForm(bookingForm)) {
+          return;
+        }
+
+        if (phoneInput) {
+          phoneInput.value = phoneValueForSubmit(phoneInput);
+        }
+
+        setSubmitLoading(submitBtn, true);
+
+        try {
+          const response = await fetch(bookingForm.action, {
+            method: 'POST',
+            body: new FormData(bookingForm),
+            headers: {
+              'X-Booking-Modal': '1',
+              Accept: 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            bookingForm.reset();
+            resetBookingFormState();
+            showBookingSuccess();
+            return;
+          }
+
+          const payload = await response.json().catch(() => null);
+          applyFormErrors(bookingForm, payload?.errors);
+        } catch {
+          const summary = bookingForm.querySelector('.validation-summary');
+          if (summary) {
+            summary.hidden = false;
+            summary.textContent = 'Не удалось отправить заявку. Попробуйте ещё раз.';
+          }
+        } finally {
+          setSubmitLoading(submitBtn, false);
+          if (phoneInput && phoneInput.dataset.phoneInit === '1') {
+            const digits = getPhoneDigits(phoneInput);
+            if (digits.length) {
+              phoneInput.value = formatPhoneDisplay(digits);
+            }
+          }
+        }
+      },
+      true
+    );
   }
 
   // Sticky header scroll state
@@ -197,6 +390,7 @@
   function resetBookingView() {
     formWrap?.removeAttribute('hidden');
     successWrap?.setAttribute('hidden', '');
+    resetBookingFormState();
   }
 
   function openBooking(tourId, tourName) {

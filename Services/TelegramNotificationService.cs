@@ -13,29 +13,32 @@ public class TelegramNotificationService(
 {
     public async Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
     {
-        var telegramOptions = options.Value;
-        if (!telegramOptions.TryGetAdminChatId(out var adminChatId))
+        var adminChatIds = options.Value.GetAdminChatIds();
+        if (adminChatIds.Count == 0)
             return;
 
         var culture = new System.Globalization.CultureInfo("ru-RU");
         var text =
             "🔔 Новая заявка\n\n" +
-            $"Имя: {booking.FullName}\n" +
+            $"ФИО: {booking.FullName}\n" +
             $"Телефон: {booking.Phone}\n" +
             $"Дата: {booking.VisitDate.ToString("d MMMM yyyy", culture)}\n" +
             $"Количество человек: {booking.PersonsCount}";
 
-        try
+        foreach (var chatId in adminChatIds)
         {
-            await botClient.SendMessage(
-                chatId: adminChatId,
-                text: text,
-                parseMode: ParseMode.None,
-                cancellationToken: cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Не удалось отправить уведомление о заявке в Telegram.");
+            try
+            {
+                await botClient.SendMessage(
+                    chatId: chatId,
+                    text: text,
+                    parseMode: ParseMode.None,
+                    cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Не удалось отправить уведомление о заявке в Telegram (chat {ChatId}).", chatId);
+            }
         }
     }
 }

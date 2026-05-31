@@ -15,13 +15,4 @@ public class ExcursionController(IExcursionService excursions) : Controller
         var list = await excursions.GetAllAsync(cancellationToken);
         return View(list);
     }
-
-    public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
-    {
-        var excursion = await excursions.GetByIdAsync(id, cancellationToken);
-        if (excursion is null)
-            return NotFound();
-
-        return View(excursion);
-    }
 }

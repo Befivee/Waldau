@@ -5,6 +5,7 @@ using Telegram.Bot;
 using WaldauCastle.Data;
 using WaldauCastle.Options;
 using WaldauCastle.Services;
+using WaldauCastle.Services.Bot;
 using WaldauCastle.Services.Telegram;
 using WaldauCastle.Services.VK;
 
@@ -48,8 +49,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IExcursionService, ExcursionService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddHostedService<BookingCleanupService>();
 builder.Services.AddScoped<IEventImageService, EventImageService>();
 builder.Services.AddScoped<IBackupService, BackupService>();
+builder.Services.AddScoped<CastleAdminContentService>();
 builder.Services.AddSingleton<TelegramStateService>();
 builder.Services.AddScoped<TelegramEventManager>();
 
@@ -62,6 +65,7 @@ if (telegramOptions.IsConfigured)
     var botToken = telegramOptions.BotToken.Trim();
 
     builder.Services.AddHttpClient("telegram_bot_client")
+        .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(120))
         .AddTypedClient<ITelegramBotClient>((_, _) => new TelegramBotClient(botToken));
 
     builder.Services.AddSingleton<TelegramCommandHandler>();
@@ -73,6 +77,8 @@ else
     builder.Services.AddScoped<ITelegramNotificationService, NullTelegramNotificationService>();
 }
 
+builder.Services.AddScoped<IBookingNotificationService, BookingNotificationService>();
+
 var vkOptions = VKOptions.Load(builder.Configuration);
 var vkValidation = vkOptions.Validate();
 
@@ -82,8 +88,16 @@ if (vkValidation.IsValid)
     {
         client.Timeout = TimeSpan.FromSeconds(90);
     });
-    builder.Services.AddSingleton<VKMessageHandler>();
+    builder.Services.AddHttpClient("vk_photo_download");
+    builder.Services.AddSingleton<VKStateService>();
+    builder.Services.AddScoped<VKAdminManager>();
+    builder.Services.AddSingleton<VKCommandHandler>();
     builder.Services.AddHostedService<VKBotService>();
+    builder.Services.AddScoped<IVKNotificationService, VKNotificationService>();
+}
+else
+{
+    builder.Services.AddScoped<IVKNotificationService, NullVKNotificationService>();
 }
 
 builder.Services.AddControllersWithViews();
@@ -116,6 +130,7 @@ else
 }
 
 Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "events"));
+Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "excursions"));
 Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data", "Backups"));
 
 try

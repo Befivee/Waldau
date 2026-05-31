@@ -1,7 +1,7 @@
 @model Excursion
 
 <article class="tour-card reveal">
-    <div class="tour-card__image" style="--card-bg: url('/images/tour-placeholder.svg')">
+    <div class="tour-card__image" style="--card-bg: url('@Model.DisplayImagePath')">
         <span class="tour-card__price">@Model.Price.ToString("0") ₽</span>
     </div>
     <div class="tour-card__body">
@@ -9,7 +9,6 @@
         <p class="tour-card__desc">@Model.Description</p>
         <div class="tour-card__meta">
             <span class="tour-card__duration">@Model.Duration</span>
-            <a asp-controller="Excursion" asp-action="Details" asp-route-id="@Model.Id" class="link-arrow link-arrow--sm">Подробнее</a>
         </div>
         <button type="button" class="btn btn-primary btn-sm"
                 data-booking-open

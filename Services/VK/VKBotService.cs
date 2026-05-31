@@ -5,7 +5,7 @@ namespace WaldauCastle.Services.VK;
 
 public class VKBotService(
     VKApiClient apiClient,
-    VKMessageHandler messageHandler,
+    VKCommandHandler commandHandler,
     IOptions<VKOptions> options,
     ILogger<VKBotService> logger) : BackgroundService
 {
@@ -85,7 +85,7 @@ public class VKBotService(
                     {
                         try
                         {
-                            await messageHandler.HandleUpdateAsync(update, stoppingToken);
+                            await commandHandler.HandleUpdateAsync(update, stoppingToken);
                         }
                         catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
                         {

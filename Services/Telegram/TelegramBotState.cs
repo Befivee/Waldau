@@ -9,5 +9,15 @@ public enum TelegramBotState
     WaitingForEventImage,
     WaitingForNewTitle,
     WaitingForNewDescription,
-    WaitingForNewImage
+    WaitingForNewImage,
+    WaitingForExcursionTitle,
+    WaitingForExcursionDescription,
+    WaitingForExcursionDuration,
+    WaitingForExcursionPrice,
+    WaitingForNewExcursionTitle,
+    WaitingForNewExcursionDescription,
+    WaitingForNewExcursionDuration,
+    WaitingForNewExcursionPrice,
+    WaitingForExcursionImage,
+    WaitingForNewExcursionImage
 }

@@ -23,6 +23,9 @@ public class VKOptions
     /// </summary>
     public string GroupId { get; set; } = string.Empty;
 
+    /// <summary>VK user id of the community administrator (same role as Telegram AdminChatId).</summary>
+    public string AdminUserId { get; set; } = string.Empty;
+
     public string ApiVersion { get; set; } = "5.199";
 
     public int LongPollWaitSeconds { get; set; } = 25;
@@ -87,6 +90,15 @@ public class VKOptions
 
         groupId = Math.Abs(groupId);
         return groupId > 0;
+    }
+
+    public bool TryGetAdminUserId(out long userId)
+    {
+        userId = 0;
+        if (string.IsNullOrWhiteSpace(AdminUserId))
+            return false;
+
+        return long.TryParse(AdminUserId.Trim(), out userId) && userId > 0;
     }
 
     public static VKOptions Load(IConfiguration configuration)

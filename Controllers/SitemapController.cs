@@ -3,18 +3,14 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using WaldauCastle.Options;
-using WaldauCastle.Services;
 
 namespace WaldauCastle.Controllers;
 
-public class SitemapController(
-    IEventService events,
-    IExcursionService excursions,
-    IOptions<SiteSettings> siteSettings) : Controller
+public class SitemapController(IOptions<SiteSettings> siteSettings) : Controller
 {
     [HttpGet("/sitemap.xml")]
     [ResponseCache(Duration = 3600)]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public IActionResult Index()
     {
         var baseUrl = siteSettings.Value.BaseUrl.TrimEnd('/');
         var ns = XNamespace.Get("http://www.sitemaps.org/schemas/sitemap/0.9");
@@ -24,15 +20,10 @@ public class SitemapController(
             CreateUrl(ns, baseUrl, "/", "daily", "1.0"),
             CreateUrl(ns, baseUrl, "/Event", "weekly", "0.9"),
             CreateUrl(ns, baseUrl, "/Excursion", "weekly", "0.9"),
+            CreateUrl(ns, baseUrl, "/About", "monthly", "0.8"),
             CreateUrl(ns, baseUrl, "/Contacts", "monthly", "0.7"),
             CreateUrl(ns, baseUrl, "/privacy", "yearly", "0.5")
         };
-
-        foreach (var evt in await events.GetAllAsync(cancellationToken))
-            urls.Add(CreateUrl(ns, baseUrl, $"/Event/Details/{evt.Id}", "weekly", "0.8", evt.UpdatedAt));
-
-        foreach (var excursion in await excursions.GetAllAsync(cancellationToken))
-            urls.Add(CreateUrl(ns, baseUrl, $"/Excursion/Details/{excursion.Id}", "weekly", "0.8"));
 
         var document = new XDocument(
             new XDeclaration("1.0", "utf-8", null),

@@ -15,8 +15,58 @@ public class BookingService(ApplicationDbContext context) : IBookingService
     }
 
     public async Task<IReadOnlyList<Booking>> GetLatestAsync(int count, CancellationToken cancellationToken = default) =>
-        await context.Bookings
-            .OrderByDescending(b => b.CreatedAt)
+        await QueryOrdered()
             .Take(count)
             .ToListAsync(cancellationToken);
+
+    public Task<int> GetCountAsync(CancellationToken cancellationToken = default) =>
+        context.Bookings.CountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Booking>> GetPageAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        if (page < 0)
+            page = 0;
+
+        return await QueryOrdered()
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<Booking?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        context.Bookings.FindAsync([id], cancellationToken).AsTask();
+
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await context.Bookings.FindAsync([id], cancellationToken);
+        if (entity is null)
+            return;
+
+        context.Bookings.Remove(entity);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<int> DeleteExpiredByVisitDateAsync(
+        DateTime visitDateBefore,
+        CancellationToken cancellationToken = default)
+    {
+        var expired = await context.Bookings
+            .Where(b => b.VisitDate.Date < visitDateBefore.Date)
+            .ToListAsync(cancellationToken);
+
+        if (expired.Count == 0)
+            return 0;
+
+        context.Bookings.RemoveRange(expired);
+        await context.SaveChangesAsync(cancellationToken);
+        return expired.Count;
+    }
+
+    private IQueryable<Booking> QueryOrdered() =>
+        context.Bookings
+            .OrderBy(b => b.VisitDate)
+            .ThenByDescending(b => b.CreatedAt);
 }

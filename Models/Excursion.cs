@@ -4,6 +4,8 @@ namespace WaldauCastle.Models;
 
 public class Excursion
 {
+    public const string DefaultImagePath = "/images/tour-placeholder.svg";
+
     public int Id { get; set; }
 
     [Required]
@@ -25,4 +27,11 @@ public class Excursion
     [Range(0, 100000)]
     [Display(Name = "Цена")]
     public decimal Price { get; set; }
+
+    [StringLength(500)]
+    [Display(Name = "Изображение")]
+    public string ImagePath { get; set; } = DefaultImagePath;
+
+    public string DisplayImagePath =>
+        string.IsNullOrWhiteSpace(ImagePath) ? DefaultImagePath : ImagePath;
 }

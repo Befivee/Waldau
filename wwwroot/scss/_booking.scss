@@ -95,6 +95,12 @@
   margin-bottom: $space-md;
 }
 
+.booking-form .field-validation-error {
+  display: block;
+  font-size: 0.8125rem;
+  margin-top: 0.35rem;
+}
+
 .booking-success {
   text-align: center;
   padding: $space-md 0;
