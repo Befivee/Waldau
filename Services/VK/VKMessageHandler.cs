@@ -45,7 +45,7 @@ public class VKMessageHandler(
     {
         var siteUrl = siteSettings.Value.BaseUrl?.Trim();
         if (string.IsNullOrWhiteSpace(siteUrl))
-            siteUrl = "https://waldau-castle.ru";
+            siteUrl = SiteSettings.DefaultBaseUrl;
 
         if (string.Equals(incomingText, "/start", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(incomingText, "начать", StringComparison.OrdinalIgnoreCase))

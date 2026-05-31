@@ -19,9 +19,12 @@ public class VKApiClient(
 
     public async Task<VkLongPollServer> GetLongPollServerAsync(CancellationToken cancellationToken)
     {
+        if (!_options.TryGetGroupId(out var groupId))
+            throw new InvalidOperationException("VK GroupId is not configured.");
+
         var query = new Dictionary<string, string?>
         {
-            ["group_id"] = _options.GroupId.ToString(),
+            ["group_id"] = groupId.ToString(),
             ["access_token"] = _options.AccessToken,
             ["v"] = _options.ApiVersion
         };

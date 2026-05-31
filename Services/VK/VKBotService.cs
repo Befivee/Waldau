@@ -11,21 +11,34 @@ public class VKBotService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (!options.Value.IsConfigured)
+        var validation = options.Value.Validate();
+        if (!validation.IsValid)
         {
-            logger.LogWarning("VK-бот не настроен. Укажите VK:AccessToken и VK:GroupId в appsettings.");
+            logger.LogWarning(
+                "VKBotService не запущен: конфигурация не прошла проверку. {ValidationErrors}",
+                validation.Summary);
             return;
         }
 
+        options.Value.TryGetGroupId(out var groupId);
         var waitSeconds = Math.Clamp(options.Value.LongPollWaitSeconds, 1, 90);
 
         try
         {
             logger.LogInformation(
-                "VK-бот запущен (Groups Long Poll, group {GroupId}, фоновый сервис).",
-                options.Value.GroupId);
+                "VKBotService стартует: Groups Long Poll, group {GroupId}, api {ApiVersion}, wait {WaitSeconds}s.",
+                groupId,
+                options.Value.ApiVersion,
+                waitSeconds);
 
             var serverInfo = await apiClient.GetLongPollServerAsync(stoppingToken);
+
+            logger.LogInformation(
+                "VK Long Poll подключён: server {Server}, ts {Ts}, group {GroupId}. Ожидание событий…",
+                MaskServer(serverInfo.Server),
+                serverInfo.Ts,
+                groupId);
+
             var server = serverInfo.Server;
             var key = serverInfo.Key;
             var ts = serverInfo.Ts;
@@ -54,6 +67,10 @@ public class VKBotService(
                         server = serverInfo.Server;
                         key = serverInfo.Key;
                         ts = serverInfo.Ts;
+                        logger.LogInformation(
+                            "VK Long Poll переподключён: server {Server}, ts {Ts}.",
+                            MaskServer(serverInfo.Server),
+                            serverInfo.Ts);
                         continue;
                     }
 
@@ -61,6 +78,8 @@ public class VKBotService(
 
                     if (pollResult.Updates is null || pollResult.Updates.Count == 0)
                         continue;
+
+                    logger.LogDebug("VK long poll: получено {UpdateCount} update(s).", pollResult.Updates.Count);
 
                     foreach (var update in pollResult.Updates)
                     {
@@ -84,14 +103,27 @@ public class VKBotService(
                     await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                 }
             }
+
+            logger.LogInformation("VKBotService остановлен (cancellation requested).");
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            // graceful shutdown
+            logger.LogInformation("VKBotService остановлен (graceful shutdown).");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "VK-бот остановлен из-за ошибки. Веб-сервер продолжает работу.");
+            logger.LogError(ex, "VKBotService остановлен из-за ошибки. Веб-сервер продолжает работу.");
         }
+    }
+
+    private static string MaskServer(string server)
+    {
+        if (string.IsNullOrWhiteSpace(server))
+            return "(empty)";
+
+        if (!Uri.TryCreate(server, UriKind.Absolute, out var uri))
+            return server;
+
+        return uri.Host;
     }
 }

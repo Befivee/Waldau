@@ -542,7 +542,6 @@ c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\co
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\compressed\9udwqntj57-{0}-muycvpuwrr-muycvpuwrr.gz
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\compressed\raw4uytag3-{0}-87fc7y1x7t-87fc7y1x7t.gz
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\compressed\ve8mmuej4k-{0}-mlv21k5csn-mlv21k5csn.gz
-c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\compressed\e8o939x1qi-{0}-3ik11rnbj3-3ik11rnbj3.gz
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\staticwebassets.build.json
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\staticwebassets.build.json.cache
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\staticwebassets.development.json
@@ -551,3 +550,5 @@ c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\sw
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\WaldauCa.C48AFD03.Up2Date
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\WaldauCastle.genruntimeconfig.cache
 c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\ref\WaldauCastle.dll
+c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\WaldauCastle.sourcelink.json
+c:\Users\savva\OneDrive\Documents\Domashka\BKP\WaldauCastle\obj\Debug\net10.0\compressed\e8o939x1qi-{0}-6h9cegi73c-6h9cegi73c.gz

@@ -73,11 +73,10 @@ else
     builder.Services.AddScoped<ITelegramNotificationService, NullTelegramNotificationService>();
 }
 
-var vkOptions = builder.Configuration
-    .GetSection(VKOptions.SectionName)
-    .Get<VKOptions>() ?? new VKOptions();
+var vkOptions = VKOptions.Load(builder.Configuration);
+var vkValidation = vkOptions.Validate();
 
-if (vkOptions.IsConfigured)
+if (vkValidation.IsValid)
 {
     builder.Services.AddHttpClient<VKApiClient>(client =>
     {
@@ -96,9 +95,24 @@ if (!telegramOptions.IsConfigured)
     app.Logger.LogWarning("Telegram-бот отключён: укажите корректные BotToken и AdminChatId.");
 }
 
-if (!vkOptions.IsConfigured)
+if (!vkValidation.IsValid)
 {
-    app.Logger.LogWarning("VK-бот отключён: укажите VK:AccessToken и VK:GroupId.");
+    app.Logger.LogWarning(
+        "VK-бот отключён (VKBotService не зарегистрирован). Причины: {ValidationErrors}",
+        vkValidation.Summary);
+
+    foreach (var error in vkValidation.Errors)
+        app.Logger.LogWarning("VK config: {Error}", error);
+
+    LogVkConfigurationSources(app.Logger, builder.Configuration);
+}
+else
+{
+    vkOptions.TryGetGroupId(out var vkGroupId);
+    app.Logger.LogInformation(
+        "VK-бот зарегистрирован: VKBotService + VKApiClient (group {GroupId}, api {ApiVersion}).",
+        vkGroupId,
+        vkOptions.ApiVersion);
 }
 
 Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "events"));
@@ -186,6 +200,23 @@ app.Logger.LogInformation(
     urls ?? builder.Configuration["Kestrel:Endpoints:Http:Url"] ?? "http://0.0.0.0:5000");
 
 app.Run();
+
+static void LogVkConfigurationSources(ILogger logger, IConfiguration configuration)
+{
+    var accessTokenSource = configuration.GetSection("VK:AccessToken").Value is { Length: > 0 } ? "set" : "missing";
+    var groupIdRaw = configuration["VK:GroupId"];
+    var groupIdSource = string.IsNullOrWhiteSpace(groupIdRaw) ? "missing" : $"raw='{groupIdRaw}'";
+    var apiVersion = configuration["VK:ApiVersion"] ?? "(default)";
+    var waitSeconds = configuration["VK:LongPollWaitSeconds"] ?? "(default)";
+
+    logger.LogWarning(
+        "VK config snapshot — AccessToken: {AccessTokenState}, GroupId: {GroupIdState}, ApiVersion: {ApiVersion}, LongPollWaitSeconds: {WaitSeconds}. " +
+        "Env vars: VK__AccessToken, VK__GroupId, VK__ApiVersion, VK__LongPollWaitSeconds.",
+        accessTokenSource,
+        groupIdSource,
+        apiVersion,
+        waitSeconds);
+}
 
 static string ResolveSqliteConnectionString(IConfiguration configuration, IWebHostEnvironment environment)
 {

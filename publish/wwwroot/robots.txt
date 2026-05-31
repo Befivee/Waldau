@@ -6,4 +6,4 @@ Disallow: /Home/Error
 Disallow: /Home/ServerError
 Disallow: /Home/NotFound
 
-Sitemap: https://waldau-castle.ru/sitemap.xml
+Sitemap: https://вальдау.рф/sitemap.xml

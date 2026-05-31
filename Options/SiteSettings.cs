@@ -4,7 +4,9 @@ public class SiteSettings
 {
     public const string SectionName = "SiteSettings";
 
-    public string BaseUrl { get; set; } = "https://waldau-castle.ru";
+    public const string DefaultBaseUrl = "https://вальдау.рф";
+
+    public string BaseUrl { get; set; } = DefaultBaseUrl;
 
     public string SiteName { get; set; } = "Замок Вальдау";
 

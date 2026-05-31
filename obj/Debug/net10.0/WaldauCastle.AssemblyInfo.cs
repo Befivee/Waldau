@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WaldauCastle")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8a4317e8c4c4955ebb3045d47583badb72adb246")]
 [assembly: System.Reflection.AssemblyProductAttribute("WaldauCastle")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WaldauCastle")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
