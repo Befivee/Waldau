@@ -1177,6 +1177,10 @@ main {
   .team-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .team-card--center {
+    grid-column: 2;
+  }
 }
 
 .team-card {
@@ -1192,9 +1196,10 @@ main {
   box-shadow: 0 16px 40px rgba(42, 42, 46, 0.1);
 }
 .team-card__photo {
-  height: 240px;
+  width: 100%;
+  aspect-ratio: 3 / 5;
   background-size: cover;
-  background-position: center;
+  background-position: center top;
   background-repeat: no-repeat;
   background-image: url("/images/tour-placeholder.svg"), linear-gradient(135deg, #2d4a3e 0%, #5c1f2e 100%);
 }
