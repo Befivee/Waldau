@@ -1,11 +1,15 @@
 bin/
 obj/
 publish/
+publish-clean/
+publish-fix/
 *.db
 *.db-shm
 *.db-wal
 appsettings.Development.json
 .vs/
+*.csproj.user
+node_modules/
 
 # Не хранить медиа вне wwwroot (используйте wwwroot/images/)
 /images/

@@ -16,13 +16,23 @@ public class VKApiClient(
     };
 
     private readonly VKOptions _options = options.Value;
+    private bool _longPollSettingsApplied;
 
-    public async Task<VkLongPollServer> GetLongPollServerAsync(CancellationToken cancellationToken)
+    public async Task<VkLongPollServer> GetLongPollServerAsync(CancellationToken cancellationToken) =>
+        await GetLongPollServerAsync(reapplySettings: false, cancellationToken);
+
+    public async Task<VkLongPollServer> GetLongPollServerAsync(
+        bool reapplySettings,
+        CancellationToken cancellationToken)
     {
         if (!_options.TryGetGroupId(out var groupId))
             throw new InvalidOperationException("VK GroupId is not configured.");
 
-        await EnsureLongPollSettingsAsync(groupId, cancellationToken);
+        if (reapplySettings || !_longPollSettingsApplied)
+        {
+            await EnsureLongPollSettingsAsync(groupId, cancellationToken);
+            _longPollSettingsApplied = true;
+        }
 
         var query = new Dictionary<string, string?>
         {
@@ -31,7 +41,55 @@ public class VKApiClient(
             ["v"] = _options.ApiVersion
         };
 
-        return await GetMethodAsync<VkLongPollServer>("groups.getLongPollServer", query, cancellationToken);
+        using var body = new FormUrlEncodedContent(
+            query
+                .Where(p => !string.IsNullOrEmpty(p.Value))
+                .Select(p => new KeyValuePair<string, string>(p.Key, p.Value!)));
+
+        using var response = await httpClient.PostAsync(
+            "https://api.vk.com/method/groups.getLongPollServer",
+            body,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        if (root.TryGetProperty("error", out var errorElement))
+        {
+            var code = errorElement.GetProperty("error_code").GetInt32();
+            var message = errorElement.GetProperty("error_msg").GetString() ?? "unknown";
+            throw new InvalidOperationException($"VK API groups.getLongPollServer failed ({code}): {message}");
+        }
+
+        var responseElement = root.GetProperty("response");
+        var serverInfo = new VkLongPollServer
+        {
+            Key = responseElement.GetProperty("key").GetString() ?? string.Empty,
+            Server = responseElement.GetProperty("server").GetString() ?? string.Empty,
+            Ts = ReadJsonTs(responseElement)
+        };
+
+        logger.LogInformation("VK getLongPollServer ts={Ts}", serverInfo.Ts);
+
+        if (string.IsNullOrWhiteSpace(serverInfo.Ts) || serverInfo.Ts == "0")
+            throw new InvalidOperationException("VK getLongPollServer returned invalid ts=0. Check community Long Poll settings.");
+
+        return serverInfo;
+    }
+
+    private static string ReadJsonTs(JsonElement root)
+    {
+        if (!root.TryGetProperty("ts", out var tsElement))
+            return "0";
+
+        return tsElement.ValueKind switch
+        {
+            JsonValueKind.String => tsElement.GetString() ?? "0",
+            JsonValueKind.Number => tsElement.GetRawText(),
+            _ => "0"
+        };
     }
 
     public async Task<VkLongPollCheckResult> CheckLongPollAsync(
@@ -45,9 +103,28 @@ public class VKApiClient(
         using var response = await httpClient.GetAsync(uri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<VkLongPollCheckResult>(JsonOptions, cancellationToken);
-        if (result is null)
-            throw new InvalidOperationException("VK long poll returned an empty body.");
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        using var doc = JsonDocument.Parse(body);
+        var root = doc.RootElement;
+
+        var result = new VkLongPollCheckResult
+        {
+            Ts = ReadJsonTs(root),
+            Failed = root.TryGetProperty("failed", out var failedProp) ? failedProp.GetInt32() : null,
+            Updates = root.TryGetProperty("updates", out var updatesProp)
+                ? updatesProp.EnumerateArray().Select(static element => element.Clone()).ToList()
+                : null
+        };
+
+        if (result.Failed is not null)
+        {
+            logger.LogWarning(
+                "VK long poll response failed={Failed}, ts={Ts}, requestTs={RequestTs}, body={Body}",
+                result.Failed,
+                result.Ts,
+                ts,
+                body.Length > 200 ? body[..200] : body);
+        }
 
         return result;
     }

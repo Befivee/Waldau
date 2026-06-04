@@ -116,6 +116,11 @@
 .cards-grid {
   display: grid;
   gap: $space-md;
+  align-items: stretch;
+
+  > .tour-card {
+    height: 100%;
+  }
 
   &--2 {
     @include respond-to(md) {
@@ -160,6 +165,10 @@
   position: relative;
   z-index: 2;
   padding-bottom: $space-lg;
+
+  @include respond-to(lg) {
+    margin-top: -3.5rem;
+  }
 
   &__grid {
     display: grid;
@@ -212,6 +221,9 @@
 
 // Tour card
 .tour-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: $color-surface;
   border-radius: $radius-md;
   overflow: hidden;
@@ -237,9 +249,15 @@
     color: $color-burgundy;
   }
 
-  &__body { padding: $space-md; }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: $space-md;
+  }
   &__title { font-size: 1.25rem; margin-bottom: $space-xs; }
   &__desc {
+    flex: 1 1 auto;
     font-size: 0.875rem;
     color: $color-text-muted;
     margin-bottom: $space-sm;

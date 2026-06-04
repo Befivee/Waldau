@@ -1,5 +1,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using WaldauCastle.Helpers;
 using WaldauCastle.Models;
 using WaldauCastle.Services.Bot;
 
@@ -248,7 +249,7 @@ public partial class TelegramEventManager
         }
 
         var session = stateService.GetOrCreate(chatId);
-        session.DraftDuration = text;
+        session.DraftDuration = ExcursionDuration.Normalize(text);
         session.State = TelegramBotState.WaitingForExcursionPrice;
 
         await bot.SendMessage(chatId, "Шаг 4 из 5\nВведите цену:", replyMarkup: TelegramKeyboards.Remove(), cancellationToken: cancellationToken);
@@ -464,7 +465,7 @@ public partial class TelegramEventManager
         if (entity is null)
             return;
 
-        entity.Duration = text;
+        entity.Duration = ExcursionDuration.Normalize(text);
         await excursions.UpdateAsync(entity, cancellationToken);
         session.State = TelegramBotState.None;
 

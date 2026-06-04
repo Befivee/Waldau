@@ -3,7 +3,7 @@
 }
 
 <section class="page-hero page-hero--compact" aria-labelledby="page-title">
-    <div class="page-hero__bg page-hero__bg--directions"></div>
+    <partial name="_PageHeroPhoto" model="@(new PageHeroPhotoViewModel("images/All/как добраться", "page-hero__bg--directions"))" />
     <div class="container-xl page-hero__content reveal">
         <h1 id="page-title" class="page-hero__title">Как добраться</h1>
         <p class="page-hero__lead">@SiteInfo.DistanceFromKg · @SiteInfo.TravelTime</p>
@@ -14,7 +14,7 @@
     <div class="container-xl">
         <div class="directions-layout">
             <div class="directions-layout__map reveal">
-                <partial name="_YandexMap" model="xl" />
+                <partial name="_YandexMap" model="@("xl")" />
                 <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="btn btn-primary btn-block">Открыть маршрут</a>
             </div>
 

@@ -30,7 +30,7 @@ public partial class TelegramEventManager(
             chatId,
             "🏰 Панель управления замком Вальдау\n\n" +
             "1. 📋 Заявки\n" +
-            "2. 🎭 Ивенты\n" +
+            "2. 🎭 Мероприятия\n" +
             "3. 🚶 Экскурсии\n" +
             "4. 📊 Статистика",
             replyMarkup: TelegramKeyboards.MainMenu(),

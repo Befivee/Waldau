@@ -489,7 +489,7 @@
       () => {
         const y = window.scrollY;
         if (y < window.innerHeight) {
-          parallaxBg.style.transform = 'translate3d(0, ' + y * 0.35 + 'px, 0)';
+          parallaxBg.style.backgroundPosition = 'center ' + y * 0.35 + 'px';
         }
       },
       { passive: true }

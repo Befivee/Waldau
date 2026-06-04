@@ -8,8 +8,10 @@ public static class SiteInfo
     public const string Tagline = "Средневековая крепость XIII века";
     public const string Location = "пос. Низовье, Калининградская область";
     public const string Address = "238530, Калининградская обл., пос. Низовье, ул. Замковая, 1";
-    public const string Phone = "+7 (4012) 00-00-00";
-    public const string Email = "info@вальдау.рф";
+    public const string Phone = "+7 (963) 299-85-43";
+    public const string PhoneTel = "+79632998543";
+    public const string VkUrl = "https://vk.com/waldau1264";
+    public const string VkLabel = "ВКонтакте vk.com/waldau1264";
     public const string WorkingHours = "10:00 — 18:00, без выходных";
     public const string TicketPrice = "от 350 ₽";
     public const string BusRoute = "Автобус №110";

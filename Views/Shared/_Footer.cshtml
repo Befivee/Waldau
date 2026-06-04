@@ -26,15 +26,15 @@
             <div class="site-footer__contacts">
                 <h3 class="site-footer__heading">Контакты</h3>
                 <ul>
-                    <li><a href="tel:@SiteInfo.Phone.Replace(" ", "").Replace("(", "").Replace(")", "").Replace("-", "")">@SiteInfo.Phone</a></li>
-                    <li><a href="mailto:@SiteInfo.Email">@SiteInfo.Email</a></li>
+                    <li><a href="tel:@SiteInfo.PhoneTel">@SiteInfo.Phone</a></li>
+                    <li><a href="@SiteInfo.VkUrl" target="_blank" rel="noopener">@SiteInfo.VkLabel</a></li>
                     <li>@SiteInfo.WorkingHours</li>
                 </ul>
             </div>
 
             <div class="site-footer__map">
                 <h3 class="site-footer__heading">На карте</h3>
-                <partial name="_YandexMap" model="sm" />
+                <partial name="_YandexMap" model="@("sm")" />
                 <a href="@SiteInfo.YandexMapsUrl" target="_blank" rel="noopener" class="link-arrow">Открыть в Яндекс.Картах</a>
             </div>
         </div>

@@ -47,9 +47,7 @@ public partial class VKAdminManager
         await apiClient.SendMessageAsync(
             peerId,
             $"🗑 Удалить заявку «{entity.FullName}» ({entity.VisitDate:d})?",
-            VKKeyboards.DeleteConfirmation(
-                BotCallbackData.BookingDeleteYes(bookingId),
-                BotCallbackData.BookingDeleteNo(bookingId)),
+            VKKeyboards.DeleteConfirmation(),
             cancellationToken);
     }
 

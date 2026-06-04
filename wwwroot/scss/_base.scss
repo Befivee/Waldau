@@ -57,10 +57,12 @@ ul, ol { margin: 0; padding: 0; }
   width: 100%;
   max-width: $container-max;
   margin: 0 auto;
-  padding: 0 $space-md;
+  padding-left: $space-md;
+  padding-right: $space-md;
 
   @include respond-to(lg) {
-    padding: 0 $space-lg;
+    padding-left: $space-lg;
+    padding-right: $space-lg;
   }
 }
 
@@ -69,7 +71,7 @@ main {
 }
 
 .page-home main {
-  padding-top: 0;
+  padding-top: 0 !important;
 }
 
 :not(.page-home) main {

@@ -1,0 +1,4 @@
+@model PageHeroPhotoViewModel
+<div class="page-hero__bg @Model.FallbackClass page-hero__bg--photo"
+     style="@StaticImageCss.BackgroundImageSet(Url, Model.ImageBasePath)"
+     aria-hidden="true"></div>

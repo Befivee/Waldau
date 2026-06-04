@@ -34,4 +34,6 @@ public class Excursion
 
     public string DisplayImagePath =>
         string.IsNullOrWhiteSpace(ImagePath) ? DefaultImagePath : ImagePath;
+
+    public string DisplayDuration => Helpers.ExcursionDuration.Normalize(Duration);
 }

@@ -67,11 +67,13 @@ ul, ol {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 @media (min-width: 992px) {
   .container-xl {
-    padding: 0 2.5rem;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
   }
 }
 
@@ -80,7 +82,7 @@ main {
 }
 
 .page-home main {
-  padding-top: 0;
+  padding-top: 0 !important;
 }
 
 :not(.page-home) main {
@@ -94,6 +96,7 @@ main {
   right: 0;
   z-index: 1000;
   height: 72px;
+  background: transparent;
   transition: background 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .site-header.is-scrolled {
@@ -157,8 +160,10 @@ main {
     position: fixed;
     top: 72px;
     right: 0;
+    z-index: 1001;
     width: min(320px, 85vw);
     height: calc(100vh - 72px);
+    height: calc(100dvh - 72px);
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -166,9 +171,20 @@ main {
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     border-left: 1px solid rgba(42, 42, 46, 0.1);
+    overflow-y: auto;
   }
   .site-nav.is-open {
     transform: translateX(0);
+  }
+  .site-nav .site-nav__link {
+    color: #2a2a2e;
+    font-size: 1.0625rem;
+  }
+  .site-nav .site-nav__link:hover {
+    color: #5c1f2e;
+  }
+  .site-nav .site-nav__link::after {
+    background: #5c1f2e;
   }
 }
 .site-nav__list {
@@ -214,15 +230,19 @@ main {
   -webkit-backdrop-filter: none;
   box-shadow: none;
 }
-.page-home .site-header:not(.is-scrolled) .site-nav__link,
+@media (min-width: 992px) {
+  .page-home .site-header:not(.is-scrolled) .site-nav__link {
+    color: #fff;
+  }
+  .page-home .site-header:not(.is-scrolled) .site-nav__link:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .page-home .site-header:not(.is-scrolled) .site-nav__link::after {
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
 .page-home .site-header:not(.is-scrolled) .site-logo {
   color: #fff;
-}
-.page-home .site-header:not(.is-scrolled) .site-nav__link:hover {
-  color: rgba(255, 255, 255, 0.85);
-}
-.page-home .site-header:not(.is-scrolled) .site-nav__link::after {
-  background: rgba(255, 255, 255, 0.9);
 }
 .page-home .site-header:not(.is-scrolled) .site-logo__sub {
   color: rgba(255, 255, 255, 0.75);
@@ -321,20 +341,47 @@ main {
   justify-content: center;
   overflow: hidden;
 }
+.page-home .hero {
+  margin-top: -72px;
+  padding-top: 72px;
+  min-height: calc(100vh + 72px);
+  min-height: calc(100dvh + 72px);
+  height: calc(100vh + 72px);
+  height: calc(100dvh + 72px);
+}
+@media (min-width: 992px) {
+  .page-home .hero {
+    --hero-overlap: 10rem;
+    min-height: calc(100dvh + 72px + 10rem);
+    height: calc(100dvh + 72px + 10rem);
+  }
+}
 .hero__bg {
   position: absolute;
-  inset: -10% 0 0;
-  background-size: cover;
-  background-position: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
   background-image: url("/images/hero/home-hero.jpg");
+  background-image: image-set(url("/images/hero/home-hero.webp") type("image/webp"), url("/images/hero/home-hero.jpg") type("image/jpeg"));
   background-color: #1e3329;
-  will-change: transform;
+  will-change: background-position;
+}
+@media (min-aspect-ratio: 16/9) {
+  .hero__bg {
+    background-size: 100% 100%;
+  }
 }
 .hero__overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom, rgba(20, 14, 12, 0.35) 0%, rgba(20, 16, 14, 0.55) 55%, rgba(20, 14, 12, 0.75) 100%);
+}
+.page-home .hero__overlay {
+  background: linear-gradient(to bottom, rgba(20, 14, 12, 0.12) 0%, rgba(20, 14, 12, 0.28) 20%, rgba(20, 16, 14, 0.55) 55%, rgba(20, 14, 12, 0.75) 100%);
 }
 .hero__content {
   position: relative;
@@ -343,6 +390,15 @@ main {
   color: #fff;
   padding: 6rem 1.5rem 4rem;
   padding-top: calc(72px + 6rem);
+}
+.page-home .hero__content {
+  padding-top: 6rem;
+}
+@media (min-width: 992px) {
+  .page-home .hero__content {
+    margin-top: calc(var(--hero-overlap, 10rem) / -2);
+    padding: 4rem 1.5rem;
+  }
 }
 .hero__eyebrow {
   font-size: 0.8125rem;
@@ -379,6 +435,11 @@ main {
   height: 44px;
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 14px;
+}
+@media (min-width: 992px) {
+  .page-home .hero .hero__scroll {
+    bottom: calc(2.5rem + var(--hero-overlap, 10rem));
+  }
 }
 .hero__scroll span {
   display: block;
@@ -436,22 +497,28 @@ main {
   inset: 0;
   background: linear-gradient(to top, rgba(20, 16, 14, 0.55), transparent 60%);
 }
+.page-hero__bg--photo::after {
+  background: linear-gradient(to bottom, rgba(20, 14, 12, 0.12) 0%, rgba(20, 14, 12, 0.28) 20%, rgba(20, 16, 14, 0.55) 55%, rgba(20, 14, 12, 0.75) 100%);
+}
 .page-hero__content {
   position: relative;
   z-index: 2;
   color: #fff;
-  padding: 4rem 0 2.5rem;
+  padding-top: 4rem;
+  padding-bottom: 2.5rem;
   width: 100%;
 }
 .page-hero__title {
   color: #fff;
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.3);
 }
 .page-hero__lead {
   font-size: 1.0625rem;
   opacity: 0.9;
   margin: 0;
   max-width: 36rem;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.35);
 }
 
 .directions-preview {
@@ -662,6 +729,10 @@ main {
 .cards-grid {
   display: grid;
   gap: 1.5rem;
+  align-items: stretch;
+}
+.cards-grid > .tour-card {
+  height: 100%;
 }
 @media (min-width: 768px) {
   .cards-grid--2 {
@@ -719,6 +790,11 @@ main {
   z-index: 2;
   padding-bottom: 2.5rem;
 }
+@media (min-width: 992px) {
+  .quick-info {
+    margin-top: -3.5rem;
+  }
+}
 .quick-info__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -774,6 +850,9 @@ main {
 }
 
 .tour-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
@@ -806,6 +885,9 @@ main {
   color: #5c1f2e;
 }
 .tour-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   padding: 1.5rem;
 }
 .tour-card__title {
@@ -813,9 +895,14 @@ main {
   margin-bottom: 0.5rem;
 }
 .tour-card__desc {
+  flex: 1 1 auto;
   font-size: 0.875rem;
   color: #5c5c62;
   margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .tour-card__meta {
   margin-bottom: 1rem;

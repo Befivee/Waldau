@@ -10,10 +10,10 @@ public static class VKKeyboards
         BuildReply(
         [
             [
-                Callback(BotReplyLabels.Number(1), BotCallbackData.MenuBookings),
-                Callback(BotReplyLabels.Number(2), BotCallbackData.MenuEvents),
-                Callback(BotReplyLabels.Number(3), BotCallbackData.MenuExcursions),
-                Callback(BotReplyLabels.Number(4), BotCallbackData.MenuStats)
+                Text(BotReplyLabels.Number(1)),
+                Text(BotReplyLabels.Number(2)),
+                Text(BotReplyLabels.Number(3)),
+                Text(BotReplyLabels.Number(4))
             ]
         ]);
 
@@ -23,12 +23,12 @@ public static class VKKeyboards
         if (bookings.Count > 0)
         {
             rows.Add(bookings
-                .Select((b, i) => Callback(BotReplyLabels.Number(i + 1), BotCallbackData.BookingDelete(b.Id)))
+                .Select((_, i) => Text(BotReplyLabels.Number(i + 1)))
                 .ToArray());
         }
 
         rows.AddRange(NavigationRow(page, totalPages));
-        rows.Add([Callback(BotReplyLabels.BackMain, BotCallbackData.MenuMain)]);
+        rows.Add([Text(BotReplyLabels.BackMain)]);
         return BuildReply(rows);
     }
 
@@ -38,13 +38,13 @@ public static class VKKeyboards
         if (events.Count > 0)
         {
             rows.Add(events
-                .Select((e, i) => Callback(BotReplyLabels.Number(i + 1), BotCallbackData.EventView(e.Id)))
+                .Select((_, i) => Text(BotReplyLabels.Number(i + 1)))
                 .ToArray());
         }
 
         rows.AddRange(NavigationRow(page, totalPages));
-        rows.Add([Callback(BotReplyLabels.Add, BotCallbackData.EventAdd)]);
-        rows.Add([Callback(BotReplyLabels.BackMain, BotCallbackData.MenuMain)]);
+        rows.Add([Text(BotReplyLabels.Add)]);
+        rows.Add([Text(BotReplyLabels.BackMain)]);
         return BuildReply(rows);
     }
 
@@ -54,13 +54,13 @@ public static class VKKeyboards
         if (excursions.Count > 0)
         {
             rows.Add(excursions
-                .Select((e, i) => Callback(BotReplyLabels.Number(i + 1), BotCallbackData.ExcursionView(e.Id)))
+                .Select((_, i) => Text(BotReplyLabels.Number(i + 1)))
                 .ToArray());
         }
 
         rows.AddRange(NavigationRow(page, totalPages));
-        rows.Add([Callback(BotReplyLabels.Add, BotCallbackData.ExcursionAdd)]);
-        rows.Add([Callback(BotReplyLabels.BackMain, BotCallbackData.MenuMain)]);
+        rows.Add([Text(BotReplyLabels.Add)]);
+        rows.Add([Text(BotReplyLabels.BackMain)]);
         return BuildReply(rows);
     }
 
@@ -68,41 +68,41 @@ public static class VKKeyboards
         BuildReply(
         [
             [
-                Callback(BotReplyLabels.Number(1), BotCallbackData.EventEditTitle(eventId)),
-                Callback(BotReplyLabels.Number(2), BotCallbackData.EventEditDescription(eventId)),
-                Callback(BotReplyLabels.Number(3), BotCallbackData.EventEditImage(eventId)),
-                Callback(BotReplyLabels.Number(4), BotCallbackData.EventDelete(eventId))
+                Text(BotReplyLabels.Number(1)),
+                Text(BotReplyLabels.Number(2)),
+                Text(BotReplyLabels.Number(3)),
+                Text(BotReplyLabels.Number(4))
             ],
-            [Callback(BotReplyLabels.Back, BotCallbackData.EventBackList)]
+            [Text(BotReplyLabels.Back)]
         ]);
 
     public static string ExcursionManagement(int excursionId) =>
         BuildReply(
         [
             [
-                Callback(BotReplyLabels.Number(1), BotCallbackData.ExcursionEditTitle(excursionId)),
-                Callback(BotReplyLabels.Number(2), BotCallbackData.ExcursionEditDescription(excursionId)),
-                Callback(BotReplyLabels.Number(3), BotCallbackData.ExcursionEditDuration(excursionId)),
-                Callback(BotReplyLabels.Number(4), BotCallbackData.ExcursionEditPrice(excursionId))
+                Text(BotReplyLabels.Number(1)),
+                Text(BotReplyLabels.Number(2)),
+                Text(BotReplyLabels.Number(3)),
+                Text(BotReplyLabels.Number(4))
             ],
             [
-                Callback("5", BotCallbackData.ExcursionEditImage(excursionId)),
-                Callback("6", BotCallbackData.ExcursionDelete(excursionId))
+                Text("5"),
+                Text("6")
             ],
-            [Callback(BotReplyLabels.Back, BotCallbackData.ExcursionBackList)]
+            [Text(BotReplyLabels.Back)]
         ]);
 
-    public static string DeleteConfirmation(string yesPayload, string noPayload) =>
+    public static string DeleteConfirmation() =>
         BuildReply(
         [
             [
-                Callback(BotReplyLabels.Yes, yesPayload),
-                Callback(BotReplyLabels.No, noPayload)
+                Text(BotReplyLabels.Yes),
+                Text(BotReplyLabels.No)
             ]
         ]);
 
     public static string BackToMainMenu() =>
-        BuildReply([[Callback(BotReplyLabels.BackMain, BotCallbackData.MenuMain)]]);
+        BuildReply([[Text(BotReplyLabels.BackMain)]]);
 
     public static string Remove() =>
         JsonSerializer.Serialize(new { buttons = Array.Empty<object[]>(), one_time = true });
@@ -114,23 +114,23 @@ public static class VKKeyboards
 
         var buttons = new List<object>();
         if (page > 0)
-            buttons.Add(Callback(BotReplyLabels.Prev, BotCallbackData.PagePrev));
+            buttons.Add(Text(BotReplyLabels.Prev));
         if (page < totalPages - 1)
-            buttons.Add(Callback(BotReplyLabels.Next, BotCallbackData.PageNext));
+            buttons.Add(Text(BotReplyLabels.Next));
 
         if (buttons.Count > 0)
             yield return buttons.ToArray();
     }
 
-    private static object Callback(string label, string payload) => new
+    private static object Text(string label) => new
     {
         action = new
         {
-            type = "callback",
+            type = "text",
             label,
-            payload = JsonSerializer.Serialize(new { cmd = payload })
+            payload = JsonSerializer.Serialize(new { cmd = label })
         },
-        color = "secondary"
+        color = "primary"
     };
 
     private static string BuildReply(IEnumerable<IEnumerable<object>> rows)
@@ -138,7 +138,6 @@ public static class VKKeyboards
         var keyboard = new
         {
             one_time = false,
-            inline = false,
             buttons = rows.Select(r => r.ToArray()).ToArray()
         };
 

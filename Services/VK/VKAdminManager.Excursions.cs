@@ -1,3 +1,4 @@
+using WaldauCastle.Helpers;
 using WaldauCastle.Models;
 using WaldauCastle.Services.Bot;
 
@@ -152,9 +153,7 @@ public partial class VKAdminManager
         await apiClient.SendMessageAsync(
             peerId,
             $"🗑 Удалить экскурсию «{entity.Title}»?",
-            VKKeyboards.DeleteConfirmation(
-                BotCallbackData.ExcursionDeleteYes(excursionId),
-                BotCallbackData.ExcursionDeleteNo(excursionId)),
+            VKKeyboards.DeleteConfirmation(),
             cancellationToken);
 
         stateService.GetOrCreate(peerId).PendingDeleteExcursionId = excursionId;
@@ -226,7 +225,7 @@ public partial class VKAdminManager
         }
 
         var session = stateService.GetOrCreate(peerId);
-        session.DraftDuration = text;
+        session.DraftDuration = ExcursionDuration.Normalize(text);
         session.State = VKBotState.WaitingForExcursionPrice;
 
         await apiClient.SendMessageAsync(peerId, "Шаг 4 из 5\nВведите цену:", VKKeyboards.Remove(), cancellationToken);
@@ -404,7 +403,7 @@ public partial class VKAdminManager
         if (entity is null)
             return;
 
-        entity.Duration = text;
+        entity.Duration = ExcursionDuration.Normalize(text);
         await excursions.UpdateAsync(entity, cancellationToken);
         var id = entity.Id;
         session.State = VKBotState.None;

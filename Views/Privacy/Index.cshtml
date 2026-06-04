@@ -46,8 +46,8 @@
         <p>По вопросам обработки персональных данных обращайтесь:</p>
         <ul>
             <li>Адрес: @SiteInfo.Address</li>
-            <li>Телефон: <a href="tel:@SiteInfo.Phone.Replace(" ", "").Replace("(", "").Replace(")", "").Replace("-", "")">@SiteInfo.Phone</a></li>
-            <li>Email: <a href="mailto:@SiteInfo.Email">@SiteInfo.Email</a></li>
+            <li>Телефон: <a href="tel:@SiteInfo.PhoneTel">@SiteInfo.Phone</a></li>
+            <li>ВКонтакте: <a href="@SiteInfo.VkUrl" target="_blank" rel="noopener">@SiteInfo.VkLabel</a></li>
         </ul>
 
         <p><em>Дата публикации: @DateTime.Now.ToString("d MMMM yyyy", new System.Globalization.CultureInfo("ru-RU"))</em></p>

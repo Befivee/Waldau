@@ -1,7 +1,22 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace WaldauCastle.Services.VK;
+
+internal sealed class JsonStringOrNumberConverter : JsonConverter<string>
+{
+    public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        reader.TokenType switch
+        {
+            JsonTokenType.String => reader.GetString(),
+            JsonTokenType.Number => reader.GetInt64().ToString(CultureInfo.InvariantCulture),
+            _ => "0"
+        };
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options) =>
+        writer.WriteStringValue(value);
+}
 
 internal sealed class VkApiResponse<T>
 {
@@ -30,12 +45,14 @@ public sealed class VkLongPollServer
     public string Server { get; set; } = string.Empty;
 
     [JsonPropertyName("ts")]
+    [JsonConverter(typeof(JsonStringOrNumberConverter))]
     public string Ts { get; set; } = "0";
 }
 
 public sealed class VkLongPollCheckResult
 {
     [JsonPropertyName("ts")]
+    [JsonConverter(typeof(JsonStringOrNumberConverter))]
     public string Ts { get; set; } = "0";
 
     [JsonPropertyName("updates")]

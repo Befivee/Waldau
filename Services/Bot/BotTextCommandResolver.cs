@@ -4,6 +4,10 @@ namespace WaldauCastle.Services.Bot;
 
 public static class BotTextCommandResolver
 {
+    private const int ExcursionDetailButtonCount = 6;
+    private const int EventDetailButtonCount = 4;
+    private const int MainMenuButtonCount = 4;
+
     public static bool TryResolve(
         string? text,
         BotScreen screen,
@@ -60,7 +64,7 @@ public static class BotTextCommandResolver
             return false;
 
         if (int.TryParse(normalized, NumberStyles.None, CultureInfo.InvariantCulture, out var index) &&
-            index is >= 1 and <= BotListPaging.PageSize)
+            IsValidMenuIndex(screen, index, pageIds.Count))
         {
             payload = screen switch
             {
@@ -117,6 +121,20 @@ public static class BotTextCommandResolver
 
         return false;
     }
+
+    private static bool IsValidMenuIndex(BotScreen screen, int index, int pageIdsCount) =>
+        screen switch
+        {
+            BotScreen.Bookings or BotScreen.Events or BotScreen.Excursions =>
+                index is >= 1 and <= BotListPaging.PageSize && pageIdsCount >= index,
+            BotScreen.EventDetail =>
+                index is >= 1 and <= EventDetailButtonCount && pageIdsCount > 0,
+            BotScreen.ExcursionDetail =>
+                index is >= 1 and <= ExcursionDetailButtonCount && pageIdsCount > 0,
+            BotScreen.Main or BotScreen.None =>
+                index is >= 1 and <= MainMenuButtonCount,
+            _ => false
+        };
 
     public static bool TryResolveConfirmation(string? text, out bool confirmed)
     {
