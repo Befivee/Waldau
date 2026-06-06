@@ -47,9 +47,7 @@
     li { margin-bottom: 0.5rem; }
   }
 
-  &__social {
-    display: flex;
-    gap: $space-sm;
+  &__contacts .social-links {
     margin-top: $space-md;
   }
 
@@ -62,21 +60,50 @@
   }
 }
 
+.social-links {
+  display: flex;
+  gap: $space-sm;
+}
+
 .social-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(#fff, 0.25);
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba($color-graphite, 0.12);
   border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: background 0.2s, border-color 0.2s;
+  color: $color-graphite;
+  background: $color-surface;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
 
   &:hover {
-    background: $color-burgundy;
-    border-color: $color-burgundy;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  &--vk:hover {
+    background: #0077ff;
+    border-color: #0077ff;
+  }
+
+  &--telegram:hover {
+    background: #26a5e4;
+    border-color: #26a5e4;
+  }
+}
+
+.site-footer .social-link {
+  border-color: rgba(#fff, 0.25);
+  background: rgba(#fff, 0.06);
+  color: rgba(#fff, 0.9);
+
+  &:hover {
     color: #fff;
   }
 }
@@ -182,6 +209,14 @@
   }
 }
 
+.contacts-info__cta {
+  margin-top: $space-md;
+}
+
+.contacts-info .social-links {
+  margin: $space-md 0 $space-lg;
+}
+
 .contact-block {
   margin-bottom: $space-lg;
 
@@ -202,6 +237,63 @@
     text-decoration: none;
 
     &:hover { color: $color-burgundy; }
+  }
+}
+
+.team-grid {
+  display: grid;
+  gap: $space-md;
+  margin-bottom: $space-xl;
+
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include respond-to(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.team-card {
+  display: flex;
+  flex-direction: column;
+  background: $color-surface;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid $color-border;
+  text-align: left;
+  transition: transform $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-md;
+  }
+
+  &__photo {
+    width: 100%;
+    aspect-ratio: 3 / 5;
+    @include image-cover;
+    background-image: url('/images/tour-placeholder.svg'), linear-gradient(135deg, $color-green 0%, $color-burgundy 100%);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: $space-md $space-md $space-lg;
+  }
+
+  &__name {
+    font-size: 1.25rem;
+    margin: 0 0 $space-sm;
+    color: $color-graphite;
+  }
+
+  &__bio {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: $color-text-muted;
+    margin: 0;
   }
 }
 

@@ -19,8 +19,8 @@
                     <a href="tel:@SiteInfo.PhoneTel" class="contact-block__value">@SiteInfo.Phone</a>
                 </div>
                 <div class="contact-block">
-                    <h2>ВКонтакте</h2>
-                    <a href="@SiteInfo.VkUrl" target="_blank" rel="noopener" class="contact-block__value">@SiteInfo.VkLabel</a>
+                    <h2>Дополнительный телефон</h2>
+                    <a href="tel:@SiteInfo.Phone2Tel" class="contact-block__value">@SiteInfo.Phone2</a>
                 </div>
                 <div class="contact-block">
                     <h2>Адрес</h2>
@@ -30,7 +30,8 @@
                     <h2>Режим работы</h2>
                     <p class="contact-block__value">@SiteInfo.WorkingHours</p>
                 </div>
-                <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
+                <partial name="_SocialLinks" />
+                <button type="button" class="btn btn-primary btn-lg contacts-info__cta" data-booking-open>Записаться на экскурсию</button>
             </div>
             <div class="contacts-map reveal">
                 <partial name="_YandexMap" model="@("lg")" />

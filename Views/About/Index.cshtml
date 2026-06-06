@@ -1,15 +1,19 @@
 @{
     ViewData["Title"] = "О нас";
-    ViewData["MetaDescription"] = "Замок Вальдау: история крепости, музей, команда и люди, которые создают атмосферу для гостей.";
+    ViewData["MetaDescription"] = "Замок Вальдау: история крепости, семья Сорокиных, команда и люди, которые создают атмосферу для гостей.";
 
-    var teamMembers = new (string Name, string PhotoBase)[]
+    var teamMembers = new (string Name, string PhotoBase, string Bio)[]
     {
-        ("Надежда", "images/AboutUs/Надежда2"),
-        ("Сергей", "images/AboutUs/Сергей3"),
-        ("Савелий", "images/AboutUs/Савелий4"),
-        ("Павел", "images/AboutUs/Павел5"),
-        ("Елена", "images/AboutUs/Елена6"),
-        ("Персик", "images/AboutUs/Персик7"),
+        (
+            "Надежда",
+            "images/AboutUs/Надежда2",
+            "Хозяйка замка. У каждой крепости была своя хозяйка — та, что заботилась о тепле, уюте и том, чем заняться гостям. В XXI веке эту роль в Вальдау несёт Надежда Сорокина: двенадцать лет назад ей пришла идея заняться замком XIII века. Сегодня она организует съёмки, ищет новые смыслы для старых стен и занимается «сказочными делами» замка."
+        ),
+        ("Сергей", "images/AboutUs/Сергей3", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."),
+        ("Савелий", "images/AboutUs/Савелий4", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud."),
+        ("Павел", "images/AboutUs/Павел5", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit."),
+        ("Елена", "images/AboutUs/Елена6", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Excepteur sint occaecat cupidatat non proident."),
+        ("Персик", "images/AboutUs/Персик7", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis iste natus."),
     };
 }
 
@@ -35,11 +39,11 @@
         <div class="about-features">
             <article class="about-feature reveal">
                 <h3>Архитектура</h3>
-                <p>Руины крепостных стен, башни и внутренний двор — редкий пример средневековой фортификации региона.</p>
+                <p>На данный момент один из самых сохранившихся замков Калининграда. Перекрытия, несущие стены, деревянные окна и многое другое сохранилось со времён XIII века.</p>
             </article>
             <article class="about-feature reveal">
-                <h3>Музей</h3>
-                <p>Экспозиции о рыцарях, ордене и быте жителей крепости. Интерактивные зоны для детей.</p>
+                <h3>Семья Сорокиных</h3>
+                <p>Семья Сорокиных занимается восстановлением замка с 2014 года. Благодаря их труду и заботе Вальдау снова открыт для гостей и живёт полноценной жизнью.</p>
             </article>
             <article class="about-feature reveal">
                 <h3>Экскурсии</h3>
@@ -57,7 +61,10 @@
             {
                 <article class="team-card reveal">
                     <div class="team-card__photo" style="@StaticImageCss.BackgroundImageSet(Url, member.PhotoBase)" role="img" aria-label="@member.Name"></div>
-                    <h3 class="team-card__name">@member.Name</h3>
+                    <div class="team-card__body">
+                        <h3 class="team-card__name">@member.Name</h3>
+                        <p class="team-card__bio">@member.Bio</p>
+                    </div>
                 </article>
             }
         </div>
