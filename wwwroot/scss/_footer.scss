@@ -69,8 +69,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border: 1px solid rgba($color-graphite, 0.12);
   border-radius: 50%;
   color: $color-graphite;
@@ -78,8 +78,10 @@
   transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
 
   svg {
-    width: 22px;
-    height: 22px;
+    display: block;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
   }
 
   &:hover {
