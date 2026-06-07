@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" role="img" aria-label="Waldau">
+  <g fill="none" stroke="#111" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M100 10 L170 34 V142 C170 200 150 245 100 282 C50 245 30 200 30 142 V34 Z"/>
+    <path d="M100 24 L158 44 V140 C158 188 142 228 100 260 C58 228 42 188 42 140 V44 Z"/>
+    <line x1="48" y1="58" x2="152" y2="58"/>
+    <rect x="78" y="74" width="14" height="11"/>
+    <rect x="93" y="74" width="14" height="11"/>
+    <rect x="108" y="74" width="14" height="11"/>
+    <path d="M78 85 H122 V168 L100 182 L78 168 Z"/>
+    <rect x="90" y="108" width="7" height="24" fill="#111" stroke="none"/>
+    <rect x="103" y="108" width="7" height="24" fill="#111" stroke="none"/>
+    <path d="M54 178 C68 166 82 178 100 178 C118 178 132 166 146 178"/>
+  </g>
+  <text x="100" y="48" text-anchor="middle" font-family="Arial Black, Helvetica Neue, sans-serif" font-size="15" font-weight="900" fill="#111">WALDAU</text>
+  <text x="100" y="236" text-anchor="middle" font-family="Arial Black, Helvetica Neue, sans-serif" font-size="21" font-weight="900" fill="#111">1264</text>
+</svg>

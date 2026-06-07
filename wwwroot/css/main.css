@@ -1265,6 +1265,11 @@ main {
   height: 28px;
   flex-shrink: 0;
 }
+.social-link--telegram svg {
+  width: 26px;
+  height: 26px;
+  transform: translate(-1px, 2px);
+}
 .social-link:hover {
   color: #fff;
   transform: translateY(-2px);
