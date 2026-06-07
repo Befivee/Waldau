@@ -22,7 +22,8 @@ public class TelegramBotService(
 
         var receiverOptions = new ReceiverOptions
         {
-            AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
+            AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
+            DropPendingUpdates = true
         };
 
         while (!stoppingToken.IsCancellationRequested)
@@ -39,13 +40,12 @@ public class TelegramBotService(
                     logger.LogWarning(ex, "GetMe не удался — polling всё равно будет запущен.");
                 }
 
-                botClient.StartReceiving(
-                    updateHandler: commandHandler.HandleUpdateAsync,
-                    errorHandler: commandHandler.HandleErrorAsync,
-                    receiverOptions: receiverOptions,
-                    cancellationToken: stoppingToken);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
-                await Task.Delay(Timeout.Infinite, stoppingToken);
+                await botClient.ReceiveAsync(
+                    updateHandler: commandHandler,
+                    receiverOptions: receiverOptions,
+                    cancellationToken: cts.Token);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -53,7 +53,7 @@ public class TelegramBotService(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Telegram-бот остановлен из-за ошибки. Повтор через 15 секунд.");
+                logger.LogError(ex, "Telegram polling прерван. Повтор через 15 секунд.");
                 try
                 {
                     await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using WaldauCastle.Options;
 using WaldauCastle.Services.Bot;
@@ -10,7 +11,7 @@ public class TelegramCommandHandler(
     IServiceScopeFactory scopeFactory,
     TelegramStateService stateService,
     IOptions<TelegramBotOptions> options,
-    ILogger<TelegramCommandHandler> logger)
+    ILogger<TelegramCommandHandler> logger) : IUpdateHandler
 {
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
@@ -39,11 +40,27 @@ public class TelegramCommandHandler(
         }
     }
 
-    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    public Task HandleErrorAsync(
+        ITelegramBotClient botClient,
+        Exception exception,
+        HandleErrorSource source,
+        CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Ошибка Telegram polling.");
+        if (IsPollingTimeout(exception))
+        {
+            logger.LogDebug(exception, "Telegram long poll timeout ({Source}).", source);
+            return Task.CompletedTask;
+        }
+
+        logger.LogError(exception, "Ошибка Telegram polling ({Source}).", source);
         return Task.CompletedTask;
     }
+
+    private static bool IsPollingTimeout(Exception exception) =>
+        exception is global::Telegram.Bot.Exceptions.RequestException
+        {
+            InnerException: TaskCanceledException or TimeoutException
+        };
 
     private async Task HandleMessageAsync(
         ITelegramBotClient botClient,
