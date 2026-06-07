@@ -17,4 +17,8 @@ public interface IBookingService
     Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 
     Task<int> DeleteExpiredByVisitDateAsync(DateTime visitDateBefore, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<string>> GetOccupiedGuidedSlotsAsync(DateTime visitDate, CancellationToken cancellationToken = default);
+
+    Task<bool> IsGuidedSlotAvailableAsync(DateTime visitDate, string visitTime, CancellationToken cancellationToken = default);
 }

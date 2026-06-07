@@ -12,6 +12,7 @@ public sealed class ExcursionTypeInfo
 
     public int Id => (int)Kind;
     public string KindKey => Kind == ExcursionKind.Guided ? "guided" : "self";
+    public string FormLabel => Kind == ExcursionKind.Guided ? "С гидом" : "Самостоятельно";
     public string DisplayPrice => $"от {Price:0} ₽";
 }
 
@@ -20,7 +21,7 @@ public static class ExcursionCatalog
     public static readonly ExcursionTypeInfo Guided = new()
     {
         Kind = ExcursionKind.Guided,
-        Title = "Экскурсия с экскурсоводом",
+        Title = "Экскурсия с гидом",
         Description =
             "Прогулка по замку с профессиональным гидом: история крепости, " +
             "интерьеры, легенды и ответы на ваши вопросы.",

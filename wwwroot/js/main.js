@@ -14,10 +14,11 @@
   const bookingForm = document.getElementById('booking-form');
   const tourIdInput = document.getElementById('booking-tour-id');
   const tourNameInput = document.getElementById('booking-tour-name');
-  const tourLabel = document.getElementById('booking-selected-tour');
   const dateInput = document.getElementById('booking-date');
   const timeWrap = document.getElementById('booking-time-wrap');
   const timeInput = document.getElementById('booking-time');
+  const typeSwitch = document.querySelector('.booking-type-switch');
+  const typeButtons = typeSwitch ? [...typeSwitch.querySelectorAll('.booking-type-switch__btn')] : [];
 
   const PHONE_PREFIX = '+7';
   const PHONE_DIGITS_LEN = 10;
@@ -141,13 +142,31 @@
   }
 
   function updatePhoneHint(input, hintEl) {
-    if (!hintEl) return;
+    if (!hintEl || hintEl.dataset.forceError === '1') return;
     const digits = getPhoneDigits(input);
     const incomplete = digits.length > 0 && digits.length < PHONE_DIGITS_LEN;
     hintEl.textContent = incomplete
       ? 'Введите 10 цифр номера после +7'
       : '+7 и 10 цифр номера';
     hintEl.classList.toggle('is-error', incomplete);
+  }
+
+  function showPhoneError(message) {
+    const hint = document.getElementById('booking-phone-hint');
+    if (!hint) return;
+    hint.dataset.forceError = '1';
+    hint.textContent = message;
+    hint.classList.add('is-error');
+    hint.hidden = false;
+  }
+
+  function clearPhoneError() {
+    const hint = document.getElementById('booking-phone-hint');
+    if (!hint) return;
+    hint.dataset.forceError = '';
+    hint.classList.remove('is-error');
+    hint.textContent = '+7 и 10 цифр номера';
+    hint.hidden = false;
   }
 
   function setFieldError(span, message) {
@@ -167,20 +186,20 @@
       el.textContent = '';
       el.hidden = true;
     });
-    const hint = document.getElementById('booking-phone-hint');
-    if (hint) hint.hidden = false;
+    clearPhoneError();
   }
 
   function applyFormErrors(form, errors) {
     if (!errors) return;
     Object.entries(errors).forEach(([field, messages]) => {
+      if (field === 'Phone' && messages?.length) {
+        showPhoneError(messages[0]);
+        return;
+      }
+
       const span = form.querySelector(`[data-valmsg-for="${field}"]`);
       if (span && messages?.length) {
         setFieldError(span, messages[0]);
-        if (field === 'Phone') {
-          const hint = document.getElementById('booking-phone-hint');
-          if (hint) hint.hidden = true;
-        }
       }
     });
   }
@@ -195,17 +214,13 @@
     }
 
     const phoneInput = form.querySelector('#booking-phone');
-    const phoneError = form.querySelector('[data-valmsg-for="Phone"]');
-    const phoneHint = document.getElementById('booking-phone-hint');
     const digits = phoneInput ? getPhoneDigits(phoneInput) : '';
 
     if (digits.length === 0) {
-      setFieldError(phoneError, 'Укажите телефон');
-      if (phoneHint) phoneHint.hidden = true;
+      showPhoneError('Укажите телефон');
       valid = false;
     } else if (digits.length < PHONE_DIGITS_LEN) {
-      setFieldError(phoneError, 'Введите 10 цифр номера после +7');
-      if (phoneHint) phoneHint.hidden = true;
+      showPhoneError('Введите 10 цифр номера после +7');
       valid = false;
     }
 
@@ -246,12 +261,7 @@
     if (!bookingForm) return;
     clearFormErrors(bookingForm);
     setSubmitLoading(document.getElementById('booking-submit'), false);
-    const hint = document.getElementById('booking-phone-hint');
-    if (hint) {
-      hint.textContent = '+7 и 10 цифр номера';
-      hint.classList.remove('is-error');
-      hint.hidden = false;
-    }
+    clearPhoneError();
   }
 
   function disableBookingFormUnobtrusive() {
@@ -275,14 +285,8 @@
 
     if (phoneInput) {
       phoneInput.addEventListener('input', () => {
+        clearPhoneError();
         updatePhoneHint(phoneInput, phoneHint);
-        const phoneError = bookingForm.querySelector('[data-valmsg-for="Phone"]');
-        if (phoneError?.classList.contains('field-validation-error')) {
-          phoneError.textContent = '';
-          phoneError.classList.add('field-validation-valid');
-          phoneError.classList.remove('field-validation-error');
-          if (phoneHint) phoneHint.hidden = false;
-        }
       });
       phoneInput.addEventListener('blur', () => updatePhoneHint(phoneInput, phoneHint));
     }
@@ -402,6 +406,10 @@
     resetBookingFormState();
   }
 
+  function isGuidedKind(kind) {
+    return kind === 'guided';
+  }
+
   function setBookingTimeVisible(show) {
     if (!timeWrap) return;
     timeWrap.hidden = !show;
@@ -409,23 +417,70 @@
       if (!show) timeInput.value = '';
       timeInput.required = show;
     }
+    if (show) {
+      refreshOccupiedSlots();
+    }
   }
 
-  function openBooking(tourId, tourName, requiresTime) {
+  function setExcursionKind(kind) {
+    const normalized = isGuidedKind(kind) ? 'guided' : 'self';
+    const activeBtn =
+      typeButtons.find((btn) => btn.dataset.excursionKind === normalized) || typeButtons[0];
+
+    if (!activeBtn) return;
+
+    typeButtons.forEach((btn) => {
+      btn.classList.toggle('is-active', btn === activeBtn);
+    });
+
+    if (tourIdInput) tourIdInput.value = activeBtn.dataset.excursionId || '';
+    if (tourNameInput) tourNameInput.value = activeBtn.dataset.excursionTitle || '';
+    setBookingTimeVisible(activeBtn.dataset.excursionGuided === '1');
+  }
+
+  async function refreshOccupiedSlots() {
+    if (!timeInput || !dateInput?.value || timeWrap?.hidden) return;
+
+    const previousValue = timeInput.value;
+
+    timeInput.querySelectorAll('option').forEach((option) => {
+      if (!option.value) return;
+      option.disabled = false;
+      option.classList.remove('is-occupied');
+      option.textContent = option.value;
+    });
+
+    try {
+      const response = await fetch(`/booking/occupied-slots?date=${encodeURIComponent(dateInput.value)}`, {
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) return;
+
+      const occupied = await response.json();
+      occupied.forEach((slot) => {
+        const option = timeInput.querySelector(`option[value="${slot}"]`);
+        if (!option) return;
+        option.disabled = true;
+        option.classList.add('is-occupied');
+        option.textContent = `${slot} — занято`;
+      });
+
+      if (previousValue && timeInput.querySelector(`option[value="${previousValue}"]:not(:disabled)`)) {
+        timeInput.value = previousValue;
+      } else {
+        timeInput.value = '';
+      }
+    } catch {
+      // Слоты останутся доступными, сервер проверит при отправке.
+    }
+  }
+
+  function openBooking(kind) {
     if (!modal) return;
     closeNav();
     resetBookingView();
-    if (tourIdInput) tourIdInput.value = tourId || '';
-    if (tourNameInput) tourNameInput.value = tourName || '';
-    setBookingTimeVisible(requiresTime === true || requiresTime === '1' || requiresTime === 1);
-    if (tourLabel) {
-      if (tourName) {
-        tourLabel.textContent = 'Экскурсия: ' + tourName;
-        tourLabel.hidden = false;
-      } else {
-        tourLabel.hidden = true;
-      }
-    }
+    setExcursionKind(kind || 'self');
     modal.hidden = false;
     modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
@@ -451,15 +506,22 @@
     document.body.style.overflow = 'hidden';
   }
 
+  typeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setExcursionKind(btn.dataset.excursionKind || 'self');
+    });
+  });
+
+  dateInput?.addEventListener('change', () => {
+    refreshOccupiedSlots();
+  });
+
   document.addEventListener('click', (e) => {
     const openBtn = e.target.closest('[data-booking-open]');
     if (openBtn) {
       e.preventDefault();
       e.stopPropagation();
-      const id = openBtn.getAttribute('data-tour-id');
-      const name = openBtn.getAttribute('data-tour-name');
-      const guided = openBtn.getAttribute('data-tour-guided');
-      openBooking(id, name, guided);
+      openBooking(openBtn.getAttribute('data-tour-kind') || 'self');
     }
   });
 

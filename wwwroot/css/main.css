@@ -997,6 +997,7 @@ main {
 .excursion-type-block__facts {
   list-style: none;
   margin: 0;
+  margin-top: auto;
   padding: 0;
   display: grid;
   gap: 0.75rem;
@@ -1676,7 +1677,66 @@ main {
 .booking-modal__subtitle {
   font-size: 0.9375rem;
   color: #5c5c62;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-type-switch {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-type-switch__btn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(42, 42, 46, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #2a2a2e;
+  cursor: pointer;
+  transition: border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.booking-type-switch__btn:hover:not(.is-active) {
+  border-color: rgba(42, 42, 46, 0.35);
+}
+
+.booking-type-switch__btn.is-active {
+  border: 2px solid #2a2a2e;
+  padding: calc(0.65rem - 1px) calc(1rem - 1px);
+}
+
+.booking-form__select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid rgba(42, 42, 46, 0.1);
+  border-radius: 6px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 1rem;
+  background-color: #f8f6f3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235c5c62' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  color: #2a2a2e;
+  transition: border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.booking-form__select:focus {
+  outline: none;
+  border-color: #5c1f2e;
+  box-shadow: 0 0 0 3px rgba(92, 31, 46, 0.12);
+}
+
+.booking-form__select option:disabled,
+.booking-form__select option.is-occupied {
+  color: #b5b5b8;
 }
 
 .form-hint {
@@ -1684,6 +1744,10 @@ main {
   margin-top: 0.35rem;
   font-size: 0.75rem;
   color: #5c5c62;
+}
+
+.form-hint.is-error {
+  color: #c0392b;
 }
 
 @keyframes modal-in {

@@ -17,12 +17,22 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         return RedirectToAction("Index", "Home");
     }
 
+    [HttpGet("/booking/occupied-slots")]
+    public async Task<IActionResult> OccupiedSlots(DateTime? date, CancellationToken cancellationToken)
+    {
+        if (date is null || date.Value.Date < DateTime.Today.AddDays(1))
+            return Ok(Array.Empty<string>());
+
+        var slots = await bookings.GetOccupiedGuidedSlotsAsync(date.Value.Date, cancellationToken);
+        return Ok(slots);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BookingCreateViewModel model, CancellationToken cancellationToken)
     {
         NormalizePhone(model, ModelState);
-        ValidateExcursion(model, ModelState);
+        await ValidateExcursionAsync(model, ModelState, cancellationToken);
 
         if (!ModelState.IsValid)
         {
@@ -73,7 +83,10 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
                     entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToArray())
         };
 
-    private static void ValidateExcursion(BookingCreateViewModel model, ModelStateDictionary modelState)
+    private async Task ValidateExcursionAsync(
+        BookingCreateViewModel model,
+        ModelStateDictionary modelState,
+        CancellationToken cancellationToken)
     {
         if (!ExcursionCatalog.TryGetById(model.ExcursionId, out var excursion))
         {
@@ -96,7 +109,16 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         }
 
         if (!ExcursionCatalog.GuidedTimeSlots.Contains(model.VisitTime))
+        {
             modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите доступное время с 10:00 до 17:00");
+            return;
+        }
+
+        if (model.VisitDate is null)
+            return;
+
+        if (!await bookings.IsGuidedSlotAvailableAsync(model.VisitDate.Value.Date, model.VisitTime, cancellationToken))
+            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Это время уже занято. Выберите другое.");
     }
 
     private static void NormalizePhone(BookingCreateViewModel model, ModelStateDictionary modelState)

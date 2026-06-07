@@ -12,7 +12,7 @@
         <h1 class="hero__title">@SiteInfo.CastleName</h1>
         <p class="hero__subtitle">@SiteInfo.Tagline</p>
         <div class="hero__actions">
-            <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
+            <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться на экскурсию</button>
             <a asp-controller="Directions" asp-action="Index" class="btn btn-outline btn-lg btn-outline--light">Как добраться</a>
         </div>
     </div>
@@ -167,7 +167,7 @@
         <div class="cta-banner reveal">
             <h2>Готовы к путешествию во времени?</h2>
             <p>Запишитесь на экскурсию — места ограничены в сезон</p>
-            <button type="button" class="btn btn-primary btn-lg" data-booking-open>Записаться на экскурсию</button>
+            <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться на экскурсию</button>
         </div>
     </div>
 </section>

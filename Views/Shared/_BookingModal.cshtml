@@ -16,6 +16,20 @@
                 <input type="hidden" asp-for="ExcursionId" id="booking-tour-id" />
                 <input type="hidden" asp-for="ExcursionTitle" id="booking-tour-name" />
 
+                <div class="booking-type-switch" role="group" aria-label="Тип экскурсии">
+                    @foreach (var excursion in ExcursionCatalog.All)
+                    {
+                        <button type="button"
+                                class="booking-type-switch__btn"
+                                data-excursion-kind="@excursion.KindKey"
+                                data-excursion-id="@excursion.Id"
+                                data-excursion-title="@excursion.Title"
+                                data-excursion-guided="@(excursion.RequiresTimeSlot ? "1" : "0")">
+                            @excursion.FormLabel
+                        </button>
+                    }
+                </div>
+
                 <div class="form-group">
                     <label asp-for="FullName">ФИО</label>
                     <input asp-for="FullName" id="booking-name" autocomplete="name" placeholder="Как к вам обращаться" />
@@ -25,9 +39,8 @@
                 <div class="form-group">
                     <label asp-for="Phone">Телефон</label>
                     <input asp-for="Phone" type="tel" id="booking-phone" class="js-phone-input"
-                           autocomplete="tel-national" placeholder="+7 (___) ___-__-__" />
+                           autocomplete="tel-national" placeholder="+7 (___) ___-__-__" aria-describedby="booking-phone-hint" />
                     <span class="form-hint" id="booking-phone-hint">+7 и 10 цифр номера</span>
-                    <span asp-validation-for="Phone" class="text-danger field-validation-valid" data-valmsg-for="Phone"></span>
                 </div>
 
                 <div class="form-row">
@@ -36,17 +49,6 @@
                         <input asp-for="VisitDate" type="date" id="booking-date" />
                         <span asp-validation-for="VisitDate" class="text-danger"></span>
                     </div>
-                    <div class="form-group" id="booking-time-wrap" hidden>
-                        <label asp-for="VisitTime">Время визита</label>
-                        <select asp-for="VisitTime" id="booking-time">
-                            <option value="">Выберите время</option>
-                            @foreach (var slot in ExcursionCatalog.GuidedTimeSlots)
-                            {
-                                <option value="@slot">@slot</option>
-                            }
-                        </select>
-                        <span asp-validation-for="VisitTime" class="text-danger" data-valmsg-for="VisitTime"></span>
-                    </div>
                     <div class="form-group">
                         <label asp-for="PersonsCount">Гостей</label>
                         <input asp-for="PersonsCount" type="number" id="booking-guests" min="1" max="30" />
@@ -54,7 +56,17 @@
                     </div>
                 </div>
 
-                <p class="booking-form__tour-label" id="booking-selected-tour" hidden></p>
+                <div class="form-group" id="booking-time-wrap" hidden>
+                    <label asp-for="VisitTime">Время визита</label>
+                    <select asp-for="VisitTime" id="booking-time" class="booking-form__select">
+                        <option value="">Выберите время</option>
+                        @foreach (var slot in ExcursionCatalog.GuidedTimeSlots)
+                        {
+                            <option value="@slot">@slot</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VisitTime" class="text-danger" data-valmsg-for="VisitTime"></span>
+                </div>
 
                 <partial name="_PersonalDataConsent" model="Model" />
 

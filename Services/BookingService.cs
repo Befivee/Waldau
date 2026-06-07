@@ -65,6 +65,27 @@ public class BookingService(ApplicationDbContext context) : IBookingService
         return expired.Count;
     }
 
+    public async Task<IReadOnlyList<string>> GetOccupiedGuidedSlotsAsync(
+        DateTime visitDate,
+        CancellationToken cancellationToken = default) =>
+        await context.Bookings
+            .Where(b =>
+                b.ExcursionKind == ExcursionKind.Guided &&
+                b.VisitDate.Date == visitDate.Date &&
+                b.VisitTime != null)
+            .Select(b => b.VisitTime!)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+    public async Task<bool> IsGuidedSlotAvailableAsync(
+        DateTime visitDate,
+        string visitTime,
+        CancellationToken cancellationToken = default)
+    {
+        var occupied = await GetOccupiedGuidedSlotsAsync(visitDate, cancellationToken);
+        return !occupied.Contains(visitTime);
+    }
+
     private IQueryable<Booking> QueryOrdered() =>
         context.Bookings
             .OrderBy(b => b.VisitDate)
