@@ -9,7 +9,6 @@ namespace WaldauCastle.Services.VK;
 
 public partial class VKAdminManager(
     IEventService events,
-    IExcursionService excursions,
     IBookingService bookings,
     IEventImageService images,
     CastleAdminContentService content,
@@ -32,8 +31,7 @@ public partial class VKAdminManager(
             "🏰 Панель управления замком Вальдау\n\n" +
             "1. 📋 Заявки\n" +
             "2. 🎭 Мероприятия\n" +
-            "3. 🚶 Экскурсии\n" +
-            "4. 📊 Статистика",
+            "3. 📊 Статистика",
             VKKeyboards.MainMenu(),
             cancellationToken);
     }
@@ -203,13 +201,10 @@ public partial class VKAdminManager(
             BotCallbackData.MenuBookings => SendBookingsAsync(peerId, cancellationToken),
             BotCallbackData.MenuEvents => SendEventsListWithResetAsync(peerId, cancellationToken),
             BotCallbackData.EventBackList => SendEventsListAsync(peerId, cancellationToken),
-            BotCallbackData.MenuExcursions => SendExcursionsListWithResetAsync(peerId, cancellationToken),
-            BotCallbackData.ExcursionBackList => SendExcursionsListAsync(peerId, cancellationToken),
             BotCallbackData.MenuStats => SendStatisticsAsync(peerId, cancellationToken),
             BotCallbackData.PagePrev => ChangeListPageAsync(peerId, -1, cancellationToken),
             BotCallbackData.PageNext => ChangeListPageAsync(peerId, 1, cancellationToken),
             BotCallbackData.EventAdd => StartAddWizardAsync(peerId, cancellationToken),
-            BotCallbackData.ExcursionAdd => StartExcursionAddWizardAsync(peerId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:view:", out var viewId) =>
                 SendEventDetailsAsync(peerId, viewId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:edit_title:", out var titleId) =>
@@ -224,24 +219,6 @@ public partial class VKAdminManager(
                 DeleteEventAsync(peerId, delYesId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:del_no:", out var delNoId) =>
                 SendEventDetailsAsync(peerId, delNoId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:view:", out var excViewId) =>
-                SendExcursionDetailsAsync(peerId, excViewId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_title:", out var excTitleId) =>
-                StartExcursionEditTitleAsync(peerId, excTitleId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_desc:", out var excDescId) =>
-                StartExcursionEditDescriptionAsync(peerId, excDescId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_dur:", out var excDurId) =>
-                StartExcursionEditDurationAsync(peerId, excDurId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_price:", out var excPriceId) =>
-                StartExcursionEditPriceAsync(peerId, excPriceId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_img:", out var excImgId) =>
-                StartExcursionEditImageAsync(peerId, excImgId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:del:", out var excDelId) =>
-                SendExcursionDeleteConfirmationAsync(peerId, excDelId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:del_yes:", out var excDelYesId) =>
-                DeleteExcursionAsync(peerId, excDelYesId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:del_no:", out var excDelNoId) =>
-                SendExcursionDetailsAsync(peerId, excDelNoId, cancellationToken),
             _ when BotCallbackData.TryParseBookingId(payload, "book:del:", out var bookDelId) =>
                 SendBookingDeleteConfirmationAsync(peerId, bookDelId, cancellationToken),
             _ when BotCallbackData.TryParseBookingId(payload, "book:del_yes:", out var bookDelYesId) =>
@@ -258,12 +235,6 @@ public partial class VKAdminManager(
         await SendEventsListAsync(peerId, cancellationToken);
     }
 
-    private async Task SendExcursionsListWithResetAsync(long peerId, CancellationToken cancellationToken)
-    {
-        stateService.GetOrCreate(peerId).ListPage = 0;
-        await SendExcursionsListAsync(peerId, cancellationToken);
-    }
-
     private async Task ChangeListPageAsync(long peerId, int delta, CancellationToken cancellationToken)
     {
         var session = stateService.GetOrCreate(peerId);
@@ -277,15 +248,19 @@ public partial class VKAdminManager(
             case BotScreen.Events:
                 await SendEventsPageAsync(peerId, session.ListPage, cancellationToken);
                 break;
-            case BotScreen.Excursions:
-                await SendExcursionsPageAsync(peerId, session.ListPage, cancellationToken);
-                break;
         }
     }
 
     public async Task HandleMenuTextAsync(long peerId, string text, CancellationToken cancellationToken)
     {
         var session = stateService.GetOrCreate(peerId);
+
+        if (session.Screen is BotScreen.Excursions or BotScreen.ExcursionDetail)
+        {
+            session.Reset();
+            await SendMainMenuAsync(peerId, cancellationToken);
+            return;
+        }
 
         if (BotTextCommandResolver.TryResolveConfirmation(text, out var confirmed))
         {
@@ -313,17 +288,6 @@ public partial class VKAdminManager(
                 return;
             }
 
-            if (session.PendingDeleteExcursionId is int excursionId)
-            {
-                if (confirmed)
-                    await DeleteExcursionAsync(peerId, excursionId, cancellationToken);
-                else
-                {
-                    session.PendingDeleteExcursionId = null;
-                    await SendExcursionDetailsAsync(peerId, excursionId, cancellationToken);
-                }
-                return;
-            }
         }
 
         if (BotTextCommandResolver.TryResolve(text, session.Screen, session.PageIds, out var payload))
@@ -371,34 +335,6 @@ public partial class VKAdminManager(
                 case VKBotState.WaitingForNewImage:
                     await HandleImageFallbackAsync(peerId, text, cancellationToken);
                     break;
-                case VKBotState.WaitingForExcursionImage:
-                case VKBotState.WaitingForNewExcursionImage:
-                    await HandleExcursionImageFallbackAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForExcursionTitle:
-                    await HandleExcursionWizardTitleAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForExcursionDescription:
-                    await HandleExcursionWizardDescriptionAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForExcursionDuration:
-                    await HandleExcursionWizardDurationAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForExcursionPrice:
-                    await HandleExcursionWizardPriceAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForNewExcursionTitle:
-                    await HandleExcursionEditTitleAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForNewExcursionDescription:
-                    await HandleExcursionEditDescriptionAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForNewExcursionDuration:
-                    await HandleExcursionEditDurationAsync(peerId, text, cancellationToken);
-                    break;
-                case VKBotState.WaitingForNewExcursionPrice:
-                    await HandleExcursionEditPriceAsync(peerId, text, cancellationToken);
-                    break;
                 default:
                     session.Reset();
                     await SendMainMenuAsync(peerId, cancellationToken);
@@ -419,8 +355,7 @@ public partial class VKAdminManager(
     {
         var session = stateService.GetOrCreate(peerId);
 
-        if (session.State is not (VKBotState.WaitingForEventImage or VKBotState.WaitingForNewImage
-            or VKBotState.WaitingForExcursionImage or VKBotState.WaitingForNewExcursionImage))
+        if (session.State is not (VKBotState.WaitingForEventImage or VKBotState.WaitingForNewImage))
         {
             await apiClient.SendMessageAsync(peerId, "Сейчас изображение не ожидается. Используйте /start.", cancellationToken: cancellationToken);
             return;
@@ -428,19 +363,12 @@ public partial class VKAdminManager(
 
         try
         {
-            if (session.State is VKBotState.WaitingForEventImage or VKBotState.WaitingForNewImage)
-            {
-                var imagePath = await DownloadPhotoAsync(message, cancellationToken);
+            var imagePath = await DownloadPhotoAsync(message, cancellationToken);
 
-                if (session.State == VKBotState.WaitingForEventImage)
-                    await CompleteAddWizardAsync(peerId, imagePath, cancellationToken);
-                else
-                    await CompleteEditImageAsync(peerId, imagePath, cancellationToken);
-            }
+            if (session.State == VKBotState.WaitingForEventImage)
+                await CompleteAddWizardAsync(peerId, imagePath, cancellationToken);
             else
-            {
-                await HandleExcursionPhotoMessageAsync(peerId, message, cancellationToken);
-            }
+                await CompleteEditImageAsync(peerId, imagePath, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -516,12 +444,8 @@ public partial class VKAdminManager(
         var session = stateService.GetOrCreate(peerId);
         if (session.State == VKBotState.WaitingForEventImage)
             await CompleteAddWizardAsync(peerId, DefaultImagePath, cancellationToken);
-        else if (session.State == VKBotState.WaitingForNewImage)
-            await CompleteEditImageAsync(peerId, DefaultImagePath, cancellationToken);
-        else if (session.State == VKBotState.WaitingForExcursionImage)
-            await CompleteExcursionAddWizardWithPathAsync(peerId, DefaultImagePath, cancellationToken);
         else
-            await CompleteExcursionEditImageWithPathAsync(peerId, DefaultImagePath, cancellationToken);
+            await CompleteEditImageAsync(peerId, DefaultImagePath, cancellationToken);
     }
 
     private async Task CompleteAddWizardAsync(long peerId, string imagePath, CancellationToken cancellationToken)
@@ -664,21 +588,6 @@ public partial class VKAdminManager(
         memory.Position = 0;
 
         return await images.SaveFromStreamAsync(memory, ".jpg", cancellationToken: cancellationToken);
-    }
-
-    private async Task<string> DownloadExcursionPhotoAsync(VkMessage message, CancellationToken cancellationToken)
-    {
-        var url = message.GetLargestPhotoUrl();
-        if (string.IsNullOrWhiteSpace(url))
-            throw new InvalidOperationException("Изображение не найдено в сообщении.");
-
-        using var client = httpClientFactory.CreateClient("vk_photo_download");
-        await using var stream = await client.GetStreamAsync(url, cancellationToken);
-        using var memory = new MemoryStream();
-        await stream.CopyToAsync(memory, cancellationToken);
-        memory.Position = 0;
-
-        return await images.SaveFromStreamAsync(memory, ".jpg", "excursions", cancellationToken: cancellationToken);
     }
 
     private async Task<bool> EnsureEventExists(long peerId, int eventId, CancellationToken cancellationToken)

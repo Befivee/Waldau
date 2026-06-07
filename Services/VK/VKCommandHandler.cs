@@ -90,11 +90,11 @@ public class VKCommandHandler(
         }
 
         var session = stateService.GetOrCreate(peerId);
+        NormalizeLegacySession(session);
 
         if (message.HasPhoto)
         {
-            if (session.State is VKBotState.WaitingForEventImage or VKBotState.WaitingForNewImage
-                or VKBotState.WaitingForExcursionImage or VKBotState.WaitingForNewExcursionImage)
+            if (session.State is VKBotState.WaitingForEventImage or VKBotState.WaitingForNewImage)
             {
                 await WithManager(m => m.HandlePhotoMessageAsync(peerId, message, cancellationToken), cancellationToken);
                 return;
@@ -113,7 +113,22 @@ public class VKCommandHandler(
             }
 
             await WithManager(m => m.HandleMenuTextAsync(peerId, text, cancellationToken), cancellationToken);
+            return;
         }
+
+        await apiClient.SendMessageAsync(
+            peerId,
+            "Команда не распознана. Отправьте /start для открытия панели управления.",
+            cancellationToken: cancellationToken);
+    }
+
+    private static void NormalizeLegacySession(VKUserSession session)
+    {
+        if (session.Screen is BotScreen.Excursions or BotScreen.ExcursionDetail)
+            session.Reset();
+
+        if ((int)session.State > (int)VKBotState.WaitingForNewImage)
+            session.State = VKBotState.None;
     }
 
     private async Task HandleMessageEventAsync(JsonElement update, CancellationToken cancellationToken)

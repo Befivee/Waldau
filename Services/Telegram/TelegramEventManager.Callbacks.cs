@@ -53,6 +53,13 @@ public partial class TelegramEventManager
     {
         var session = stateService.GetOrCreate(chatId);
 
+        if (session.Screen is BotScreen.Excursions or BotScreen.ExcursionDetail)
+        {
+            session.Reset();
+            await SendMainMenuAsync(bot, chatId, cancellationToken);
+            return;
+        }
+
         if (BotTextCommandResolver.TryResolveConfirmation(text, out var confirmed))
         {
             if (session.PendingDeleteBookingId is int bookingId)

@@ -22,17 +22,30 @@ public partial class TelegramEventManager
         CancellationToken cancellationToken)
     {
         var session = stateService.GetOrCreate(chatId);
-        var (text, totalPages) = await content.BuildBookingsPageAsync(page, cancellationToken);
-        session.ListPage = Math.Clamp(page, 0, totalPages - 1);
 
-        var list = await bookings.GetPageAsync(session.ListPage, BotListPaging.PageSize, cancellationToken);
-        session.PageIds = list.Select(b => b.Id).ToList();
+        try
+        {
+            var (text, totalPages) = await content.BuildBookingsPageAsync(page, cancellationToken);
+            session.ListPage = Math.Clamp(page, 0, totalPages - 1);
 
-        await bot.SendMessage(
-            chatId,
-            text,
-            replyMarkup: TelegramKeyboards.BookingsPage(list, session.ListPage, totalPages),
-            cancellationToken: cancellationToken);
+            var list = await bookings.GetPageAsync(session.ListPage, BotListPaging.PageSize, cancellationToken);
+            session.PageIds = list.Select(b => b.Id).ToList();
+
+            await bot.SendMessage(
+                chatId,
+                text,
+                replyMarkup: TelegramKeyboards.BookingsPage(list, session.ListPage, totalPages),
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Не удалось загрузить заявки для Telegram chat {ChatId}", chatId);
+            await bot.SendMessage(
+                chatId,
+                "⚠️ Не удалось загрузить заявки. Перезапустите бота командой /start или обратитесь к администратору сайта.",
+                replyMarkup: TelegramKeyboards.BackToMainMenu(),
+                cancellationToken: cancellationToken);
+        }
     }
 
     public async Task SendBookingDeleteConfirmationAsync(

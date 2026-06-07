@@ -12,8 +12,7 @@ public static class VKKeyboards
             [
                 Text(BotReplyLabels.Number(1)),
                 Text(BotReplyLabels.Number(2)),
-                Text(BotReplyLabels.Number(3)),
-                Text(BotReplyLabels.Number(4))
+                Text(BotReplyLabels.Number(3))
             ]
         ]);
 
@@ -48,22 +47,6 @@ public static class VKKeyboards
         return BuildReply(rows);
     }
 
-    public static string ExcursionsPage(IReadOnlyList<Excursion> excursions, int page, int totalPages)
-    {
-        var rows = new List<object[]>();
-        if (excursions.Count > 0)
-        {
-            rows.Add(excursions
-                .Select((_, i) => Text(BotReplyLabels.Number(i + 1)))
-                .ToArray());
-        }
-
-        rows.AddRange(NavigationRow(page, totalPages));
-        rows.Add([Text(BotReplyLabels.Add)]);
-        rows.Add([Text(BotReplyLabels.BackMain)]);
-        return BuildReply(rows);
-    }
-
     public static string EventManagement(int eventId) =>
         BuildReply(
         [
@@ -72,22 +55,6 @@ public static class VKKeyboards
                 Text(BotReplyLabels.Number(2)),
                 Text(BotReplyLabels.Number(3)),
                 Text(BotReplyLabels.Number(4))
-            ],
-            [Text(BotReplyLabels.Back)]
-        ]);
-
-    public static string ExcursionManagement(int excursionId) =>
-        BuildReply(
-        [
-            [
-                Text(BotReplyLabels.Number(1)),
-                Text(BotReplyLabels.Number(2)),
-                Text(BotReplyLabels.Number(3)),
-                Text(BotReplyLabels.Number(4))
-            ],
-            [
-                Text("5"),
-                Text("6")
             ],
             [Text(BotReplyLabels.Back)]
         ]);

@@ -84,6 +84,7 @@ public class TelegramCommandHandler(
         }
 
         var session = stateService.GetOrCreate(chatId);
+        NormalizeLegacySession(session);
 
         if (message.Photo is { Length: > 0 })
         {
@@ -106,6 +107,23 @@ public class TelegramCommandHandler(
             }
 
             await WithManager(m => m.HandleMenuTextAsync(botClient, chatId, message.Text.Trim(), cancellationToken), cancellationToken);
+            return;
+        }
+
+        await botClient.SendMessage(
+            chatId,
+            "Команда не распознана. Отправьте /start для открытия панели управления.",
+            cancellationToken: cancellationToken);
+    }
+
+    private static void NormalizeLegacySession(TelegramUserSession session)
+    {
+        if (session.Screen is BotScreen.Excursions or BotScreen.ExcursionDetail)
+            session.Reset();
+
+        if ((int)session.State > (int)TelegramBotState.WaitingForNewImage)
+        {
+            session.State = TelegramBotState.None;
         }
     }
 

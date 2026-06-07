@@ -18,17 +18,30 @@ public partial class VKAdminManager
     private async Task SendBookingsPageAsync(long peerId, int page, CancellationToken cancellationToken)
     {
         var session = stateService.GetOrCreate(peerId);
-        var (text, totalPages) = await content.BuildBookingsPageAsync(page, cancellationToken);
-        session.ListPage = Math.Clamp(page, 0, totalPages - 1);
 
-        var list = await bookings.GetPageAsync(session.ListPage, BotListPaging.PageSize, cancellationToken);
-        session.PageIds = list.Select(b => b.Id).ToList();
+        try
+        {
+            var (text, totalPages) = await content.BuildBookingsPageAsync(page, cancellationToken);
+            session.ListPage = Math.Clamp(page, 0, totalPages - 1);
 
-        await apiClient.SendMessageAsync(
-            peerId,
-            text,
-            VKKeyboards.BookingsPage(list, session.ListPage, totalPages),
-            cancellationToken);
+            var list = await bookings.GetPageAsync(session.ListPage, BotListPaging.PageSize, cancellationToken);
+            session.PageIds = list.Select(b => b.Id).ToList();
+
+            await apiClient.SendMessageAsync(
+                peerId,
+                text,
+                VKKeyboards.BookingsPage(list, session.ListPage, totalPages),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Не удалось загрузить заявки для VK peer {PeerId}", peerId);
+            await apiClient.SendMessageAsync(
+                peerId,
+                "⚠️ Не удалось загрузить заявки. Перезапустите бота командой /start или обратитесь к администратору сайта.",
+                VKKeyboards.BackToMainMenu(),
+                cancellationToken);
+        }
     }
 
     public async Task SendBookingDeleteConfirmationAsync(long peerId, int bookingId, CancellationToken cancellationToken)

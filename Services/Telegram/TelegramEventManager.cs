@@ -209,6 +209,9 @@ public partial class TelegramEventManager(
         var text = message.Text?.Trim() ?? string.Empty;
         var session = stateService.GetOrCreate(chatId);
 
+        if ((int)session.State > (int)TelegramBotState.WaitingForNewImage)
+            session.State = TelegramBotState.None;
+
         if (session.State == TelegramBotState.None)
         {
             await HandleMenuTextAsync(bot, chatId, text, cancellationToken);
