@@ -1,0 +1,30 @@
+@model ExcursionTypeInfo
+
+<article class="excursion-type-block reveal">
+    <div class="excursion-type-block__media" style="--block-bg: url('@Model.ImagePath')">
+        <span class="excursion-type-block__badge">@Model.DisplayPrice</span>
+    </div>
+    <div class="excursion-type-block__body">
+        <h2 class="excursion-type-block__title">@Model.Title</h2>
+        <p class="excursion-type-block__desc">@Model.Description</p>
+        <ul class="excursion-type-block__facts">
+            <li><span>Длительность</span><strong>@Model.Duration</strong></li>
+            @if (Model.RequiresTimeSlot)
+            {
+                <li><span>Время</span><strong>10:00 — 17:00, каждый час</strong></li>
+            }
+            else
+            {
+                <li><span>График</span><strong>@SiteInfo.WorkingHours</strong></li>
+            }
+        </ul>
+        <button type="button" class="btn btn-primary btn-lg"
+                data-booking-open
+                data-tour-id="@Model.Id"
+                data-tour-name="@Model.Title"
+                data-tour-kind="@Model.KindKey"
+                data-tour-guided="@(Model.RequiresTimeSlot ? "1" : "0")">
+            Записаться
+        </button>
+    </div>
+</article>

@@ -36,6 +36,17 @@
                         <input asp-for="VisitDate" type="date" id="booking-date" />
                         <span asp-validation-for="VisitDate" class="text-danger"></span>
                     </div>
+                    <div class="form-group" id="booking-time-wrap" hidden>
+                        <label asp-for="VisitTime">Время визита</label>
+                        <select asp-for="VisitTime" id="booking-time">
+                            <option value="">Выберите время</option>
+                            @foreach (var slot in ExcursionCatalog.GuidedTimeSlots)
+                            {
+                                <option value="@slot">@slot</option>
+                            }
+                        </select>
+                        <span asp-validation-for="VisitTime" class="text-danger" data-valmsg-for="VisitTime"></span>
+                    </div>
                     <div class="form-group">
                         <label asp-for="PersonsCount">Гостей</label>
                         <input asp-for="PersonsCount" type="number" id="booking-guests" min="1" max="30" />

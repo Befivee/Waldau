@@ -10,7 +10,6 @@ namespace WaldauCastle.Services.Telegram;
 
 public partial class TelegramEventManager(
     IEventService events,
-    IExcursionService excursions,
     IBookingService bookings,
     IEventImageService images,
     CastleAdminContentService content,
@@ -31,8 +30,7 @@ public partial class TelegramEventManager(
             "🏰 Панель управления замком Вальдау\n\n" +
             "1. 📋 Заявки\n" +
             "2. 🎭 Мероприятия\n" +
-            "3. 🚶 Экскурсии\n" +
-            "4. 📊 Статистика",
+            "3. 📊 Статистика",
             replyMarkup: TelegramKeyboards.MainMenu(),
             cancellationToken: cancellationToken);
     }
@@ -240,34 +238,6 @@ public partial class TelegramEventManager(
                 case TelegramBotState.WaitingForNewImage:
                     await HandleImageFallbackAsync(bot, chatId, text, cancellationToken);
                     break;
-                case TelegramBotState.WaitingForExcursionImage:
-                case TelegramBotState.WaitingForNewExcursionImage:
-                    await HandleExcursionImageFallbackAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForExcursionTitle:
-                    await HandleExcursionWizardTitleAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForExcursionDescription:
-                    await HandleExcursionWizardDescriptionAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForExcursionDuration:
-                    await HandleExcursionWizardDurationAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForExcursionPrice:
-                    await HandleExcursionWizardPriceAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForNewExcursionTitle:
-                    await HandleExcursionEditTitleAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForNewExcursionDescription:
-                    await HandleExcursionEditDescriptionAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForNewExcursionDuration:
-                    await HandleExcursionEditDurationAsync(bot, chatId, text, cancellationToken);
-                    break;
-                case TelegramBotState.WaitingForNewExcursionPrice:
-                    await HandleExcursionEditPriceAsync(bot, chatId, text, cancellationToken);
-                    break;
                 default:
                     session.Reset();
                     await SendMainMenuAsync(bot, chatId, cancellationToken);
@@ -289,8 +259,7 @@ public partial class TelegramEventManager(
         var chatId = message.Chat.Id;
         var session = stateService.GetOrCreate(chatId);
 
-        if (session.State is not (TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage
-            or TelegramBotState.WaitingForExcursionImage or TelegramBotState.WaitingForNewExcursionImage))
+        if (session.State is not (TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage))
         {
             await bot.SendMessage(chatId, "Сейчас изображение не ожидается. Используйте /start.", cancellationToken: cancellationToken);
             return;
@@ -298,17 +267,10 @@ public partial class TelegramEventManager(
 
         try
         {
-            if (session.State is TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage)
-            {
-                if (session.State == TelegramBotState.WaitingForEventImage)
-                    await CompleteAddWizardAsync(bot, chatId, message, cancellationToken);
-                else
-                    await CompleteEditImageAsync(bot, chatId, message, cancellationToken);
-            }
+            if (session.State == TelegramBotState.WaitingForEventImage)
+                await CompleteAddWizardAsync(bot, chatId, message, cancellationToken);
             else
-            {
-                await HandleExcursionPhotoMessageAsync(bot, message, cancellationToken);
-            }
+                await CompleteEditImageAsync(bot, chatId, message, cancellationToken);
         }
         catch (InvalidOperationException ex)
         {

@@ -16,6 +16,8 @@
   const tourNameInput = document.getElementById('booking-tour-name');
   const tourLabel = document.getElementById('booking-selected-tour');
   const dateInput = document.getElementById('booking-date');
+  const timeWrap = document.getElementById('booking-time-wrap');
+  const timeInput = document.getElementById('booking-time');
 
   const PHONE_PREFIX = '+7';
   const PHONE_DIGITS_LEN = 10;
@@ -213,6 +215,13 @@
       valid = false;
     }
 
+    const timeField = form.querySelector('#booking-time');
+    const timeWrapEl = form.querySelector('#booking-time-wrap');
+    if (timeWrapEl && !timeWrapEl.hidden && !timeField?.value) {
+      setFieldError(form.querySelector('[data-valmsg-for="VisitTime"]'), 'Выберите время визита');
+      valid = false;
+    }
+
     const consentInput = form.querySelector('input[name="PersonalDataConsent"]');
     if (!consentInput?.checked) {
       setFieldError(
@@ -393,12 +402,22 @@
     resetBookingFormState();
   }
 
-  function openBooking(tourId, tourName) {
+  function setBookingTimeVisible(show) {
+    if (!timeWrap) return;
+    timeWrap.hidden = !show;
+    if (timeInput) {
+      if (!show) timeInput.value = '';
+      timeInput.required = show;
+    }
+  }
+
+  function openBooking(tourId, tourName, requiresTime) {
     if (!modal) return;
     closeNav();
     resetBookingView();
     if (tourIdInput) tourIdInput.value = tourId || '';
     if (tourNameInput) tourNameInput.value = tourName || '';
+    setBookingTimeVisible(requiresTime === true || requiresTime === '1' || requiresTime === 1);
     if (tourLabel) {
       if (tourName) {
         tourLabel.textContent = 'Экскурсия: ' + tourName;
@@ -439,7 +458,8 @@
       e.stopPropagation();
       const id = openBtn.getAttribute('data-tour-id');
       const name = openBtn.getAttribute('data-tour-name');
-      openBooking(id, name);
+      const guided = openBtn.getAttribute('data-tour-guided');
+      openBooking(id, name, guided);
     }
   });
 

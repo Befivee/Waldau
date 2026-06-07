@@ -17,13 +17,10 @@ public partial class TelegramEventManager
             BotCallbackData.MenuBookings => SendBookingsAsync(bot, chatId, cancellationToken),
             BotCallbackData.MenuEvents => SendEventsListWithResetAsync(bot, chatId, cancellationToken),
             BotCallbackData.EventBackList => SendEventsListAsync(bot, chatId, cancellationToken),
-            BotCallbackData.MenuExcursions => SendExcursionsListWithResetAsync(bot, chatId, cancellationToken),
-            BotCallbackData.ExcursionBackList => SendExcursionsListAsync(bot, chatId, cancellationToken),
             BotCallbackData.MenuStats => SendStatisticsAsync(bot, chatId, cancellationToken),
             BotCallbackData.PagePrev => ChangeListPageAsync(bot, chatId, -1, cancellationToken),
             BotCallbackData.PageNext => ChangeListPageAsync(bot, chatId, 1, cancellationToken),
             BotCallbackData.EventAdd => StartAddWizardAsync(bot, chatId, cancellationToken),
-            BotCallbackData.ExcursionAdd => StartExcursionAddWizardAsync(bot, chatId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:view:", out var viewId) =>
                 SendEventDetailsAsync(bot, chatId, viewId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:edit_title:", out var titleId) =>
@@ -38,24 +35,6 @@ public partial class TelegramEventManager
                 DeleteEventAsync(bot, chatId, delYesId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:del_no:", out var delNoId) =>
                 SendEventDetailsAsync(bot, chatId, delNoId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:view:", out var excViewId) =>
-                SendExcursionDetailsAsync(bot, chatId, excViewId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_title:", out var excTitleId) =>
-                StartExcursionEditTitleAsync(bot, chatId, excTitleId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_desc:", out var excDescId) =>
-                StartExcursionEditDescriptionAsync(bot, chatId, excDescId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_dur:", out var excDurId) =>
-                StartExcursionEditDurationAsync(bot, chatId, excDurId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_price:", out var excPriceId) =>
-                StartExcursionEditPriceAsync(bot, chatId, excPriceId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:edit_img:", out var excImgId) =>
-                StartExcursionEditImageAsync(bot, chatId, excImgId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:del:", out var excDelId) =>
-                SendExcursionDeleteConfirmationAsync(bot, chatId, excDelId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:del_yes:", out var excDelYesId) =>
-                DeleteExcursionAsync(bot, chatId, excDelYesId, cancellationToken),
-            _ when BotCallbackData.TryParseExcursionId(payload, "exc:del_no:", out var excDelNoId) =>
-                SendExcursionDetailsAsync(bot, chatId, excDelNoId, cancellationToken),
             _ when BotCallbackData.TryParseBookingId(payload, "book:del:", out var bookDelId) =>
                 SendBookingDeleteConfirmationAsync(bot, chatId, bookDelId, cancellationToken),
             _ when BotCallbackData.TryParseBookingId(payload, "book:del_yes:", out var bookDelYesId) =>
@@ -99,18 +78,6 @@ public partial class TelegramEventManager
                 }
                 return;
             }
-
-            if (session.PendingDeleteExcursionId is int excursionId)
-            {
-                if (confirmed)
-                    await DeleteExcursionAsync(bot, chatId, excursionId, cancellationToken);
-                else
-                {
-                    session.PendingDeleteExcursionId = null;
-                    await SendExcursionDetailsAsync(bot, chatId, excursionId, cancellationToken);
-                }
-                return;
-            }
         }
 
         if (BotTextCommandResolver.TryResolve(text, session.Screen, session.PageIds, out var payload))
@@ -126,12 +93,6 @@ public partial class TelegramEventManager
     {
         stateService.GetOrCreate(chatId).ListPage = 0;
         await SendEventsListAsync(bot, chatId, cancellationToken);
-    }
-
-    private async Task SendExcursionsListWithResetAsync(ITelegramBotClient bot, long chatId, CancellationToken cancellationToken)
-    {
-        stateService.GetOrCreate(chatId).ListPage = 0;
-        await SendExcursionsListAsync(bot, chatId, cancellationToken);
     }
 
     private async Task ChangeListPageAsync(
@@ -150,9 +111,6 @@ public partial class TelegramEventManager
                 break;
             case BotScreen.Events:
                 await SendEventsPageAsync(bot, chatId, session.ListPage, cancellationToken);
-                break;
-            case BotScreen.Excursions:
-                await SendExcursionsPageAsync(bot, chatId, session.ListPage, cancellationToken);
                 break;
         }
     }

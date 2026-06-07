@@ -22,6 +22,17 @@ public class Booking
     [Display(Name = "Дата визита")]
     public DateTime VisitDate { get; set; }
 
+    [Display(Name = "Вид экскурсии")]
+    public ExcursionKind ExcursionKind { get; set; }
+
+    [StringLength(200)]
+    [Display(Name = "Экскурсия")]
+    public string ExcursionTitle { get; set; } = string.Empty;
+
+    [StringLength(5)]
+    [Display(Name = "Время визита")]
+    public string? VisitTime { get; set; }
+
     [Required(ErrorMessage = "Укажите количество человек")]
     [Range(1, 30, ErrorMessage = "От 1 до 30 человек")]
     [Display(Name = "Количество человек")]

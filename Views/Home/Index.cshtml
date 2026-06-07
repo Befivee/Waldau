@@ -87,10 +87,10 @@
             </div>
             <a asp-controller="Excursion" asp-action="Index" class="link-arrow">Все экскурсии</a>
         </header>
-        <div class="cards-grid cards-grid--3">
-            @foreach (var excursion in Model.UpcomingExcursions)
+        <div class="excursion-types excursion-types--compact">
+            @foreach (var excursion in ExcursionCatalog.All)
             {
-                <partial name="Components/_ExcursionCard" model="excursion" />
+                <partial name="Components/_ExcursionTypeBlock" model="excursion" />
             }
         </div>
     </div>

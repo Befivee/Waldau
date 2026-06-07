@@ -4,7 +4,7 @@ using WaldauCastle.ViewModels;
 
 namespace WaldauCastle.Controllers;
 
-public class HomeController(IExcursionService excursions, IEventService events) : Controller
+public class HomeController(IEventService events) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -16,7 +16,6 @@ public class HomeController(IExcursionService excursions, IEventService events) 
 
         var model = new HomeIndexViewModel
         {
-            UpcomingExcursions = await excursions.GetFeaturedAsync(3, cancellationToken),
             UpcomingEvents = await events.GetUpcomingAsync(3, cancellationToken)
         };
 

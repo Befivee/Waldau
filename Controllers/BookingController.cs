@@ -22,6 +22,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
     public async Task<IActionResult> Create(BookingCreateViewModel model, CancellationToken cancellationToken)
     {
         NormalizePhone(model, ModelState);
+        ValidateExcursion(model, ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -31,11 +32,16 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
             return View(model);
         }
 
+        var excursion = ExcursionCatalog.Get((ExcursionKind)model.ExcursionId!.Value);
+
         var booking = new Booking
         {
             FullName = model.FullName.Trim(),
             Phone = model.Phone.Trim(),
             VisitDate = model.VisitDate!.Value.Date,
+            ExcursionKind = excursion.Kind,
+            ExcursionTitle = excursion.Title,
+            VisitTime = excursion.RequiresTimeSlot ? model.VisitTime : null,
             PersonsCount = model.PersonsCount,
             PersonalDataConsent = model.PersonalDataConsent,
             CreatedAt = DateTime.UtcNow
@@ -66,6 +72,32 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
                     entry => entry.Key,
                     entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToArray())
         };
+
+    private static void ValidateExcursion(BookingCreateViewModel model, ModelStateDictionary modelState)
+    {
+        if (!ExcursionCatalog.TryGetById(model.ExcursionId, out var excursion))
+        {
+            modelState.AddModelError(nameof(BookingCreateViewModel.ExcursionId), "Выберите вид экскурсии");
+            return;
+        }
+
+        model.ExcursionTitle = excursion.Title;
+
+        if (!excursion.RequiresTimeSlot)
+        {
+            model.VisitTime = null;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(model.VisitTime))
+        {
+            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите время визита");
+            return;
+        }
+
+        if (!ExcursionCatalog.GuidedTimeSlots.Contains(model.VisitTime))
+            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите доступное время с 10:00 до 17:00");
+    }
 
     private static void NormalizePhone(BookingCreateViewModel model, ModelStateDictionary modelState)
     {

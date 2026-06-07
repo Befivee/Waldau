@@ -926,6 +926,97 @@ main {
   font-weight: 500;
 }
 
+.excursion-types {
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 992px) {
+  .excursion-types {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem;
+  }
+}
+.excursion-types--compact .excursion-type-block__media {
+  min-height: 220px;
+}
+
+.excursion-type-block {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(42, 42, 46, 0.1);
+  box-shadow: 0 8px 30px rgba(42, 42, 46, 0.06);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.excursion-type-block:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(42, 42, 46, 0.12);
+}
+.excursion-type-block__media {
+  min-height: 280px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: var(--block-bg), linear-gradient(135deg, #2d4a3e 0%, #5c1f2e 100%);
+  position: relative;
+}
+.excursion-type-block__badge {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #5c1f2e;
+}
+.excursion-type-block__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 1rem;
+  padding: 2rem;
+}
+.excursion-type-block__title {
+  font-size: clamp(1.5rem, 2vw, 1.875rem);
+  margin: 0;
+  color: #2a2a2e;
+}
+.excursion-type-block__desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #5c5c62;
+}
+.excursion-type-block__facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.excursion-type-block__facts li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(42, 42, 46, 0.08);
+  font-size: 0.9375rem;
+}
+.excursion-type-block__facts span {
+  color: #5c5c62;
+}
+.excursion-type-block__facts strong {
+  color: #2d4a3e;
+  text-align: right;
+}
+
 .event-card {
   border-radius: 12px;
   overflow: hidden;

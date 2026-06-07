@@ -87,8 +87,7 @@ public class TelegramCommandHandler(
 
         if (message.Photo is { Length: > 0 })
         {
-            if (session.State is TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage
-                or TelegramBotState.WaitingForExcursionImage or TelegramBotState.WaitingForNewExcursionImage)
+            if (session.State is TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage)
             {
                 await WithManager(m => m.HandlePhotoMessageAsync(botClient, message, cancellationToken), cancellationToken);
                 return;

@@ -10,8 +10,7 @@ public static class TelegramKeyboards
         [
             new KeyboardButton(BotReplyLabels.Number(1)),
             new KeyboardButton(BotReplyLabels.Number(2)),
-            new KeyboardButton(BotReplyLabels.Number(3)),
-            new KeyboardButton(BotReplyLabels.Number(4))
+            new KeyboardButton(BotReplyLabels.Number(3))
         ]
     ])
     {
@@ -49,22 +48,6 @@ public static class TelegramKeyboards
         return Build(rows);
     }
 
-    public static ReplyKeyboardMarkup ExcursionsPage(IReadOnlyList<Excursion> excursions, int page, int totalPages)
-    {
-        var rows = new List<KeyboardButton[]>();
-        if (excursions.Count > 0)
-        {
-            rows.Add(excursions
-                .Select((_, i) => new KeyboardButton(BotReplyLabels.Number(i + 1)))
-                .ToArray());
-        }
-
-        rows.AddRange(NavigationRow(page, totalPages));
-        rows.Add([new KeyboardButton(BotReplyLabels.Add)]);
-        rows.Add([new KeyboardButton(BotReplyLabels.BackMain)]);
-        return Build(rows);
-    }
-
     public static ReplyKeyboardMarkup EventManagement() => Build([
         [
             new KeyboardButton(BotReplyLabels.Number(1)),
@@ -72,17 +55,6 @@ public static class TelegramKeyboards
             new KeyboardButton(BotReplyLabels.Number(3)),
             new KeyboardButton(BotReplyLabels.Number(4))
         ],
-        [new KeyboardButton(BotReplyLabels.Back)]
-    ]);
-
-    public static ReplyKeyboardMarkup ExcursionManagement() => Build([
-        [
-            new KeyboardButton(BotReplyLabels.Number(1)),
-            new KeyboardButton(BotReplyLabels.Number(2)),
-            new KeyboardButton(BotReplyLabels.Number(3)),
-            new KeyboardButton(BotReplyLabels.Number(4))
-        ],
-        [new KeyboardButton("5"), new KeyboardButton("6")],
         [new KeyboardButton(BotReplyLabels.Back)]
     ]);
 

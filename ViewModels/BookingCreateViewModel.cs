@@ -30,6 +30,9 @@ public class BookingCreateViewModel
     [Display(Name = "Экскурсия")]
     public string? ExcursionTitle { get; set; }
 
+    [Display(Name = "Время визита")]
+    public string? VisitTime { get; set; }
+
     [MustBeTrue(ErrorMessage = "Необходимо дать согласие на обработку персональных данных")]
     [Display(Name = "Я согласен(а) на обработку персональных данных")]
     public bool PersonalDataConsent { get; set; }

@@ -18,11 +18,16 @@ public class VKNotificationService(
         }
 
         var culture = new System.Globalization.CultureInfo("ru-RU");
+        var schedule = string.IsNullOrWhiteSpace(booking.VisitTime)
+            ? booking.VisitDate.ToString("d MMMM yyyy", culture)
+            : $"{booking.VisitDate.ToString("d MMMM yyyy", culture)}, {booking.VisitTime}";
+
         var text =
             "🔔 Новая заявка\n\n" +
+            $"Экскурсия: {booking.ExcursionTitle}\n" +
             $"ФИО: {booking.FullName}\n" +
             $"Телефон: {booking.Phone}\n" +
-            $"Дата: {booking.VisitDate.ToString("d MMMM yyyy", culture)}\n" +
+            $"Дата: {schedule}\n" +
             $"Количество человек: {booking.PersonsCount}";
 
         try

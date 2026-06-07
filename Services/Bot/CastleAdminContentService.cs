@@ -8,7 +8,6 @@ namespace WaldauCastle.Services.Bot;
 
 public class CastleAdminContentService(
     IBookingService bookings,
-    IExcursionService excursions,
     ApplicationDbContext db)
 {
     private static readonly CultureInfo RuCulture = new("ru-RU");
@@ -33,10 +32,15 @@ public class CastleAdminContentService(
         for (var i = 0; i < list.Count; i++)
         {
             var booking = list[i];
+            var schedule = string.IsNullOrWhiteSpace(booking.VisitTime)
+                ? booking.VisitDate.ToString("d MMMM yyyy", RuCulture)
+                : $"{booking.VisitDate.ToString("d MMMM yyyy", RuCulture)}, {booking.VisitTime}";
+
             lines.Add(
                 $"{i + 1}. {booking.FullName}\n" +
+                $"   {booking.ExcursionTitle}\n" +
                 $"   {booking.Phone}\n" +
-                $"   {booking.VisitDate.ToString("d MMMM yyyy", RuCulture)}, {booking.PersonsCount} чел.");
+                $"   {schedule}, {booking.PersonsCount} чел.");
         }
 
         lines.Add("\nНажмите номер заявки, чтобы удалить.");
@@ -48,26 +52,21 @@ public class CastleAdminContentService(
     {
         var eventsCount = await db.Events.CountAsync(cancellationToken);
         var bookingsCount = await db.Bookings.CountAsync(cancellationToken);
-        var excursionsCount = await db.Excursions.CountAsync(cancellationToken);
         var upcomingCount = await db.Events.CountAsync(e => e.EventDate >= DateTime.Today, cancellationToken);
 
         return
             "📊 Статистика\n\n" +
             $"🎭 Мероприятий: {eventsCount} (предстоящих: {upcomingCount})\n" +
             $"📋 Заявок: {bookingsCount}\n" +
-            $"🚶 Экскурсий: {excursionsCount}";
+            $"🚶 Форматов экскурсий: {ExcursionCatalog.All.Count}";
     }
 
-    public async Task<string> BuildExcursionsTextAsync(CancellationToken cancellationToken)
+    public Task<string> BuildExcursionsTextAsync(CancellationToken cancellationToken)
     {
-        var list = await excursions.GetAllAsync(cancellationToken);
-        if (list.Count == 0)
-            return "🚶 Экскурсии пока не добавлены.";
+        var lines = ExcursionCatalog.All.Select(e =>
+            $"• {e.Title}\n  ⏱ {e.Duration} · 💰 {e.DisplayPrice}\n  {Truncate(e.Description, 120)}");
 
-        var lines = list.Select(e =>
-            $"• {e.Title}\n  ⏱ {e.Duration} · 💰 {e.Price:0} ₽\n  {Truncate(e.Description, 120)}");
-
-        return "🚶 Экскурсии:\n\n" + string.Join("\n\n", lines);
+        return Task.FromResult("🚶 Экскурсии:\n\n" + string.Join("\n\n", lines));
     }
 
     public static string BuildNumberedEventsIntro(IReadOnlyList<Event> events, int page)
