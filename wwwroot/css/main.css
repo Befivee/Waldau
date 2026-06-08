@@ -1018,6 +1018,97 @@ main {
   text-align: right;
 }
 
+.excursion-pricing {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: rgba(45, 74, 62, 0.06);
+  border: 1px solid rgba(42, 42, 46, 0.08);
+  border-radius: 16px;
+}
+
+.excursion-pricing__header {
+  margin-bottom: 1.5rem;
+}
+
+.excursion-pricing__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.375rem, 2vw, 1.75rem);
+  color: #2a2a2e;
+}
+
+.excursion-pricing__lead {
+  margin: 0;
+  color: #5c5c62;
+  font-size: 0.9375rem;
+}
+
+.excursion-pricing__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .excursion-pricing__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.excursion-pricing__card {
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(42, 42, 46, 0.08);
+}
+
+.excursion-pricing__card-title {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  color: #5c1f2e;
+}
+
+.excursion-pricing__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.excursion-pricing__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(42, 42, 46, 0.08);
+  font-size: 0.9375rem;
+}
+
+.excursion-pricing__list li:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.excursion-pricing__list span {
+  color: #5c5c62;
+}
+
+.excursion-pricing__list strong {
+  color: #2d4a3e;
+  white-space: nowrap;
+}
+
+.excursion-pricing__note {
+  margin: 1.5rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: #5c5c62;
+}
+
+.excursion-pricing__note strong {
+  color: #2a2a2e;
+}
+
 .event-card {
   border-radius: 12px;
   overflow: hidden;

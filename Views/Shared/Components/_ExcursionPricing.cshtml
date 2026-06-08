@@ -1,0 +1,41 @@
+<section class="excursion-pricing reveal" aria-labelledby="excursion-pricing-title">
+    <header class="excursion-pricing__header">
+        <h2 id="excursion-pricing-title" class="excursion-pricing__title">Стоимость посещения</h2>
+        <p class="excursion-pricing__lead">Цены указаны за одного человека</p>
+    </header>
+
+    <div class="excursion-pricing__grid">
+        <article class="excursion-pricing__card">
+            <h3 class="excursion-pricing__card-title">Экскурсия с гидом</h3>
+            <ul class="excursion-pricing__list">
+                <li>
+                    <span>Полная стоимость</span>
+                    <strong>@ExcursionCatalog.GuidedRegularPrice.ToString("0") ₽</strong>
+                </li>
+                <li>
+                    <span>Льготный билет</span>
+                    <strong>@ExcursionCatalog.ConcessionPrice.ToString("0") ₽</strong>
+                </li>
+            </ul>
+        </article>
+
+        <article class="excursion-pricing__card">
+            <h3 class="excursion-pricing__card-title">Самостоятельное посещение</h3>
+            <ul class="excursion-pricing__list">
+                <li>
+                    <span>Полная стоимость</span>
+                    <strong>@ExcursionCatalog.SelfGuidedRegularPrice.ToString("0") ₽</strong>
+                </li>
+                <li>
+                    <span>Льготный билет</span>
+                    <strong>@ExcursionCatalog.ConcessionPrice.ToString("0") ₽</strong>
+                </li>
+            </ul>
+        </article>
+    </div>
+
+    <p class="excursion-pricing__note">
+        <strong>Льготный билет — @ExcursionCatalog.ConcessionPrice.ToString("0") ₽</strong> для школьников, студентов, пенсионеров и других льготных категорий.
+        При посещении может потребоваться документ, подтверждающий право на льготу.
+    </p>
+</section>

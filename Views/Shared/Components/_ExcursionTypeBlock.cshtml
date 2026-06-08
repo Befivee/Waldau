@@ -8,6 +8,7 @@
         <h2 class="excursion-type-block__title">@Model.Title</h2>
         <p class="excursion-type-block__desc">@Model.Description</p>
         <ul class="excursion-type-block__facts">
+            <li><span>Стоимость</span><strong>@Model.PriceDetail</strong></li>
             <li><span>Длительность</span><strong>@Model.Duration</strong></li>
             @if (Model.RequiresTimeSlot)
             {

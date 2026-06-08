@@ -6,18 +6,24 @@ public sealed class ExcursionTypeInfo
     public string Title { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public string Duration { get; init; } = string.Empty;
-    public decimal Price { get; init; }
+    public decimal RegularPrice { get; init; }
+    public decimal ConcessionPrice { get; init; } = ExcursionCatalog.ConcessionPrice;
     public string ImagePath { get; init; } = Excursion.DefaultImagePath;
     public bool RequiresTimeSlot { get; init; }
 
     public int Id => (int)Kind;
     public string KindKey => Kind == ExcursionKind.Guided ? "guided" : "self";
     public string FormLabel => Kind == ExcursionKind.Guided ? "С гидом" : "Самостоятельно";
-    public string DisplayPrice => $"от {Price:0} ₽";
+    public string DisplayPrice => $"от {ConcessionPrice:0} ₽";
+    public string PriceDetail => $"{RegularPrice:0} ₽ / {ConcessionPrice:0} ₽ льготный";
 }
 
 public static class ExcursionCatalog
 {
+    public const decimal ConcessionPrice = 650;
+    public const decimal GuidedRegularPrice = 1000;
+    public const decimal SelfGuidedRegularPrice = 800;
+
     public static readonly ExcursionTypeInfo Guided = new()
     {
         Kind = ExcursionKind.Guided,
@@ -25,8 +31,8 @@ public static class ExcursionCatalog
         Description =
             "Прогулка по замку с профессиональным гидом: история крепости, " +
             "интерьеры, легенды и ответы на ваши вопросы.",
-        Duration = "90 мин",
-        Price = 650,
+        Duration = "40 мин",
+        RegularPrice = GuidedRegularPrice,
         ImagePath = "/images/All/Экскурсии.webp",
         RequiresTimeSlot = true
     };
@@ -39,7 +45,7 @@ public static class ExcursionCatalog
             "Свободный осмотр замка в часы работы: экспозиции, двор, " +
             "фотозоны и атмосфера средневековой крепости без сопровождения гида.",
         Duration = "без ограничения",
-        Price = 650,
+        RegularPrice = SelfGuidedRegularPrice,
         ImagePath = "/images/hero/home-hero.webp",
         RequiresTimeSlot = false
     };
