@@ -19,9 +19,17 @@
   const timeInput = document.getElementById('booking-time');
   const typeSwitch = document.querySelector('.booking-type-switch');
   const typeButtons = typeSwitch ? [...typeSwitch.querySelectorAll('.booking-type-switch__btn')] : [];
+  const eventWrap = document.getElementById('booking-event-wrap');
+  const eventLabel = document.getElementById('booking-event-label');
+  const eventTitleInput = document.getElementById('booking-event-title');
 
   const PHONE_PREFIX = '+7';
   const PHONE_DIGITS_LEN = 10;
+  const defaultDateMin = (() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  })();
 
   // Ensure modal is closed on load (CSS must not override [hidden])
   if (modal) {
@@ -30,11 +38,8 @@
     document.body.style.overflow = '';
   }
 
-  // Min date for booking
   if (dateInput) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.min = tomorrow.toISOString().split('T')[0];
+    dateInput.min = defaultDateMin;
   }
 
   // --- Phone inputs (+7, digits only, max 10 after code) ---
@@ -422,6 +427,30 @@
     }
   }
 
+  function clearEventContext() {
+    if (eventWrap) eventWrap.hidden = true;
+    if (eventLabel) eventLabel.textContent = '';
+    if (eventTitleInput) eventTitleInput.value = '';
+    if (dateInput) dateInput.min = defaultDateMin;
+  }
+
+  function setEventContext(eventTitle, eventDate) {
+    if (!eventTitle) {
+      clearEventContext();
+      return;
+    }
+
+    if (eventWrap) eventWrap.hidden = false;
+    if (eventLabel) eventLabel.textContent = eventTitle;
+    if (eventTitleInput) eventTitleInput.value = eventTitle;
+
+    if (dateInput && eventDate) {
+      dateInput.min = eventDate < defaultDateMin ? eventDate : defaultDateMin;
+      dateInput.value = eventDate;
+      refreshOccupiedSlots();
+    }
+  }
+
   function setExcursionKind(kind) {
     const normalized = isGuidedKind(kind) ? 'guided' : 'self';
     const activeBtn =
@@ -476,10 +505,17 @@
     }
   }
 
-  function openBooking(kind) {
+  function openBooking(kind, options = {}) {
     if (!modal) return;
     closeNav();
     resetBookingView();
+
+    if (options.eventTitle) {
+      setEventContext(options.eventTitle, options.eventDate || '');
+    } else {
+      clearEventContext();
+    }
+
     setExcursionKind(kind || 'self');
     modal.hidden = false;
     modal.classList.add('is-open');
@@ -494,6 +530,7 @@
     modal.hidden = true;
     modal.classList.remove('is-open');
     document.body.style.overflow = '';
+    clearEventContext();
     resetBookingView();
   }
 
@@ -521,7 +558,12 @@
     if (openBtn) {
       e.preventDefault();
       e.stopPropagation();
-      openBooking(openBtn.getAttribute('data-tour-kind') || 'self');
+      const eventTitle = openBtn.getAttribute('data-event-title');
+      const eventDate = openBtn.getAttribute('data-event-date');
+      openBooking(openBtn.getAttribute('data-tour-kind') || 'self', {
+        eventTitle: eventTitle || '',
+        eventDate: eventDate || '',
+      });
     }
   });
 

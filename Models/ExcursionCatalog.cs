@@ -16,6 +16,7 @@ public sealed class ExcursionTypeInfo
     public string FormLabel => Kind == ExcursionKind.Guided ? "С гидом" : "Самостоятельно";
     public string DisplayPrice => $"от {ConcessionPrice:0} ₽";
     public string PriceDetail => $"{RegularPrice:0} ₽ / {ConcessionPrice:0} ₽ льготный";
+    public string FormPriceLabel => $"{RegularPrice:0} ₽ / {ConcessionPrice:0} ₽ льгот.";
 }
 
 public static class ExcursionCatalog

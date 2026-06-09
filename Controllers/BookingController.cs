@@ -44,13 +44,17 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
 
         var excursion = ExcursionCatalog.Get((ExcursionKind)model.ExcursionId!.Value);
 
+        var excursionTitle = excursion.Title;
+        if (!string.IsNullOrWhiteSpace(model.EventTitle))
+            excursionTitle = $"{excursion.Title} · {model.EventTitle.Trim()}";
+
         var booking = new Booking
         {
             FullName = model.FullName.Trim(),
             Phone = model.Phone.Trim(),
             VisitDate = model.VisitDate!.Value.Date,
             ExcursionKind = excursion.Kind,
-            ExcursionTitle = excursion.Title,
+            ExcursionTitle = excursionTitle,
             VisitTime = excursion.RequiresTimeSlot ? model.VisitTime : null,
             PersonsCount = model.PersonsCount,
             PersonalDataConsent = model.PersonalDataConsent,

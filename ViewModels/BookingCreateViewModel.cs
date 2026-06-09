@@ -30,6 +30,10 @@ public class BookingCreateViewModel
     [Display(Name = "Экскурсия")]
     public string? ExcursionTitle { get; set; }
 
+    [StringLength(200)]
+    [Display(Name = "Мероприятие")]
+    public string? EventTitle { get; set; }
+
     [Display(Name = "Время визита")]
     public string? VisitTime { get; set; }
 

@@ -8,7 +8,12 @@
         </time>
         <h3 class="event-card__title">@Model.Title</h3>
         <p class="event-card__desc">@Model.Description</p>
-        <button type="button" class="btn btn-primary btn-sm" data-booking-open>
+        <button type="button"
+                class="btn btn-primary btn-sm"
+                data-booking-open
+                data-tour-kind="self"
+                data-event-title="@Model.Title"
+                data-event-date="@Model.EventDate.ToString("yyyy-MM-dd")">
             Записаться
         </button>
     </div>

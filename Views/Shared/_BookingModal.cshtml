@@ -6,7 +6,7 @@
         <button type="button" class="booking-modal__close" data-booking-close aria-label="Закрыть">&times;</button>
 
         <div class="booking-modal__form-wrap" id="booking-form-wrap">
-            <h2 id="booking-title" class="booking-modal__title">Запись на экскурсию</h2>
+            <h2 id="booking-title" class="booking-modal__title">Запись на посещение</h2>
             <p class="booking-modal__subtitle">Оставьте заявку — мы перезвоним для подтверждения</p>
 
             <form asp-controller="Booking" asp-action="Create" method="post" class="booking-form" id="booking-form" novalidate>
@@ -15,8 +15,13 @@
 
                 <input type="hidden" asp-for="ExcursionId" id="booking-tour-id" />
                 <input type="hidden" asp-for="ExcursionTitle" id="booking-tour-name" />
+                <input type="hidden" asp-for="EventTitle" id="booking-event-title" />
 
-                <div class="booking-type-switch" role="group" aria-label="Тип экскурсии">
+                <div class="booking-event-chip" id="booking-event-wrap" hidden>
+                    <span class="booking-event-chip__label" id="booking-event-label"></span>
+                </div>
+
+                <div class="booking-type-switch" role="group" aria-label="Тип посещения">
                     @foreach (var excursion in ExcursionCatalog.All)
                     {
                         <button type="button"
@@ -25,7 +30,8 @@
                                 data-excursion-id="@excursion.Id"
                                 data-excursion-title="@excursion.Title"
                                 data-excursion-guided="@(excursion.RequiresTimeSlot ? "1" : "0")">
-                            @excursion.FormLabel
+                            <span class="booking-type-switch__label">@excursion.FormLabel</span>
+                            <span class="booking-type-switch__price">@excursion.FormPriceLabel</span>
                         </button>
                     }
                 </div>
