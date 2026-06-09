@@ -85,7 +85,7 @@
                 <h2 id="tours-title" class="section-header__title">Экскурсии</h2>
                 <p class="section-header__lead">Выберите программу и запишитесь онлайн</p>
             </div>
-            <a asp-controller="Excursion" asp-action="Index" class="link-arrow">Все экскурсии</a>
+            <a asp-controller="Excursion" asp-action="Index" class="link-arrow">Подробнее</a>
         </header>
         <div class="excursion-types excursion-types--compact">
             @foreach (var excursion in ExcursionCatalog.All)
@@ -105,12 +105,19 @@
             </div>
             <a asp-controller="Event" asp-action="Index" class="link-arrow">Все мероприятия</a>
         </header>
-        <div class="cards-grid cards-grid--3">
-            @foreach (var evt in Model.UpcomingEvents)
-            {
-                <partial name="Components/_EventCard" model="evt" />
-            }
-        </div>
+        @if (Model.UpcomingEvents.Count == 0)
+        {
+            <partial name="Components/_EventsEmpty" />
+        }
+        else
+        {
+            <div class="cards-grid cards-grid--3">
+                @foreach (var evt in Model.UpcomingEvents)
+                {
+                    <partial name="Components/_EventCard" model="evt" />
+                }
+            </div>
+        }
     </div>
 </section>
 

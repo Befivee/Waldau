@@ -130,12 +130,10 @@ main {
 }
 .site-logo__img {
   display: block;
-  width: 40px;
-  height: 48px;
+  width: 44px;
+  height: 54px;
   object-fit: contain;
   flex-shrink: 0;
-  border-radius: 4px;
-  background: #fff;
 }
 .site-logo__text {
   display: flex;
@@ -164,8 +162,8 @@ main {
   color: rgba(255, 255, 255, 0.9);
 }
 .site-logo--footer .site-logo__img {
-  background: #fff;
-  padding: 2px;
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
 }
 
 @media (max-width: 991px) {
@@ -262,6 +260,10 @@ main {
 }
 .page-home .site-header:not(.is-scrolled) .site-logo__icon {
   color: rgba(255, 255, 255, 0.95);
+}
+.page-home .site-header:not(.is-scrolled) .site-logo__img {
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
 }
 .page-home .site-header:not(.is-scrolled) .site-logo:hover {
   color: rgba(255, 255, 255, 0.9);
@@ -744,7 +746,8 @@ main {
   gap: 1.5rem;
   align-items: stretch;
 }
-.cards-grid > .tour-card {
+.cards-grid > .tour-card,
+.cards-grid > .event-card {
   height: 100%;
 }
 @media (min-width: 768px) {
@@ -1110,6 +1113,8 @@ main {
 }
 
 .event-card {
+  display: flex;
+  flex-direction: column;
   border-radius: 12px;
   overflow: hidden;
   background: #ffffff;
@@ -1128,6 +1133,9 @@ main {
   background-image: var(--card-bg), linear-gradient(160deg, #5c1f2e 0%, #1e3329 100%);
 }
 .event-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   padding: 1.5rem;
 }
 .event-card__date {
@@ -1148,6 +1156,29 @@ main {
   color: #5c5c62;
   margin-bottom: 1.25rem;
   line-height: 1.5;
+  flex: 1;
+}
+
+.event-card__body .btn {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.events-empty {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(45, 74, 62, 0.06);
+  border: 1px dashed rgba(42, 42, 46, 0.12);
+  border-radius: 16px;
+}
+
+.events-empty__text {
+  margin: 0 0 1.5rem;
+  max-width: 36rem;
+  margin-inline: auto;
+  color: #5c5c62;
+  font-size: 1.0625rem;
+  line-height: 1.65;
 }
 
 .legal-content h2 {

@@ -29,5 +29,10 @@ jobs:
 
     - name: Deploy to server
       run: |
-        scp -r publish/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/waldau
+        rsync -avz --delete \
+          --exclude 'waldau.db' \
+          --exclude 'waldau.db-*' \
+          --exclude 'App_Data/' \
+          --exclude 'uploads/' \
+          publish/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/waldau/
         ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "systemctl restart waldau"

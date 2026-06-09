@@ -140,12 +140,12 @@ try
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
 {
-    await DbInitializer.SeedAsync(db);
-    app.Logger.LogInformation("DB seeded successfully");
+    await DbInitializer.InitializeAsync(db);
+    app.Logger.LogInformation("Миграции базы данных применены");
 }
 catch (Exception ex)
 {
-    app.Logger.LogError(ex, "DB seed failed — app will continue startup");
+    app.Logger.LogError(ex, "Не удалось применить миграции — приложение продолжит запуск");
 }
     app.Logger.LogInformation("База данных SQLite инициализирована: {DbPath}", sqliteConnectionString);
 }
