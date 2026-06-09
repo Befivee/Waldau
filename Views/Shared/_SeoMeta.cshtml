@@ -2,9 +2,10 @@
 @inject IOptions<WaldauCastle.Options.SiteSettings> SiteOptions
 @{
     var site = SiteOptions.Value;
-    var title = ViewData["Title"]?.ToString() ?? site.SiteName;
+    var pageTitle = ViewData["Title"]?.ToString();
+    var browserTitle = SiteInfo.GetBrowserTitle(pageTitle);
     var description = ViewData["MetaDescription"]?.ToString()
-        ?? "Замок Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, музей.";
+        ?? "Официальный сайт замка Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, музей.";
     var keywords = ViewData["MetaKeywords"]?.ToString() ?? site.DefaultKeywords;
     var ogType = ViewData["OgType"]?.ToString() ?? "website";
     var ogImage = ViewData["OgImage"]?.ToString() ?? "/images/hero-castle.svg";
@@ -20,12 +21,12 @@
 
 <meta property="og:locale" content="ru_RU" />
 <meta property="og:type" content="@ogType" />
-<meta property="og:title" content="@title — @site.SiteName" />
+<meta property="og:title" content="@browserTitle" />
 <meta property="og:description" content="@description" />
 <meta property="og:url" content="@canonical" />
 <meta property="og:site_name" content="@site.SiteName" />
 <meta property="og:image" content="@(site.BaseUrl.TrimEnd('/') + ogImage)" />
 
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="@title — @site.SiteName" />
+<meta name="twitter:title" content="@browserTitle" />
 <meta name="twitter:description" content="@description" />

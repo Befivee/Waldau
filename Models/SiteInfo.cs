@@ -5,6 +5,8 @@ namespace WaldauCastle.Models;
 public static class SiteInfo
 {
     public const string CastleName = "Замок Вальдау";
+    public const string BrowserTitle = "Официальный сайт замка Вальдау";
+    public const string LogoPath = "/images/logo.png";
     public const string Tagline = "Средневековая крепость XIII века";
     public const string Location = "пос. Низовье, Калининградская область";
     public const string Address = "238530, Калининградская обл., пос. Низовье, ул. Замковая, 1";
@@ -23,6 +25,11 @@ public static class SiteInfo
     public const string TravelTime = "~45 мин на автобусе";
     public const double Latitude = 54.700653;
     public const double Longitude = 20.743124;
+
+    public static string GetBrowserTitle(string? pageTitle) =>
+        string.IsNullOrWhiteSpace(pageTitle) || pageTitle == "Главная"
+            ? BrowserTitle
+            : $"{pageTitle} — {BrowserTitle}";
 
     public static string YandexMapsUrl =>
         $"https://yandex.ru/maps/?pt={Longitude.ToString(CultureInfo.InvariantCulture)},{Latitude.ToString(CultureInfo.InvariantCulture)}&z=15&l=map";

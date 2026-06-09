@@ -1,3 +1,5 @@
+using WaldauCastle.Models;
+
 namespace WaldauCastle.Options;
 
 public class SiteSettings
@@ -8,7 +10,7 @@ public class SiteSettings
 
     public string BaseUrl { get; set; } = DefaultBaseUrl;
 
-    public string SiteName { get; set; } = "Замок Вальдау";
+    public string SiteName { get; set; } = SiteInfo.BrowserTitle;
 
     public string DefaultKeywords { get; set; } =
         "замок Вальдау, музей, экскурсии, Калининград, Низовье, средневековый замок";

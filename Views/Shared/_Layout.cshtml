@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] — @SiteInfo.CastleName</title>
+    <title>@SiteInfo.GetBrowserTitle(ViewData["Title"]?.ToString())</title>
+    <link rel="icon" href="@SiteInfo.LogoPath" type="image/png" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="@SiteInfo.LogoPath" asp-append-version="true" />
     <partial name="_SeoMeta" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
