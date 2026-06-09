@@ -130,9 +130,10 @@ main {
 }
 .site-logo__img {
   display: block;
-  width: 44px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
+  object-position: center;
   flex-shrink: 0;
 }
 .site-logo__text {
@@ -1524,9 +1525,6 @@ main {
   background-position: center;
   background-repeat: no-repeat;
 }
-.about-split__image--castle {
-  background-image: url("/images/about-castle.svg"), linear-gradient(135deg, #2d4a3e, #5c1f2e);
-}
 .about-split__text h2 {
   margin-bottom: 1.5rem;
 }
@@ -1653,6 +1651,43 @@ main {
   font-size: 0.9375rem;
   color: #5c5c62;
   margin: 0 0 0.5rem;
+}
+
+.directions-entrance {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 4rem;
+  align-items: center;
+}
+
+@media (min-width: 992px) {
+  .directions-entrance {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+
+.directions-entrance__image {
+  min-height: 320px;
+  border-radius: 20px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.directions-entrance__text h2 {
+  margin-bottom: 1.5rem;
+}
+
+.directions-entrance__text p {
+  color: #5c5c62;
+  line-height: 1.65;
+}
+
+.directions-entrance__hint {
+  font-size: 0.9375rem;
+  color: #2d4a3e;
+  font-weight: 500;
+  margin-top: 1rem;
 }
 
 .route-steps {

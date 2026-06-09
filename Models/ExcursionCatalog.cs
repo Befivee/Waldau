@@ -33,7 +33,7 @@ public static class ExcursionCatalog
             "интерьеры, легенды и ответы на ваши вопросы.",
         Duration = "40 мин",
         RegularPrice = GuidedRegularPrice,
-        ImagePath = "/images/All/Экскурсии.webp",
+        ImagePath = "/images/excursion-guided.webp",
         RequiresTimeSlot = true
     };
 
@@ -46,7 +46,7 @@ public static class ExcursionCatalog
             "фотозоны и атмосфера средневековой крепости без сопровождения гида.",
         Duration = "без ограничения",
         RegularPrice = SelfGuidedRegularPrice,
-        ImagePath = "/images/hero/home-hero.webp",
+        ImagePath = "/images/excursion-self.webp",
         RequiresTimeSlot = false
     };
 

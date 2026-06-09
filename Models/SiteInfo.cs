@@ -6,7 +6,8 @@ public static class SiteInfo
 {
     public const string CastleName = "Замок Вальдау";
     public const string BrowserTitle = "Официальный сайт замка Вальдау";
-    public const string LogoPath = "/images/logo-header.png";
+    public const string LogoPath = "/images/logo.svg";
+    public const string LogoPngPath = "/images/logo.png";
     public const string FaviconPath = "/favicon.ico";
     public const string FaviconPngPath = "/images/favicon-256.png";
     public const string Tagline = "Средневековая крепость XIII века";
