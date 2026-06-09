@@ -125,18 +125,18 @@ main {
 }
 
 .site-header__social .social-link {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
 }
 
 .site-header__social .social-link svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .site-header__social .social-link--telegram svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   transform: translate(-1px, 1px);
 }
 
@@ -217,13 +217,41 @@ main {
   }
   .site-nav .site-nav__link {
     color: #2a2a2e;
-    font-size: 1.0625rem;
+    font-size: 1.1875rem;
   }
   .site-nav .site-nav__link:hover {
     color: #5c1f2e;
   }
   .site-nav .site-nav__link::after {
     background: #5c1f2e;
+  }
+
+  .site-nav__social {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(42, 42, 46, 0.1);
+  }
+
+  .site-nav__social .social-link {
+    width: 52px;
+    height: 52px;
+  }
+
+  .site-nav__social .social-link svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .site-nav__social .social-link--telegram svg {
+    width: 26px;
+    height: 26px;
+    transform: translate(-1px, 2px);
+  }
+}
+
+@media (min-width: 992px) {
+  .site-nav__social {
+    display: none;
   }
 }
 .site-nav__list {
@@ -445,12 +473,12 @@ main {
   padding-top: calc(72px + 6rem);
 }
 .page-home .hero__content {
-  padding-top: 6rem;
+  padding-top: 8.5rem;
 }
 @media (min-width: 992px) {
   .page-home .hero__content {
     margin-top: calc(var(--hero-overlap, 10rem) / -2);
-    padding: 4rem 1.5rem;
+    padding: 5rem 1.5rem 4rem;
   }
 }
 .hero__eyebrow {
@@ -460,10 +488,20 @@ main {
   opacity: 0.85;
   margin-bottom: 1.5rem;
 }
+.page-home .hero__eyebrow {
+  font-size: clamp(0.875rem, 2.2vw, 1rem);
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.14em;
+}
 .hero__title {
   color: #fff;
   margin-bottom: 1rem;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.3);
+}
+.page-home .hero__title {
+  font-size: clamp(2.75rem, 9vw, 4.75rem);
+  margin-bottom: 1.125rem;
 }
 .hero__subtitle {
   font-family: "Cormorant Garamond", Georgia, serif;
@@ -471,6 +509,14 @@ main {
   font-style: italic;
   opacity: 0.9;
   margin-bottom: 2.5rem;
+}
+.page-home .hero__subtitle {
+  font-size: clamp(1.25rem, 3.2vw, 1.75rem);
+  margin-bottom: 2.75rem;
+}
+.page-home .hero__actions .btn-lg {
+  font-size: 1.0625rem;
+  padding: 1.05rem 2.1rem;
 }
 .hero__actions {
   display: flex;
@@ -778,6 +824,12 @@ main {
   margin: 0;
   font-size: 1.0625rem;
 }
+.page-home .section-header__title {
+  font-size: clamp(1.875rem, 4.5vw, 2.875rem);
+}
+.page-home .section-header__lead {
+  font-size: 1.125rem;
+}
 
 .cards-grid {
   display: grid;
@@ -832,10 +884,16 @@ main {
   color: #2d4a3e;
   margin-bottom: 0.25rem;
 }
+.page-home .info-card__title {
+  font-size: 0.9375rem;
+}
 .info-card__text {
   font-size: 0.9375rem;
   color: #5c5c62;
   margin: 0;
+}
+.page-home .info-card__text {
+  font-size: 1rem;
 }
 
 .quick-info {
@@ -897,10 +955,16 @@ main {
 .why-card h3 {
   font-size: 1.25rem;
 }
+.page-home .why-card h3 {
+  font-size: 1.375rem;
+}
 .why-card p {
   font-size: 0.9375rem;
   color: #5c5c62;
   margin: 0;
+}
+.page-home .why-card p {
+  font-size: 1rem;
 }
 
 .tour-card {
