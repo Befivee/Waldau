@@ -17,8 +17,12 @@
                 <input type="hidden" asp-for="ExcursionTitle" id="booking-tour-name" />
                 <input type="hidden" asp-for="EventTitle" id="booking-event-title" />
 
-                <div class="booking-event-chip" id="booking-event-wrap" hidden>
-                    <span class="booking-event-chip__label" id="booking-event-label"></span>
+                <div class="booking-event-row" id="booking-event-wrap" hidden>
+                    <button type="button"
+                            class="booking-type-switch__btn booking-type-switch__btn--event"
+                            id="booking-event-btn">
+                        <span class="booking-type-switch__label" id="booking-event-label"></span>
+                    </button>
                 </div>
 
                 <div class="booking-type-switch" role="group" aria-label="Тип посещения">
@@ -46,7 +50,6 @@
                     <label asp-for="Phone">Телефон</label>
                     <input asp-for="Phone" type="tel" id="booking-phone" class="js-phone-input"
                            autocomplete="tel-national" placeholder="+7 (___) ___-__-__" aria-describedby="booking-phone-hint" />
-                    <span class="form-hint" id="booking-phone-hint">+7 и 10 цифр номера</span>
                 </div>
 
                 <div class="form-row">

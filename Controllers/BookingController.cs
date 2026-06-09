@@ -42,11 +42,13 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
             return View(model);
         }
 
-        var excursion = ExcursionCatalog.Get((ExcursionKind)model.ExcursionId!.Value);
+        var isEventBooking = !string.IsNullOrWhiteSpace(model.EventTitle);
+        var excursion = ExcursionCatalog.Get(
+            isEventBooking ? ExcursionKind.SelfGuided : (ExcursionKind)model.ExcursionId!.Value);
 
-        var excursionTitle = excursion.Title;
-        if (!string.IsNullOrWhiteSpace(model.EventTitle))
-            excursionTitle = $"{excursion.Title} · {model.EventTitle.Trim()}";
+        var excursionTitle = isEventBooking
+            ? $"{BookingNotificationText.EventBookingPrefix} {model.EventTitle!.Trim()}"
+            : excursion.Title;
 
         var booking = new Booking
         {
@@ -55,7 +57,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
             VisitDate = model.VisitDate!.Value.Date,
             ExcursionKind = excursion.Kind,
             ExcursionTitle = excursionTitle,
-            VisitTime = excursion.RequiresTimeSlot ? model.VisitTime : null,
+            VisitTime = isEventBooking || !excursion.RequiresTimeSlot ? null : model.VisitTime,
             PersonsCount = model.PersonsCount,
             PersonalDataConsent = model.PersonalDataConsent,
             CreatedAt = DateTime.UtcNow
@@ -92,6 +94,13 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         ModelStateDictionary modelState,
         CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(model.EventTitle))
+        {
+            model.ExcursionId = (int)ExcursionKind.SelfGuided;
+            model.VisitTime = null;
+            return;
+        }
+
         if (!ExcursionCatalog.TryGetById(model.ExcursionId, out var excursion))
         {
             modelState.AddModelError(nameof(BookingCreateViewModel.ExcursionId), "Выберите вид экскурсии");

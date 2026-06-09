@@ -17,18 +17,7 @@ public class TelegramNotificationService(
         if (adminChatIds.Count == 0)
             return;
 
-        var culture = new System.Globalization.CultureInfo("ru-RU");
-        var schedule = string.IsNullOrWhiteSpace(booking.VisitTime)
-            ? booking.VisitDate.ToString("d MMMM yyyy", culture)
-            : $"{booking.VisitDate.ToString("d MMMM yyyy", culture)}, {booking.VisitTime}";
-
-        var text =
-            "🔔 Новая заявка\n\n" +
-            $"Экскурсия: {booking.ExcursionTitle}\n" +
-            $"ФИО: {booking.FullName}\n" +
-            $"Телефон: {booking.Phone}\n" +
-            $"Дата: {schedule}\n" +
-            $"Количество человек: {booking.PersonsCount}";
+        var text = BookingNotificationText.Format(booking);
 
         foreach (var chatId in adminChatIds)
         {

@@ -20,8 +20,10 @@
   const typeSwitch = document.querySelector('.booking-type-switch');
   const typeButtons = typeSwitch ? [...typeSwitch.querySelectorAll('.booking-type-switch__btn')] : [];
   const eventWrap = document.getElementById('booking-event-wrap');
+  const eventBtn = document.getElementById('booking-event-btn');
   const eventLabel = document.getElementById('booking-event-label');
   const eventTitleInput = document.getElementById('booking-event-title');
+  let pendingEvent = { title: '', date: '' };
 
   const PHONE_PREFIX = '+7';
   const PHONE_DIGITS_LEN = 10;
@@ -428,27 +430,25 @@
   }
 
   function clearEventContext() {
+    pendingEvent = { title: '', date: '' };
     if (eventWrap) eventWrap.hidden = true;
+    if (eventBtn) eventBtn.classList.remove('is-active');
     if (eventLabel) eventLabel.textContent = '';
     if (eventTitleInput) eventTitleInput.value = '';
     if (dateInput) dateInput.min = defaultDateMin;
   }
 
-  function setEventContext(eventTitle, eventDate) {
-    if (!eventTitle) {
-      clearEventContext();
-      return;
-    }
-
+  function setupEventContext(eventTitle, eventDate) {
+    pendingEvent = { title: eventTitle, date: eventDate || '' };
     if (eventWrap) eventWrap.hidden = false;
     if (eventLabel) eventLabel.textContent = eventTitle;
-    if (eventTitleInput) eventTitleInput.value = eventTitle;
+  }
 
-    if (dateInput && eventDate) {
-      dateInput.min = eventDate < defaultDateMin ? eventDate : defaultDateMin;
-      dateInput.value = eventDate;
-      refreshOccupiedSlots();
-    }
+  function applyEventDate() {
+    if (!dateInput || !pendingEvent.date) return;
+    dateInput.min = pendingEvent.date < defaultDateMin ? pendingEvent.date : defaultDateMin;
+    dateInput.value = pendingEvent.date;
+    refreshOccupiedSlots();
   }
 
   function setExcursionKind(kind) {
@@ -465,6 +465,29 @@
     if (tourIdInput) tourIdInput.value = activeBtn.dataset.excursionId || '';
     if (tourNameInput) tourNameInput.value = activeBtn.dataset.excursionTitle || '';
     setBookingTimeVisible(activeBtn.dataset.excursionGuided === '1');
+  }
+
+  function setBookingMode(mode) {
+    const isEvent = mode === 'event';
+
+    if (eventBtn) {
+      eventBtn.classList.toggle('is-active', isEvent);
+    }
+
+    if (isEvent) {
+      typeButtons.forEach((btn) => btn.classList.remove('is-active'));
+      if (eventTitleInput) eventTitleInput.value = pendingEvent.title || '';
+      const selfBtn = typeButtons.find((btn) => btn.dataset.excursionKind === 'self');
+      if (tourIdInput) tourIdInput.value = selfBtn?.dataset.excursionId || '2';
+      if (tourNameInput) tourNameInput.value = selfBtn?.dataset.excursionTitle || '';
+      setBookingTimeVisible(false);
+      applyEventDate();
+      return;
+    }
+
+    if (eventBtn) eventBtn.classList.remove('is-active');
+    if (eventTitleInput) eventTitleInput.value = '';
+    setExcursionKind(mode);
   }
 
   async function refreshOccupiedSlots() {
@@ -511,12 +534,12 @@
     resetBookingView();
 
     if (options.eventTitle) {
-      setEventContext(options.eventTitle, options.eventDate || '');
+      setupEventContext(options.eventTitle, options.eventDate || '');
+      setBookingMode('event');
     } else {
       clearEventContext();
+      setBookingMode(kind || 'self');
     }
-
-    setExcursionKind(kind || 'self');
     modal.hidden = false;
     modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
@@ -543,9 +566,13 @@
     document.body.style.overflow = 'hidden';
   }
 
+  eventBtn?.addEventListener('click', () => {
+    setBookingMode('event');
+  });
+
   typeButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      setExcursionKind(btn.dataset.excursionKind || 'self');
+      setBookingMode(btn.dataset.excursionKind || 'self');
     });
   });
 
