@@ -18,9 +18,14 @@
             </ul>
         </nav>
 
-        <button type="button" class="btn btn-primary btn-book" data-booking-open data-tour-kind="self" aria-label="Записаться на экскурсию">
-            Записаться
-        </button>
+        <div class="site-header__actions">
+            <div class="site-header__social">
+                <partial name="_SocialLinks" />
+            </div>
+            <button type="button" class="btn btn-primary btn-book" data-booking-open data-tour-kind="self" aria-label="Записаться на экскурсию">
+                Записаться
+            </button>
+        </div>
 
         <button type="button" class="burger" id="burger" aria-expanded="false" aria-controls="site-nav" aria-label="Открыть меню">
             <span class="burger__line"></span>
