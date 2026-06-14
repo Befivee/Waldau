@@ -12,8 +12,7 @@ public partial class TelegramBotOptions
             "TOKEN_HERE",
             "YOUR_CHAT_ID",
             "YOUR_BOT_TOKEN",
-            "CHANGEME",
-            "SET_ON_SERVER"
+            "CHANGEME"
         };
 
     public string BotToken { get; set; } = string.Empty;
@@ -22,32 +21,17 @@ public partial class TelegramBotOptions
 
     public string SecondAdminChatId { get; set; } = string.Empty;
 
-    /// <summary>Приоритет IPv4 при подключении к api.telegram.org (рекомендуется для VPS в РФ).</summary>
-    public bool PreferIpv4 { get; set; } = true;
-
-    /// <summary>Таймаут TCP-подключения к API Telegram, секунды.</summary>
-    public int ConnectTimeoutSeconds { get; set; } = 8;
-
-    /// <summary>HTTP/SOCKS прокси для обхода блокировок (например http://127.0.0.1:8080).</summary>
+    /// <summary>HTTP/SOCKS5 прокси для api.telegram.org (http://host:port или socks5://host:port).</summary>
     public string ProxyUrl { get; set; } = string.Empty;
 
-    /// <summary>Альтернативный URL Bot API (локальный telegram-bot-api, например http://127.0.0.1:8081).</summary>
-    public string ApiBaseUrl { get; set; } = string.Empty;
+    /// <summary>Таймаут подключения к API Telegram, секунды.</summary>
+    public int ConnectTimeoutSeconds { get; set; } = 15;
 
-    /// <summary>Получать сообщения через webhook (рекомендуется на VPS в РФ вместо long polling).</summary>
-    public bool UseWebhook { get; set; } = true;
-
-    /// <summary>Секрет для заголовка X-Telegram-Bot-Api-Secret-Token (задайте на сервере).</summary>
-    public string WebhookSecret { get; set; } = string.Empty;
+    /// <summary>Если прокси не задан — подключение только по IPv4.</summary>
+    public bool PreferIpv4 { get; set; } = true;
 
     public bool HasProxy =>
         !string.IsNullOrWhiteSpace(ProxyUrl) && !IsPlaceholder(ProxyUrl);
-
-    public bool HasApiBaseUrl =>
-        !string.IsNullOrWhiteSpace(ApiBaseUrl) && !IsPlaceholder(ApiBaseUrl);
-
-    public bool HasWebhookSecret =>
-        !string.IsNullOrWhiteSpace(WebhookSecret) && !IsPlaceholder(WebhookSecret);
 
     public bool HasValidBotToken =>
         !string.IsNullOrWhiteSpace(BotToken) &&

@@ -9,26 +9,30 @@ internal static class TelegramHttpHandlers
     public static SocketsHttpHandler CreateHandler(TelegramBotOptions options)
     {
         var connectTimeout = TimeSpan.FromSeconds(Math.Clamp(options.ConnectTimeoutSeconds, 3, 60));
-        var preferIpv4 = options.PreferIpv4;
-
-        var handler = new SocketsHttpHandler
-        {
-            ConnectCallback = (context, cancellationToken) =>
-                ConnectAsync(context, preferIpv4, connectTimeout, cancellationToken),
-            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
-            ConnectTimeout = connectTimeout,
-        };
 
         if (options.HasProxy)
         {
-            handler.Proxy = new WebProxy(options.ProxyUrl.Trim());
-            handler.UseProxy = true;
+            return new SocketsHttpHandler
+            {
+                Proxy = new WebProxy(options.ProxyUrl.Trim()),
+                UseProxy = true,
+                ConnectTimeout = connectTimeout,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            };
         }
 
-        return handler;
+        var preferIpv4 = options.PreferIpv4;
+
+        return new SocketsHttpHandler
+        {
+            ConnectCallback = (context, cancellationToken) =>
+                ConnectDirectAsync(context, preferIpv4, connectTimeout, cancellationToken),
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            ConnectTimeout = connectTimeout,
+        };
     }
 
-    private static async ValueTask<Stream> ConnectAsync(
+    private static async ValueTask<Stream> ConnectDirectAsync(
         SocketsHttpConnectionContext context,
         bool preferIpv4,
         TimeSpan connectTimeout,
@@ -69,6 +73,6 @@ internal static class TelegramHttpHandlers
             }
         }
 
-        throw new HttpRequestException($"Не удалось подключиться к {host}:{port} (IPv4/IPv6, таймаут {connectTimeout.TotalSeconds:0}s).");
+        throw new HttpRequestException($"Не удалось подключиться к {host}:{port} (таймаут {connectTimeout.TotalSeconds:0}s).");
     }
 }

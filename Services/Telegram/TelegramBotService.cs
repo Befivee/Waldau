@@ -14,17 +14,16 @@ public class TelegramBotService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (!options.Value.IsConfigured)
+        var telegram = options.Value;
+        if (!telegram.IsConfigured)
         {
-            logger.LogWarning("Telegram-бот не настроен. Укажите BotToken и AdminChatId в appsettings.");
+            logger.LogWarning("Telegram-бот не настроен. Укажите BotToken и AdminChatId.");
             return;
         }
 
-        if (options.Value.UseWebhook)
-        {
-            logger.LogInformation("Telegram webhook mode — long polling отключён.");
-            return;
-        }
+        if (!telegram.HasProxy)
+            logger.LogWarning(
+                "Telegram ProxyUrl не задан — на VPS в РФ бот может не отвечать. Укажите Telegram__ProxyUrl.");
 
         var dropPendingUpdates = true;
 
@@ -41,16 +40,16 @@ public class TelegramBotService(
             {
                 try
                 {
+                    await botClient.DeleteWebhook(dropPendingUpdates: false, cancellationToken: stoppingToken);
                     var me = await botClient.GetMe(stoppingToken);
                     logger.LogInformation(
-                        "Telegram CMS-бот @{BotUsername} запущен (IPv4 first: {PreferIpv4}, proxy: {Proxy}).",
+                        "Telegram CMS-бот @{BotUsername} запущен (long polling, proxy: {Proxy}).",
                         me.Username,
-                        options.Value.PreferIpv4,
-                        options.Value.HasProxy ? "yes" : "no");
+                        telegram.HasProxy ? "задан" : "нет");
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "GetMe не удался — polling всё равно будет запущен.");
+                    logger.LogWarning(ex, "GetMe/DeleteWebhook не удался — polling всё равно будет запущен.");
                 }
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
