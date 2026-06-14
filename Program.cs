@@ -67,9 +67,17 @@ if (telegramOptions.IsConfigured)
     builder.Services.AddHttpClient("telegram_bot_client")
         .ConfigurePrimaryHttpMessageHandler(() => TelegramHttpHandlers.CreateHandler(telegramOptions))
         .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(90))
-        .AddTypedClient<ITelegramBotClient>((httpClient, _) => new TelegramBotClient(botToken, httpClient));
+        .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
+        {
+            var clientOptions = telegramOptions.HasApiBaseUrl
+                ? new TelegramBotClientOptions(botToken, telegramOptions.ApiBaseUrl.Trim())
+                : new TelegramBotClientOptions(botToken);
+            clientOptions.RetryCount = 2;
+            return new TelegramBotClient(clientOptions, httpClient);
+        });
 
     builder.Services.AddSingleton<TelegramCommandHandler>();
+    builder.Services.AddHostedService<TelegramWebhookSetupService>();
     builder.Services.AddHostedService<TelegramBotService>();
     builder.Services.AddScoped<ITelegramNotificationService, TelegramNotificationService>();
 }
@@ -185,6 +193,8 @@ app.UseStatusCodePagesWithReExecute("/Home/StatusCodeError/{0}");
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 

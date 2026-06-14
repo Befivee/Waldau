@@ -37,7 +37,7 @@ internal static class TelegramHttpHandlers
         var host = context.DnsEndPoint.Host;
         var port = context.DnsEndPoint.Port;
         var families = preferIpv4
-            ? new[] { AddressFamily.InterNetwork, AddressFamily.InterNetworkV6 }
+            ? new[] { AddressFamily.InterNetwork }
             : new[] { AddressFamily.InterNetworkV6, AddressFamily.InterNetwork };
 
         foreach (var family in families)

@@ -12,7 +12,8 @@ public partial class TelegramBotOptions
             "TOKEN_HERE",
             "YOUR_CHAT_ID",
             "YOUR_BOT_TOKEN",
-            "CHANGEME"
+            "CHANGEME",
+            "SET_ON_SERVER"
         };
 
     public string BotToken { get; set; } = string.Empty;
@@ -30,8 +31,23 @@ public partial class TelegramBotOptions
     /// <summary>HTTP/SOCKS прокси для обхода блокировок (например http://127.0.0.1:8080).</summary>
     public string ProxyUrl { get; set; } = string.Empty;
 
+    /// <summary>Альтернативный URL Bot API (локальный telegram-bot-api, например http://127.0.0.1:8081).</summary>
+    public string ApiBaseUrl { get; set; } = string.Empty;
+
+    /// <summary>Получать сообщения через webhook (рекомендуется на VPS в РФ вместо long polling).</summary>
+    public bool UseWebhook { get; set; } = true;
+
+    /// <summary>Секрет для заголовка X-Telegram-Bot-Api-Secret-Token (задайте на сервере).</summary>
+    public string WebhookSecret { get; set; } = string.Empty;
+
     public bool HasProxy =>
         !string.IsNullOrWhiteSpace(ProxyUrl) && !IsPlaceholder(ProxyUrl);
+
+    public bool HasApiBaseUrl =>
+        !string.IsNullOrWhiteSpace(ApiBaseUrl) && !IsPlaceholder(ApiBaseUrl);
+
+    public bool HasWebhookSecret =>
+        !string.IsNullOrWhiteSpace(WebhookSecret) && !IsPlaceholder(WebhookSecret);
 
     public bool HasValidBotToken =>
         !string.IsNullOrWhiteSpace(BotToken) &&

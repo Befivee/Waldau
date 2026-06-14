@@ -22,14 +22,14 @@ public class BookingCleanupService(
         {
             using var scope = scopeFactory.CreateScope();
             var bookings = scope.ServiceProvider.GetRequiredService<IBookingService>();
-            var deleted = await bookings.DeleteExpiredByVisitDateAsync(BotTime.MoscowToday, cancellationToken);
+            var deleted = await bookings.DeleteExpiredByVisitDateAsync(BotTime.LocalToday, cancellationToken);
 
             if (deleted > 0)
             {
                 logger.LogInformation(
-                    "Удалено {Count} заявок с датой визита до {Cutoff:yyyy-MM-dd} (MSK).",
+                    "Удалено {Count} заявок с датой визита до {Cutoff:yyyy-MM-dd} (Калининград).",
                     deleted,
-                    BotTime.MoscowToday);
+                    BotTime.LocalToday);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

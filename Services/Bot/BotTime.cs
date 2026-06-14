@@ -5,12 +5,12 @@ namespace WaldauCastle.Services.Bot;
 public static class BotTime
 {
     private static readonly CultureInfo RuCulture = new("ru-RU");
-    private static readonly TimeZoneInfo MoscowZone = ResolveMoscowZone();
+    private static readonly TimeZoneInfo KaliningradZone = ResolveKaliningradZone();
 
-    public static DateTime MoscowToday =>
-        TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, MoscowZone).Date;
+    public static DateTime LocalToday =>
+        TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, KaliningradZone).Date;
 
-    public static string FormatMoscowDateTime(DateTime dateTime)
+    public static string FormatLocalDateTime(DateTime dateTime)
     {
         var utc = dateTime.Kind switch
         {
@@ -19,13 +19,13 @@ public static class BotTime
             _ => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
         };
 
-        var moscow = TimeZoneInfo.ConvertTimeFromUtc(utc, MoscowZone);
-        return moscow.ToString("d MMMM yyyy, HH:mm", RuCulture) + " (МСК)";
+        var local = TimeZoneInfo.ConvertTimeFromUtc(utc, KaliningradZone);
+        return local.ToString("d MMMM yyyy, HH:mm", RuCulture) + " (Калининград)";
     }
 
-    private static TimeZoneInfo ResolveMoscowZone()
+    private static TimeZoneInfo ResolveKaliningradZone()
     {
-        foreach (var id in new[] { "Europe/Moscow", "Russian Standard Time" })
+        foreach (var id in new[] { "Europe/Kaliningrad", "Kaliningrad Standard Time" })
         {
             try
             {
@@ -39,6 +39,6 @@ public static class BotTime
             }
         }
 
-        return TimeZoneInfo.CreateCustomTimeZone("MSK", TimeSpan.FromHours(3), "MSK", "MSK");
+        return TimeZoneInfo.CreateCustomTimeZone("Kaliningrad", TimeSpan.FromHours(2), "Kaliningrad", "Kaliningrad");
     }
 }

@@ -20,6 +20,12 @@ public class TelegramBotService(
             return;
         }
 
+        if (options.Value.UseWebhook)
+        {
+            logger.LogInformation("Telegram webhook mode — long polling отключён.");
+            return;
+        }
+
         var dropPendingUpdates = true;
 
         while (!stoppingToken.IsCancellationRequested)

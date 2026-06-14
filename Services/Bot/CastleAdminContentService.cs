@@ -109,7 +109,7 @@ public class CastleAdminContentService(
         var visitSchedule = FormatVisitSchedule(booking);
 
         return
-            $"📅 Заявка получена: {BotTime.FormatMoscowDateTime(booking.CreatedAt)}\n\n" +
+            $"📅 Заявка получена: {BotTime.FormatLocalDateTime(booking.CreatedAt)}\n\n" +
             $"🗑 Удалить заявку «{booking.FullName}» ({visitSchedule})?";
     }
 
