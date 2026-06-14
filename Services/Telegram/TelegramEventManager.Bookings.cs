@@ -67,7 +67,7 @@ public partial class TelegramEventManager
 
         await bot.SendMessage(
             chatId,
-            $"🗑 Удалить заявку «{entity.FullName}» ({entity.VisitDate:d})?",
+            content.BuildBookingDeletePrompt(entity),
             replyMarkup: TelegramKeyboards.DeleteConfirmation(),
             cancellationToken: cancellationToken);
     }

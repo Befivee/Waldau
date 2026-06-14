@@ -3,12 +3,12 @@
 @{
     var site = SiteOptions.Value;
     var pageTitle = ViewData["Title"]?.ToString();
-    var browserTitle = SiteInfo.GetBrowserTitle(pageTitle);
+    var documentTitle = SiteInfo.GetDocumentTitle(pageTitle, ViewData["MetaTitle"]?.ToString());
     var description = ViewData["MetaDescription"]?.ToString()
-        ?? "Официальный сайт замка Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, музей.";
+        ?? "Официальный сайт замка Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, записаться онлайн.";
     var keywords = ViewData["MetaKeywords"]?.ToString() ?? site.DefaultKeywords;
     var ogType = ViewData["OgType"]?.ToString() ?? "website";
-    var ogImage = ViewData["OgImage"]?.ToString() ?? "/images/hero-castle.svg";
+    var ogImage = ViewData["OgImage"]?.ToString() ?? SiteInfo.LogoPngPath;
     var canonical = site.BaseUrl.TrimEnd('/') + Context.Request.Path;
 }
 
@@ -21,12 +21,16 @@
 
 <meta property="og:locale" content="ru_RU" />
 <meta property="og:type" content="@ogType" />
-<meta property="og:title" content="@browserTitle" />
+<meta property="og:title" content="@documentTitle" />
 <meta property="og:description" content="@description" />
 <meta property="og:url" content="@canonical" />
-<meta property="og:site_name" content="@site.SiteName" />
+<meta property="og:site_name" content="@SiteInfo.HomePageTitle" />
 <meta property="og:image" content="@(site.BaseUrl.TrimEnd('/') + ogImage)" />
+<meta property="og:image:alt" content="@SiteInfo.CastleName" />
 
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="@browserTitle" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="@documentTitle" />
 <meta name="twitter:description" content="@description" />
+<meta name="twitter:image" content="@(site.BaseUrl.TrimEnd('/') + ogImage)" />
+
+<partial name="_JsonLd" />

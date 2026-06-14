@@ -1,0 +1,64 @@
+@using Microsoft.Extensions.Options
+@using System.Text.Json
+@inject IOptions<WaldauCastle.Options.SiteSettings> SiteOptions
+@{
+    var site = SiteOptions.Value;
+    var baseUrl = site.BaseUrl.TrimEnd('/');
+    var logoUrl = baseUrl + SiteInfo.LogoPngPath;
+    var description = ViewData["MetaDescription"]?.ToString()
+        ?? "Официальный сайт замка Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, записаться онлайн.";
+
+    var json = $$"""
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "{{baseUrl}}/#website",
+          "url": "{{baseUrl}}",
+          "name": {{JsonSerializer.Serialize(SiteInfo.HomePageTitle)}},
+          "alternateName": ["Вальдау", "замок Вальдау", "Waldau", "замок Waldau"],
+          "description": {{JsonSerializer.Serialize(description)}},
+          "inLanguage": "ru-RU",
+          "publisher": { "@id": "{{baseUrl}}/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "{{baseUrl}}/#organization",
+          "name": {{JsonSerializer.Serialize(SiteInfo.CastleName)}},
+          "alternateName": ["Вальдау", "Waldau"],
+          "url": "{{baseUrl}}",
+          "logo": "{{logoUrl}}",
+          "image": "{{logoUrl}}",
+          "telephone": "{{SiteInfo.PhoneTel}}",
+          "sameAs": ["{{SiteInfo.VkUrl}}", "{{SiteInfo.TelegramUrl}}"]
+        },
+        {
+          "@type": "TouristAttraction",
+          "@id": "{{baseUrl}}/#attraction",
+          "name": {{JsonSerializer.Serialize(SiteInfo.CastleName)}},
+          "alternateName": ["Вальдау", "Waldau Castle"],
+          "description": {{JsonSerializer.Serialize(SiteInfo.Tagline)}},
+          "url": "{{baseUrl}}",
+          "image": "{{logoUrl}}",
+          "telephone": "{{SiteInfo.PhoneTel}}",
+          "openingHours": "Mo-Su 10:00-18:00",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "ул. Замковая, 1",
+            "addressLocality": "Низовье",
+            "addressRegion": "Калининградская область",
+            "postalCode": "238530",
+            "addressCountry": "RU"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": {{SiteInfo.Latitude}},
+            "longitude": {{SiteInfo.Longitude}}
+          }
+        }
+      ]
+    }
+    """;
+}
+<script type="application/ld+json">@Html.Raw(json)</script>

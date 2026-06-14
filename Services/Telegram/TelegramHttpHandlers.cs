@@ -1,24 +1,46 @@
 using System.Net;
 using System.Net.Sockets;
+using WaldauCastle.Options;
 
 namespace WaldauCastle.Services.Telegram;
 
 internal static class TelegramHttpHandlers
 {
-    public static SocketsHttpHandler CreateIpv6PreferredHandler() => new()
+    public static SocketsHttpHandler CreateHandler(TelegramBotOptions options)
     {
-        ConnectCallback = ConnectIpv6PreferredAsync,
-        PooledConnectionLifetime = TimeSpan.FromMinutes(5),
-    };
+        var connectTimeout = TimeSpan.FromSeconds(Math.Clamp(options.ConnectTimeoutSeconds, 3, 60));
+        var preferIpv4 = options.PreferIpv4;
 
-    private static async ValueTask<Stream> ConnectIpv6PreferredAsync(
+        var handler = new SocketsHttpHandler
+        {
+            ConnectCallback = (context, cancellationToken) =>
+                ConnectAsync(context, preferIpv4, connectTimeout, cancellationToken),
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            ConnectTimeout = connectTimeout,
+        };
+
+        if (options.HasProxy)
+        {
+            handler.Proxy = new WebProxy(options.ProxyUrl.Trim());
+            handler.UseProxy = true;
+        }
+
+        return handler;
+    }
+
+    private static async ValueTask<Stream> ConnectAsync(
         SocketsHttpConnectionContext context,
+        bool preferIpv4,
+        TimeSpan connectTimeout,
         CancellationToken cancellationToken)
     {
         var host = context.DnsEndPoint.Host;
         var port = context.DnsEndPoint.Port;
+        var families = preferIpv4
+            ? new[] { AddressFamily.InterNetwork, AddressFamily.InterNetworkV6 }
+            : new[] { AddressFamily.InterNetworkV6, AddressFamily.InterNetwork };
 
-        foreach (var family in new[] { AddressFamily.InterNetworkV6, AddressFamily.InterNetwork })
+        foreach (var family in families)
         {
             IPAddress[] addresses;
             try
@@ -35,7 +57,9 @@ internal static class TelegramHttpHandlers
                 var socket = new Socket(family, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
-                    await socket.ConnectAsync(new IPEndPoint(address, port), cancellationToken);
+                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    timeoutCts.CancelAfter(connectTimeout);
+                    await socket.ConnectAsync(new IPEndPoint(address, port), timeoutCts.Token);
                     return new NetworkStream(socket, ownsSocket: true);
                 }
                 catch
@@ -45,6 +69,6 @@ internal static class TelegramHttpHandlers
             }
         }
 
-        throw new HttpRequestException($"Не удалось подключиться к {host}:{port} (IPv6/IPv4).");
+        throw new HttpRequestException($"Не удалось подключиться к {host}:{port} (IPv4/IPv6, таймаут {connectTimeout.TotalSeconds:0}s).");
     }
 }

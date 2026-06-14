@@ -1,7 +1,12 @@
 @model HomeIndexViewModel
 @{
-    ViewData["Title"] = "Главная";
+    ViewData["MetaTitle"] = SiteInfo.HomePageTitle;
     ViewData["BodyClass"] = "page-home";
+    ViewData["MetaDescription"] =
+        "Официальный сайт замка Вальдау (Вальдау) — средневековая крепость XIII века в пос. Низовье, Калининградская область. Экскурсии с гидом и самостоятельно, мероприятия, записаться онлайн.";
+    ViewData["MetaKeywords"] =
+        "замок Вальдау, вальдау сайт, замок Вальдау официальный сайт, Вальдау, Waldau, музей, экскурсии, мероприятия, Калининград, Низовье, средневековый замок";
+    ViewData["OgImage"] = SiteInfo.LogoPngPath;
 }
 
 <section class="hero" aria-label="Замок Вальдау">

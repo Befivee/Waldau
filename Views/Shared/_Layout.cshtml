@@ -3,11 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@SiteInfo.GetBrowserTitle(ViewData["Title"]?.ToString())</title>
-    <link rel="icon" href="@SiteInfo.FaviconPath" asp-append-version="true" />
-    <link rel="icon" type="image/png" sizes="512x512" href="@SiteInfo.LogoPngPath" asp-append-version="true" />
+    <title>@SiteInfo.GetDocumentTitle(ViewData["Title"]?.ToString(), ViewData["MetaTitle"]?.ToString())</title>
+    <link rel="icon" href="@SiteInfo.FaviconPath" sizes="any" asp-append-version="true" />
+    <link rel="shortcut icon" href="@SiteInfo.FaviconPath" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="48x48" href="@SiteInfo.FaviconPngPath" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32" href="@SiteInfo.FaviconPngPath" asp-append-version="true" />
     <link rel="icon" type="image/png" sizes="256x256" href="@SiteInfo.FaviconPngPath" asp-append-version="true" />
-    <link rel="apple-touch-icon" href="@SiteInfo.LogoPngPath" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="512x512" href="@SiteInfo.LogoPngPath" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@SiteInfo.FaviconPngPath" asp-append-version="true" />
     <partial name="_SeoMeta" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

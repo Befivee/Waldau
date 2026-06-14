@@ -5,7 +5,8 @@ namespace WaldauCastle.Models;
 public static class SiteInfo
 {
     public const string CastleName = "Замок Вальдау";
-    public const string BrowserTitle = "Официальный сайт замка Вальдау";
+    public const string HomePageTitle = "Замок Вальдау - Официальный сайт";
+    public const string BrowserTitle = HomePageTitle;
     public const string LogoPath = "/images/logo.svg";
     public const string LogoPngPath = "/images/logo.png";
     public const string FaviconPath = "/favicon.ico";
@@ -29,10 +30,15 @@ public static class SiteInfo
     public const double Latitude = 54.700653;
     public const double Longitude = 20.743124;
 
+    public static string GetDocumentTitle(string? pageTitle, string? metaTitle) =>
+        !string.IsNullOrWhiteSpace(metaTitle)
+            ? metaTitle.Trim()
+            : string.IsNullOrWhiteSpace(pageTitle) || pageTitle == "Главная"
+                ? HomePageTitle
+                : $"{pageTitle.Trim()} — {HomePageTitle}";
+
     public static string GetBrowserTitle(string? pageTitle) =>
-        string.IsNullOrWhiteSpace(pageTitle) || pageTitle == "Главная"
-            ? BrowserTitle
-            : $"{pageTitle} — {BrowserTitle}";
+        GetDocumentTitle(pageTitle, null);
 
     public static string YandexMapsUrl =>
         $"https://yandex.ru/maps/?pt={Longitude.ToString(CultureInfo.InvariantCulture)},{Latitude.ToString(CultureInfo.InvariantCulture)}&z=15&l=map";

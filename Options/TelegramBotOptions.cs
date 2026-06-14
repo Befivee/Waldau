@@ -21,6 +21,18 @@ public partial class TelegramBotOptions
 
     public string SecondAdminChatId { get; set; } = string.Empty;
 
+    /// <summary>Приоритет IPv4 при подключении к api.telegram.org (рекомендуется для VPS в РФ).</summary>
+    public bool PreferIpv4 { get; set; } = true;
+
+    /// <summary>Таймаут TCP-подключения к API Telegram, секунды.</summary>
+    public int ConnectTimeoutSeconds { get; set; } = 8;
+
+    /// <summary>HTTP/SOCKS прокси для обхода блокировок (например http://127.0.0.1:8080).</summary>
+    public string ProxyUrl { get; set; } = string.Empty;
+
+    public bool HasProxy =>
+        !string.IsNullOrWhiteSpace(ProxyUrl) && !IsPlaceholder(ProxyUrl);
+
     public bool HasValidBotToken =>
         !string.IsNullOrWhiteSpace(BotToken) &&
         !IsPlaceholder(BotToken) &&

@@ -104,6 +104,20 @@ public class CastleAdminContentService(
         $"💰 {entity.Price:0} ₽\n\n" +
         $"{entity.Description}";
 
+    public string BuildBookingDeletePrompt(Booking booking)
+    {
+        var visitSchedule = FormatVisitSchedule(booking);
+
+        return
+            $"📅 Заявка получена: {BotTime.FormatMoscowDateTime(booking.CreatedAt)}\n\n" +
+            $"🗑 Удалить заявку «{booking.FullName}» ({visitSchedule})?";
+    }
+
+    private string FormatVisitSchedule(Booking booking) =>
+        string.IsNullOrWhiteSpace(booking.VisitTime)
+            ? booking.VisitDate.ToString("d MMMM yyyy", RuCulture)
+            : $"{booking.VisitDate.ToString("d MMMM yyyy", RuCulture)}, {booking.VisitTime}";
+
     public static string BuildPublicWelcomeText(string siteUrl) =>
         "🏰 Замок Вальдау\n\n" +
         "Напишите «экскурсии» — список программ с сайта.\n" +

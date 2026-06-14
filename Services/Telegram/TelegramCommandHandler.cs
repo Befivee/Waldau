@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -15,6 +16,7 @@ public class TelegramCommandHandler(
 {
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        var sw = Stopwatch.StartNew();
         try
         {
             if (update.CallbackQuery is { } callback)
@@ -37,6 +39,17 @@ public class TelegramCommandHandler(
                     "⚠️ Произошла ошибка. Попробуйте /start.",
                     cancellationToken: cancellationToken);
             }
+        }
+        finally
+        {
+            sw.Stop();
+            if (sw.ElapsedMilliseconds > 3000)
+                logger.LogWarning(
+                    "Telegram update {UpdateId} обработан медленно: {ElapsedMs} ms",
+                    update.Id,
+                    sw.ElapsedMilliseconds);
+            else
+                logger.LogDebug("Telegram update {UpdateId} обработан за {ElapsedMs} ms", update.Id, sw.ElapsedMilliseconds);
         }
     }
 

@@ -1,9 +1,14 @@
 User-agent: *
 Allow: /
+Allow: /favicon.ico
+Allow: /images/logo.png
+Allow: /images/favicon-256.png
 Disallow: /Admin
 Disallow: /admin
 Disallow: /Home/Error
 Disallow: /Home/ServerError
 Disallow: /Home/NotFound
+
+Host: https://вальдау.рф
 
 Sitemap: https://вальдау.рф/sitemap.xml

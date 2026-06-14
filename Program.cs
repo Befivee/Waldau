@@ -65,8 +65,8 @@ if (telegramOptions.IsConfigured)
     var botToken = telegramOptions.BotToken.Trim();
 
     builder.Services.AddHttpClient("telegram_bot_client")
-        .ConfigurePrimaryHttpMessageHandler(TelegramHttpHandlers.CreateIpv6PreferredHandler)
-        .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(130))
+        .ConfigurePrimaryHttpMessageHandler(() => TelegramHttpHandlers.CreateHandler(telegramOptions))
+        .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(90))
         .AddTypedClient<ITelegramBotClient>((httpClient, _) => new TelegramBotClient(botToken, httpClient));
 
     builder.Services.AddSingleton<TelegramCommandHandler>();

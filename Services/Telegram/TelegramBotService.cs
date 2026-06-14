@@ -20,20 +20,27 @@ public class TelegramBotService(
             return;
         }
 
-        var receiverOptions = new ReceiverOptions
-        {
-            AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
-            DropPendingUpdates = true
-        };
+        var dropPendingUpdates = true;
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            var receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
+                DropPendingUpdates = dropPendingUpdates
+            };
+            dropPendingUpdates = false;
+
             try
             {
                 try
                 {
                     var me = await botClient.GetMe(stoppingToken);
-                    logger.LogInformation("Telegram CMS-бот @{BotUsername} запущен (фоновый сервис).", me.Username);
+                    logger.LogInformation(
+                        "Telegram CMS-бот @{BotUsername} запущен (IPv4 first: {PreferIpv4}, proxy: {Proxy}).",
+                        me.Username,
+                        options.Value.PreferIpv4,
+                        options.Value.HasProxy ? "yes" : "no");
                 }
                 catch (Exception ex)
                 {
