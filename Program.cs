@@ -69,7 +69,9 @@ if (telegramOptions.IsConfigured)
         .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(90))
         .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
         {
-            var clientOptions = new TelegramBotClientOptions(botToken) { RetryCount = 2 };
+            var clientOptions = telegramOptions.HasApiBaseUrl
+                ? new TelegramBotClientOptions(botToken, telegramOptions.ApiBaseUrl.Trim()) { RetryCount = 2 }
+                : new TelegramBotClientOptions(botToken) { RetryCount = 2 };
             return new TelegramBotClient(clientOptions, httpClient);
         });
 
@@ -112,6 +114,12 @@ var app = builder.Build();
 if (!telegramOptions.IsConfigured)
 {
     app.Logger.LogWarning("Telegram-бот отключён: укажите корректные BotToken и AdminChatId.");
+}
+else if (TelegramBotOptions.IsTelegramDeepLink(telegramOptions.ProxyUrl))
+{
+    app.Logger.LogWarning(
+        "Telegram ProxyUrl — ссылка t.me/proxy (MTProto для приложения Telegram). " +
+        "Для бота на сервере используйте socks5://host:port или локальный Bot API (Telegram__ApiBaseUrl).");
 }
 
 if (!vkValidation.IsValid)
