@@ -14,16 +14,16 @@ public class TelegramNotificationService(
 {
     public const string HttpClientName = "telegram_notifications";
 
+    private static readonly TimeSpan PerAttemptTimeout = TimeSpan.FromSeconds(35);
+
     private static readonly TimeSpan[] RetryDelays =
     [
+        TimeSpan.FromSeconds(2),
         TimeSpan.FromSeconds(3),
         TimeSpan.FromSeconds(5),
         TimeSpan.FromSeconds(10),
         TimeSpan.FromSeconds(15),
-        TimeSpan.FromSeconds(30),
-        TimeSpan.FromSeconds(45),
-        TimeSpan.FromSeconds(60),
-        TimeSpan.FromSeconds(90)
+        TimeSpan.FromSeconds(20)
     ];
 
     public async Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
@@ -38,15 +38,11 @@ public class TelegramNotificationService(
 
         var text = BookingNotificationText.Format(booking);
         var bot = CreateBotClient(telegram);
-        var allSucceeded = true;
 
-        foreach (var chatId in adminChatIds)
-        {
-            if (!await SendWithPersistentRetryAsync(bot, chatId, text, booking.Id, cancellationToken))
-                allSucceeded = false;
-        }
+        var results = await Task.WhenAll(adminChatIds.Select(chatId =>
+            SendWithPersistentRetryAsync(bot, chatId, text, booking.Id, cancellationToken)));
 
-        return allSucceeded;
+        return results.All(success => success);
     }
 
     private async Task<bool> SendWithPersistentRetryAsync(
@@ -64,12 +60,15 @@ public class TelegramNotificationService(
 
             try
             {
+                using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                attemptCts.CancelAfter(PerAttemptTimeout);
+
                 await bot.SendMessage(
                     chatId: chatId,
                     text: text,
                     parseMode: ParseMode.None,
                     replyMarkup: TelegramKeyboards.BackToMainMenu(),
-                    cancellationToken: cancellationToken);
+                    cancellationToken: attemptCts.Token);
 
                 logger.LogInformation(
                     "Telegram-уведомление о заявке #{BookingId} отправлено в chat {ChatId} (попытка {Attempt}).",

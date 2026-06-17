@@ -86,6 +86,9 @@ public class BookingService(ApplicationDbContext context) : IBookingService
         return !occupied.Contains(visitTime);
     }
 
+    private static readonly TimeSpan PendingNotificationMaxAge = TimeSpan.FromHours(72);
+    private static readonly TimeSpan NotificationRetryMinAge = TimeSpan.FromSeconds(10);
+
     public async Task<IReadOnlyList<Booking>> GetPendingAdminNotificationsAsync(
         int limit,
         CancellationToken cancellationToken = default)
@@ -93,10 +96,13 @@ public class BookingService(ApplicationDbContext context) : IBookingService
         if (limit <= 0)
             limit = 20;
 
-        var retryAfter = DateTime.UtcNow.AddSeconds(-10);
+        var now = DateTime.UtcNow;
+        var retryAfter = now.Subtract(NotificationRetryMinAge);
+        var createdAfter = now.Subtract(PendingNotificationMaxAge);
 
         return await context.Bookings
             .Where(b =>
+                b.CreatedAt >= createdAfter &&
                 b.CreatedAt <= retryAfter &&
                 (b.TelegramNotifiedAt == null || b.VkNotifiedAt == null))
             .OrderBy(b => b.CreatedAt)

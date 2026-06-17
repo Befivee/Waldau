@@ -10,6 +10,7 @@ public class BookingNotificationWorker(
     ILogger<BookingNotificationWorker> logger) : BackgroundService
 {
     private static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(30);
+    private readonly SemaphoreSlim _concurrency = new(3, 3);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -26,18 +27,7 @@ public class BookingNotificationWorker(
     {
         await foreach (var bookingId in queue.Reader.ReadAllAsync(stoppingToken))
         {
-            try
-            {
-                await NotifyBookingAsync(bookingId, stoppingToken);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Ошибка обработки уведомления о заявке #{BookingId}.", bookingId);
-            }
+            _ = DispatchNotificationAsync(bookingId, stoppingToken);
         }
     }
 
@@ -59,11 +49,16 @@ public class BookingNotificationWorker(
             var bookings = scope.ServiceProvider.GetRequiredService<IBookingService>();
             var pending = await bookings.GetPendingAdminNotificationsAsync(limit: 20, stoppingToken);
 
-            foreach (var booking in pending)
-            {
-                stoppingToken.ThrowIfCancellationRequested();
-                await NotifyBookingAsync(booking.Id, stoppingToken);
-            }
+            if (pending.Count == 0)
+                return;
+
+            logger.LogInformation("Повторная отправка уведомлений для {Count} заявок.", pending.Count);
+
+            var tasks = pending
+                .Select(booking => DispatchNotificationAsync(booking.Id, stoppingToken))
+                .ToArray();
+
+            await Task.WhenAll(tasks);
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
@@ -72,6 +67,27 @@ public class BookingNotificationWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Ошибка повторной отправки уведомлений из БД.");
+        }
+    }
+
+    private async Task DispatchNotificationAsync(int bookingId, CancellationToken stoppingToken)
+    {
+        await _concurrency.WaitAsync(stoppingToken);
+        try
+        {
+            await NotifyBookingAsync(bookingId, stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Ошибка обработки уведомления о заявке #{BookingId}.", bookingId);
+        }
+        finally
+        {
+            _concurrency.Release();
         }
     }
 
@@ -93,14 +109,10 @@ public class BookingNotificationWorker(
         var tasks = new List<Task>();
 
         if (booking.VkNotifiedAt is null)
-        {
             tasks.Add(SendVkAsync(bookings, vk, booking, stoppingToken));
-        }
 
         if (booking.TelegramNotifiedAt is null)
-        {
             tasks.Add(SendTelegramAsync(bookings, telegram, booking, stoppingToken));
-        }
 
         if (tasks.Count == 0)
             return;

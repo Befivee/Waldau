@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -14,42 +14,63 @@ public class TelegramCommandHandler(
     IOptions<TelegramBotOptions> options,
     ILogger<TelegramCommandHandler> logger) : IUpdateHandler
 {
-    public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private static readonly TimeSpan UpdateTimeout = TimeSpan.FromSeconds(55);
+    private readonly SemaphoreSlim _concurrency = new(4, 4);
+
+    /// <summary>Не блокирует long polling — обработка идёт в фоне.</summary>
+    public Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        _ = ProcessUpdateAsync(botClient, update);
+        return Task.CompletedTask;
+    }
+
+    private async Task ProcessUpdateAsync(ITelegramBotClient botClient, Update update)
+    {
+        await _concurrency.WaitAsync();
         var sw = Stopwatch.StartNew();
+
         try
         {
+            using var cts = new CancellationTokenSource(UpdateTimeout);
+
             if (update.CallbackQuery is { } callback)
             {
-                await HandleCallbackQueryAsync(botClient, callback, cancellationToken);
+                await HandleCallbackQueryAsync(botClient, callback, cts.Token);
                 return;
             }
 
             if (update.Message is { } message)
-                await HandleMessageAsync(botClient, message, cancellationToken);
+                await HandleMessageAsync(botClient, message, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogWarning("Telegram update {UpdateId} отменён по таймауту {TimeoutSeconds} с.", update.Id, UpdateTimeout.TotalSeconds);
+            await TrySendErrorAsync(botClient, update, "⏱ Ответ занял слишком много времени. Попробуйте ещё раз или /start.");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Необработанная ошибка Telegram update {UpdateId}", update.Id);
-            var chatId = update.Message?.Chat.Id ?? update.CallbackQuery?.Message?.Chat.Id;
-            if (chatId.HasValue)
-            {
-                await botClient.SendMessage(
-                    chatId.Value,
-                    "⚠️ Произошла ошибка. Попробуйте /start.",
-                    cancellationToken: cancellationToken);
-            }
+            await TrySendErrorAsync(botClient, update, "⚠️ Произошла ошибка. Попробуйте /start.");
         }
         finally
         {
             sw.Stop();
             if (sw.ElapsedMilliseconds > 3000)
+            {
                 logger.LogWarning(
                     "Telegram update {UpdateId} обработан медленно: {ElapsedMs} ms",
                     update.Id,
                     sw.ElapsedMilliseconds);
+            }
             else
-                logger.LogDebug("Telegram update {UpdateId} обработан за {ElapsedMs} ms", update.Id, sw.ElapsedMilliseconds);
+            {
+                logger.LogDebug(
+                    "Telegram update {UpdateId} обработан за {ElapsedMs} ms",
+                    update.Id,
+                    sw.ElapsedMilliseconds);
+            }
+
+            _concurrency.Release();
         }
     }
 
@@ -74,6 +95,23 @@ public class TelegramCommandHandler(
         {
             InnerException: TaskCanceledException or TimeoutException
         };
+
+    private async Task TrySendErrorAsync(ITelegramBotClient botClient, Update update, string text)
+    {
+        var chatId = update.Message?.Chat.Id ?? update.CallbackQuery?.Message?.Chat.Id;
+        if (!chatId.HasValue)
+            return;
+
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await botClient.SendMessage(chatId.Value, text, cancellationToken: cts.Token);
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Не удалось отправить сообщение об ошибке в chat {ChatId}.", chatId);
+        }
+    }
 
     private async Task HandleMessageAsync(
         ITelegramBotClient botClient,
@@ -152,9 +190,7 @@ public class TelegramCommandHandler(
             session.Reset();
 
         if ((int)session.State > (int)TelegramBotState.WaitingForNewImage)
-        {
             session.State = TelegramBotState.None;
-        }
     }
 
     private async Task HandleCallbackQueryAsync(
