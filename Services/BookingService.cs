@@ -87,7 +87,7 @@ public class BookingService(ApplicationDbContext context) : IBookingService
     }
 
     private static readonly TimeSpan PendingNotificationMaxAge = TimeSpan.FromHours(72);
-    private static readonly TimeSpan NotificationRetryMinAge = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan NotificationRetryMinAge = TimeSpan.FromSeconds(2);
 
     public async Task<IReadOnlyList<Booking>> GetPendingAdminNotificationsAsync(
         int limit,

@@ -9,7 +9,7 @@ public class BookingNotificationWorker(
     IServiceScopeFactory scopeFactory,
     ILogger<BookingNotificationWorker> logger) : BackgroundService
 {
-    private static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(15);
     private readonly SemaphoreSlim _concurrency = new(3, 3);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,7 +27,18 @@ public class BookingNotificationWorker(
     {
         await foreach (var bookingId in queue.Reader.ReadAllAsync(stoppingToken))
         {
-            _ = DispatchNotificationAsync(bookingId, stoppingToken);
+            try
+            {
+                await DispatchNotificationAsync(bookingId, stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Ошибка обработки уведомления о заявке #{BookingId}.", bookingId);
+            }
         }
     }
 

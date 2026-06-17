@@ -7,23 +7,19 @@ using WaldauCastle.Services.Telegram;
 
 namespace WaldauCastle.Services;
 
+/// <summary>Отправка уведомлений через тот же ITelegramBotClient, что и CMS-бот (проверенное соединение).</summary>
 public class TelegramNotificationService(
-    IHttpClientFactory httpClientFactory,
+    ITelegramBotClient botClient,
     IOptions<TelegramBotOptions> options,
     ILogger<TelegramNotificationService> logger) : ITelegramNotificationService
 {
-    public const string HttpClientName = "telegram_notifications";
-
-    private static readonly TimeSpan PerAttemptTimeout = TimeSpan.FromSeconds(35);
+    private static readonly TimeSpan PerAttemptTimeout = TimeSpan.FromSeconds(20);
 
     private static readonly TimeSpan[] RetryDelays =
     [
+        TimeSpan.FromSeconds(1),
         TimeSpan.FromSeconds(2),
-        TimeSpan.FromSeconds(3),
-        TimeSpan.FromSeconds(5),
-        TimeSpan.FromSeconds(10),
-        TimeSpan.FromSeconds(15),
-        TimeSpan.FromSeconds(20)
+        TimeSpan.FromSeconds(3)
     ];
 
     public async Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
@@ -37,16 +33,26 @@ public class TelegramNotificationService(
             return true;
 
         var text = BookingNotificationText.Format(booking);
-        var bot = CreateBotClient(telegram);
+        logger.LogInformation(
+            "Отправка Telegram-уведомления о заявке #{BookingId} в {Count} chat(s).",
+            booking.Id,
+            adminChatIds.Count);
 
         var results = await Task.WhenAll(adminChatIds.Select(chatId =>
-            SendWithPersistentRetryAsync(bot, chatId, text, booking.Id, cancellationToken)));
+            SendWithRetryAsync(chatId, text, booking.Id, cancellationToken)));
 
-        return results.All(success => success);
+        var anySent = results.Any(success => success);
+        if (!anySent)
+        {
+            logger.LogWarning(
+                "Telegram-уведомление о заявке #{BookingId} не доставлено ни в один admin chat.",
+                booking.Id);
+        }
+
+        return anySent;
     }
 
-    private async Task<bool> SendWithPersistentRetryAsync(
-        ITelegramBotClient bot,
+    private async Task<bool> SendWithRetryAsync(
         long chatId,
         string text,
         int bookingId,
@@ -63,7 +69,7 @@ public class TelegramNotificationService(
                 using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 attemptCts.CancelAfter(PerAttemptTimeout);
 
-                await bot.SendMessage(
+                await botClient.SendMessage(
                     chatId: chatId,
                     text: text,
                     parseMode: ParseMode.None,
@@ -82,8 +88,9 @@ public class TelegramNotificationService(
                 var delay = RetryDelays[attempt - 1];
                 logger.LogWarning(
                     ex,
-                    "Telegram-уведомление о заявке #{BookingId} не отправлено (попытка {Attempt}/{MaxAttempts}), повтор через {DelaySeconds} с.",
+                    "Telegram-уведомление о заявке #{BookingId} → chat {ChatId}: попытка {Attempt}/{MaxAttempts}, повтор через {DelaySeconds} с.",
                     bookingId,
+                    chatId,
                     attempt,
                     maxAttempts,
                     delay.TotalSeconds);
@@ -94,7 +101,7 @@ public class TelegramNotificationService(
             {
                 logger.LogError(
                     ex,
-                    "Telegram-уведомление о заявке #{BookingId} не удалось отправить в chat {ChatId} после {MaxAttempts} попыток.",
+                    "Telegram-уведомление о заявке #{BookingId} не отправлено в chat {ChatId} после {MaxAttempts} попыток.",
                     bookingId,
                     chatId,
                     maxAttempts);
@@ -102,15 +109,5 @@ public class TelegramNotificationService(
         }
 
         return false;
-    }
-
-    private ITelegramBotClient CreateBotClient(TelegramBotOptions telegram)
-    {
-        var token = telegram.BotToken.Trim();
-        var httpClient = httpClientFactory.CreateClient(HttpClientName);
-        var clientOptions = telegram.HasApiBaseUrl
-            ? new TelegramBotClientOptions(token, telegram.ApiBaseUrl.Trim()) { RetryCount = 0 }
-            : new TelegramBotClientOptions(token) { RetryCount = 0 };
-        return new TelegramBotClient(clientOptions, httpClient);
     }
 }

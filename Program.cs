@@ -77,13 +77,9 @@ if (telegramOptions.IsConfigured)
         TimeSpan.FromSeconds(90))
         .AddTypedClient<ITelegramBotClient>((httpClient, _) => CreateTelegramBotClient(botToken, telegramOptions, httpClient));
 
-    ConfigureTelegramHttpClient(
-        builder.Services.AddHttpClient(TelegramNotificationService.HttpClientName),
-        TimeSpan.FromSeconds(120));
-
     builder.Services.AddSingleton<TelegramCommandHandler>();
     builder.Services.AddHostedService<TelegramBotService>();
-    builder.Services.AddScoped<ITelegramNotificationService, TelegramNotificationService>();
+    builder.Services.AddSingleton<ITelegramNotificationService, TelegramNotificationService>();
 }
 else
 {
