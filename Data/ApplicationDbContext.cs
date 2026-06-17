@@ -23,8 +23,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<Booking>(entity =>
         {
-            entity.HasIndex(b => b.VisitDate);
-            entity.Property(b => b.ExcursionTitle).HasMaxLength(200);
+        entity.HasIndex(b => b.VisitDate);
+        entity.HasIndex(b => new { b.TelegramNotifiedAt, b.VkNotifiedAt, b.CreatedAt });
+        entity.Property(b => b.ExcursionTitle).HasMaxLength(200);
             entity.Property(b => b.VisitTime).HasMaxLength(5);
         });
     }

@@ -1,19 +1,18 @@
 using System.Threading.Channels;
-using WaldauCastle.Models;
 
 namespace WaldauCastle.Services;
 
-/// <summary>Очередь заявок для фоновой отправки уведомлений (не блокирует бота и HTTP-ответ сайта).</summary>
+/// <summary>Очередь ID заявок для фоновой отправки уведомлений.</summary>
 public sealed class BookingNotificationQueue
 {
-    private readonly Channel<Booking> _channel = Channel.CreateUnbounded<Booking>(
+    private readonly Channel<int> _channel = Channel.CreateUnbounded<int>(
         new UnboundedChannelOptions
         {
             SingleReader = true,
             SingleWriter = false
         });
 
-    public ChannelReader<Booking> Reader => _channel.Reader;
+    public ChannelReader<int> Reader => _channel.Reader;
 
-    public bool TryEnqueue(Booking booking) => _channel.Writer.TryWrite(booking);
+    public bool TryEnqueue(int bookingId) => bookingId > 0 && _channel.Writer.TryWrite(bookingId);
 }

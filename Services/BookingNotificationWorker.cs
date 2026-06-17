@@ -3,21 +3,32 @@ using WaldauCastle.Services.VK;
 
 namespace WaldauCastle.Services;
 
-/// <summary>Фоновая обработка очереди уведомлений — независимо от polling Telegram-бота.</summary>
+/// <summary>Фоновая отправка уведомлений: очередь + повтор из БД после перезапуска.</summary>
 public class BookingNotificationWorker(
     BookingNotificationQueue queue,
     IServiceScopeFactory scopeFactory,
     ILogger<BookingNotificationWorker> logger) : BackgroundService
 {
+    private static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(30);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("BookingNotificationWorker запущен.");
 
-        await foreach (var booking in queue.Reader.ReadAllAsync(stoppingToken))
+        await Task.WhenAll(
+            ProcessQueueAsync(stoppingToken),
+            RetryPendingFromDatabaseAsync(stoppingToken));
+
+        logger.LogInformation("BookingNotificationWorker остановлен.");
+    }
+
+    private async Task ProcessQueueAsync(CancellationToken stoppingToken)
+    {
+        await foreach (var bookingId in queue.Reader.ReadAllAsync(stoppingToken))
         {
             try
             {
-                await ProcessBookingAsync(booking, stoppingToken);
+                await NotifyBookingAsync(bookingId, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -25,28 +36,101 @@ public class BookingNotificationWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Ошибка обработки уведомления о заявке #{BookingId}.", booking.Id);
+                logger.LogError(ex, "Ошибка обработки уведомления о заявке #{BookingId}.", bookingId);
             }
         }
-
-        logger.LogInformation("BookingNotificationWorker остановлен.");
     }
 
-    private async Task ProcessBookingAsync(Booking booking, CancellationToken stoppingToken)
+    private async Task RetryPendingFromDatabaseAsync(CancellationToken stoppingToken)
     {
-        using var scope = scopeFactory.CreateScope();
-        var vk = scope.ServiceProvider.GetRequiredService<IVKNotificationService>();
-        var telegram = scope.ServiceProvider.GetRequiredService<ITelegramNotificationService>();
+        using var timer = new PeriodicTimer(RetryInterval);
 
+        await RetryPendingBatchAsync(stoppingToken);
+
+        while (await timer.WaitForNextTickAsync(stoppingToken))
+            await RetryPendingBatchAsync(stoppingToken);
+    }
+
+    private async Task RetryPendingBatchAsync(CancellationToken stoppingToken)
+    {
         try
         {
-            await vk.NotifyNewBookingAsync(booking, stoppingToken);
+            using var scope = scopeFactory.CreateScope();
+            var bookings = scope.ServiceProvider.GetRequiredService<IBookingService>();
+            var pending = await bookings.GetPendingAdminNotificationsAsync(limit: 20, stoppingToken);
+
+            foreach (var booking in pending)
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+                await NotifyBookingAsync(booking.Id, stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "VK-уведомление о заявке #{BookingId} не отправлено.", booking.Id);
+            logger.LogError(ex, "Ошибка повторной отправки уведомлений из БД.");
+        }
+    }
+
+    private async Task NotifyBookingAsync(int bookingId, CancellationToken stoppingToken)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var bookings = scope.ServiceProvider.GetRequiredService<IBookingService>();
+        var booking = await bookings.GetByIdAsync(bookingId, stoppingToken);
+
+        if (booking is null)
+        {
+            logger.LogWarning("Заявка #{BookingId} не найдена для уведомления.", bookingId);
+            return;
         }
 
-        await telegram.NotifyNewBookingAsync(booking, stoppingToken);
+        var vk = scope.ServiceProvider.GetRequiredService<IVKNotificationService>();
+        var telegram = scope.ServiceProvider.GetRequiredService<ITelegramNotificationService>();
+
+        var tasks = new List<Task>();
+
+        if (booking.VkNotifiedAt is null)
+        {
+            tasks.Add(SendVkAsync(bookings, vk, booking, stoppingToken));
+        }
+
+        if (booking.TelegramNotifiedAt is null)
+        {
+            tasks.Add(SendTelegramAsync(bookings, telegram, booking, stoppingToken));
+        }
+
+        if (tasks.Count == 0)
+            return;
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task SendVkAsync(
+        IBookingService bookings,
+        IVKNotificationService vk,
+        Booking booking,
+        CancellationToken stoppingToken)
+    {
+        if (await vk.NotifyNewBookingAsync(booking, stoppingToken))
+        {
+            await bookings.MarkVkNotifiedAsync(booking.Id, stoppingToken);
+            logger.LogInformation("VK-уведомление о заявке #{BookingId} подтверждено.", booking.Id);
+        }
+    }
+
+    private async Task SendTelegramAsync(
+        IBookingService bookings,
+        ITelegramNotificationService telegram,
+        Booking booking,
+        CancellationToken stoppingToken)
+    {
+        if (await telegram.NotifyNewBookingAsync(booking, stoppingToken))
+        {
+            await bookings.MarkTelegramNotifiedAsync(booking.Id, stoppingToken);
+            logger.LogInformation("Telegram-уведомление о заявке #{BookingId} подтверждено.", booking.Id);
+        }
     }
 }

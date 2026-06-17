@@ -4,6 +4,6 @@ namespace WaldauCastle.Services;
 
 public class NullTelegramNotificationService : ITelegramNotificationService
 {
-    public Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default) =>
-        Task.CompletedTask;
+    public Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default) =>
+        Task.FromResult(true);
 }

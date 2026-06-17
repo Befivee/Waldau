@@ -21,4 +21,12 @@ public interface IBookingService
     Task<IReadOnlyList<string>> GetOccupiedGuidedSlotsAsync(DateTime visitDate, CancellationToken cancellationToken = default);
 
     Task<bool> IsGuidedSlotAvailableAsync(DateTime visitDate, string visitTime, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Booking>> GetPendingAdminNotificationsAsync(
+        int limit,
+        CancellationToken cancellationToken = default);
+
+    Task MarkTelegramNotifiedAsync(int bookingId, CancellationToken cancellationToken = default);
+
+    Task MarkVkNotifiedAsync(int bookingId, CancellationToken cancellationToken = default);
 }

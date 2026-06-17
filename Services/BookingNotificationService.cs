@@ -8,33 +8,22 @@ public class BookingNotificationService(
 {
     public void ScheduleNewBookingNotification(Booking booking)
     {
-        var snapshot = CloneBooking(booking);
+        if (booking.Id <= 0)
+        {
+            logger.LogError("Не удалось поставить заявку в очередь уведомлений: отсутствует Id.");
+            return;
+        }
 
-        if (queue.TryEnqueue(snapshot))
+        if (queue.TryEnqueue(booking.Id))
         {
             logger.LogInformation(
                 "Заявка #{BookingId} поставлена в очередь уведомлений (Telegram + VK).",
-                snapshot.Id);
+                booking.Id);
             return;
         }
 
         logger.LogError(
             "Не удалось поставить заявку #{BookingId} в очередь уведомлений.",
-            snapshot.Id);
+            booking.Id);
     }
-
-    private static Booking CloneBooking(Booking booking) =>
-        new()
-        {
-            Id = booking.Id,
-            FullName = booking.FullName,
-            Phone = booking.Phone,
-            VisitDate = booking.VisitDate,
-            ExcursionKind = booking.ExcursionKind,
-            ExcursionTitle = booking.ExcursionTitle,
-            VisitTime = booking.VisitTime,
-            PersonsCount = booking.PersonsCount,
-            CreatedAt = booking.CreatedAt,
-            PersonalDataConsent = booking.PersonalDataConsent
-        };
 }

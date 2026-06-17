@@ -4,5 +4,6 @@ namespace WaldauCastle.Services.VK;
 
 public interface IVKNotificationService
 {
-    Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default);
+    /// <returns>true, если уведомление отправлено или VK отключён.</returns>
+    Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default);
 }

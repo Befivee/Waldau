@@ -26,26 +26,30 @@ public class TelegramNotificationService(
         TimeSpan.FromSeconds(90)
     ];
 
-    public async Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
+    public async Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
     {
         var telegram = options.Value;
         if (!telegram.IsConfigured)
-            return;
+            return true;
 
         var adminChatIds = telegram.GetAdminChatIds();
         if (adminChatIds.Count == 0)
-            return;
+            return true;
 
         var text = BookingNotificationText.Format(booking);
         var bot = CreateBotClient(telegram);
+        var allSucceeded = true;
 
         foreach (var chatId in adminChatIds)
         {
-            await SendWithPersistentRetryAsync(bot, chatId, text, booking.Id, cancellationToken);
+            if (!await SendWithPersistentRetryAsync(bot, chatId, text, booking.Id, cancellationToken))
+                allSucceeded = false;
         }
+
+        return allSucceeded;
     }
 
-    private async Task SendWithPersistentRetryAsync(
+    private async Task<bool> SendWithPersistentRetryAsync(
         ITelegramBotClient bot,
         long chatId,
         string text,
@@ -72,7 +76,7 @@ public class TelegramNotificationService(
                     bookingId,
                     chatId,
                     attempt);
-                return;
+                return true;
             }
             catch (Exception ex) when (attempt < maxAttempts)
             {
@@ -97,6 +101,8 @@ public class TelegramNotificationService(
                     maxAttempts);
             }
         }
+
+        return false;
     }
 
     private ITelegramBotClient CreateBotClient(TelegramBotOptions telegram)

@@ -43,4 +43,8 @@ public class Booking
 
     [Display(Name = "Согласие на обработку персональных данных")]
     public bool PersonalDataConsent { get; set; }
+
+    public DateTime? TelegramNotifiedAt { get; set; }
+
+    public DateTime? VkNotifiedAt { get; set; }
 }

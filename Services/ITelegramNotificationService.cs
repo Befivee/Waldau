@@ -4,5 +4,6 @@ namespace WaldauCastle.Services;
 
 public interface ITelegramNotificationService
 {
-    Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default);
+    /// <returns>true, если уведомление отправлено или Telegram отключён.</returns>
+    Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default);
 }

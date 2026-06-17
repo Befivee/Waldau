@@ -9,12 +9,12 @@ public class VKNotificationService(
     IOptions<VKOptions> options,
     ILogger<VKNotificationService> logger) : IVKNotificationService
 {
-    public async Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
+    public async Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
     {
         if (!options.Value.TryGetAdminUserId(out var adminUserId))
         {
             logger.LogWarning("VK-уведомления отключены: укажите VK:AdminUserId.");
-            return;
+            return true;
         }
 
         var text = BookingNotificationText.Format(booking);
@@ -26,11 +26,13 @@ public class VKNotificationService(
                 text,
                 VKKeyboards.BackToMainMenu(),
                 cancellationToken);
-            logger.LogInformation("VK-уведомление о заявке отправлено admin {AdminUserId}.", adminUserId);
+            logger.LogInformation("VK-уведомление о заявке #{BookingId} отправлено admin {AdminUserId}.", booking.Id, adminUserId);
+            return true;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Не удалось отправить уведомление о заявке в VK.");
+            logger.LogError(ex, "Не удалось отправить уведомление о заявке #{BookingId} в VK.", booking.Id);
+            return false;
         }
     }
 }

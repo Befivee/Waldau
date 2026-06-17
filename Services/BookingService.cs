@@ -86,6 +86,44 @@ public class BookingService(ApplicationDbContext context) : IBookingService
         return !occupied.Contains(visitTime);
     }
 
+    public async Task<IReadOnlyList<Booking>> GetPendingAdminNotificationsAsync(
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        if (limit <= 0)
+            limit = 20;
+
+        var retryAfter = DateTime.UtcNow.AddSeconds(-10);
+
+        return await context.Bookings
+            .Where(b =>
+                b.CreatedAt <= retryAfter &&
+                (b.TelegramNotifiedAt == null || b.VkNotifiedAt == null))
+            .OrderBy(b => b.CreatedAt)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task MarkTelegramNotifiedAsync(int bookingId, CancellationToken cancellationToken = default)
+    {
+        var entity = await context.Bookings.FindAsync([bookingId], cancellationToken);
+        if (entity is null)
+            return;
+
+        entity.TelegramNotifiedAt = DateTime.UtcNow;
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task MarkVkNotifiedAsync(int bookingId, CancellationToken cancellationToken = default)
+    {
+        var entity = await context.Bookings.FindAsync([bookingId], cancellationToken);
+        if (entity is null)
+            return;
+
+        entity.VkNotifiedAt = DateTime.UtcNow;
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     private IQueryable<Booking> QueryOrdered() =>
         context.Bookings
             .OrderBy(b => b.VisitDate)
