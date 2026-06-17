@@ -64,7 +64,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         };
 
         await bookings.CreateAsync(booking, cancellationToken);
-        await notifications.NotifyNewBookingAsync(booking, cancellationToken);
+        notifications.ScheduleNewBookingNotification(booking);
 
         if (IsModalRequest())
             return Ok(new { success = true });

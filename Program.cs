@@ -64,16 +64,19 @@ if (telegramOptions.IsConfigured)
 {
     var botToken = telegramOptions.BotToken.Trim();
 
-    builder.Services.AddHttpClient("telegram_bot_client")
-        .ConfigurePrimaryHttpMessageHandler(() => TelegramHttpHandlers.CreateHandler(telegramOptions))
-        .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(90))
-        .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
-        {
-            var clientOptions = telegramOptions.HasApiBaseUrl
-                ? new TelegramBotClientOptions(botToken, telegramOptions.ApiBaseUrl.Trim()) { RetryCount = 2 }
-                : new TelegramBotClientOptions(botToken) { RetryCount = 2 };
-            return new TelegramBotClient(clientOptions, httpClient);
-        });
+    IHttpClientBuilder ConfigureTelegramHttpClient(IHttpClientBuilder httpBuilder, TimeSpan timeout) =>
+        httpBuilder
+            .ConfigurePrimaryHttpMessageHandler(() => TelegramHttpHandlers.CreateHandler(telegramOptions))
+            .ConfigureHttpClient(client => client.Timeout = timeout);
+
+    ConfigureTelegramHttpClient(
+        builder.Services.AddHttpClient("telegram_bot_client"),
+        TimeSpan.FromSeconds(90))
+        .AddTypedClient<ITelegramBotClient>((httpClient, _) => CreateTelegramBotClient(botToken, telegramOptions, httpClient));
+
+    ConfigureTelegramHttpClient(
+        builder.Services.AddHttpClient(TelegramNotificationService.HttpClientName),
+        TimeSpan.FromSeconds(20));
 
     builder.Services.AddSingleton<TelegramCommandHandler>();
     builder.Services.AddHostedService<TelegramBotService>();
@@ -261,4 +264,15 @@ static string ResolveSqliteConnectionString(IConfiguration configuration, IWebHo
 
     var absolutePath = Path.Combine(environment.ContentRootPath, dataSource);
     return $"Data Source={absolutePath}";
+}
+
+static ITelegramBotClient CreateTelegramBotClient(
+    string botToken,
+    TelegramBotOptions telegramOptions,
+    HttpClient httpClient)
+{
+    var clientOptions = telegramOptions.HasApiBaseUrl
+        ? new TelegramBotClientOptions(botToken, telegramOptions.ApiBaseUrl.Trim()) { RetryCount = 2 }
+        : new TelegramBotClientOptions(botToken) { RetryCount = 2 };
+    return new TelegramBotClient(clientOptions, httpClient);
 }
