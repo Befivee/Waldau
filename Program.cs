@@ -75,6 +75,10 @@ if (telegramOptions.IsConfigured)
         TimeSpan.FromSeconds(90))
         .AddTypedClient<ITelegramBotClient>((httpClient, _) => CreateTelegramBotClient(botToken, telegramOptions, httpClient));
 
+    ConfigureTelegramHttpClient(
+        builder.Services.AddHttpClient(TelegramNotificationService.HttpClientName),
+        TimeSpan.FromSeconds(120));
+
     builder.Services.AddSingleton<TelegramCommandHandler>();
     builder.Services.AddHostedService<TelegramBotService>();
     builder.Services.AddScoped<ITelegramNotificationService, TelegramNotificationService>();
@@ -84,6 +88,8 @@ else
     builder.Services.AddScoped<ITelegramNotificationService, NullTelegramNotificationService>();
 }
 
+builder.Services.AddSingleton<BookingNotificationQueue>();
+builder.Services.AddHostedService<BookingNotificationWorker>();
 builder.Services.AddScoped<IBookingNotificationService, BookingNotificationService>();
 
 builder.Services.AddHttpClient("indexnow", client => client.Timeout = TimeSpan.FromSeconds(15));
