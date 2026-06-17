@@ -3,6 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using WaldauCastle.Models;
 using WaldauCastle.Options;
+using WaldauCastle.Services.Telegram;
 
 namespace WaldauCastle.Services;
 
@@ -34,6 +35,7 @@ public class TelegramNotificationService(
                     chatId: chatId,
                     text: text,
                     parseMode: ParseMode.None,
+                    replyMarkup: TelegramKeyboards.BackToMainMenu(),
                     cancellationToken: cancellationToken);
             }
             catch (Exception ex)

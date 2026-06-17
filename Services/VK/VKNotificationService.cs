@@ -21,7 +21,11 @@ public class VKNotificationService(
 
         try
         {
-            await apiClient.SendMessageAsync(adminUserId, text, cancellationToken);
+            await apiClient.SendMessageAsync(
+                adminUserId,
+                text,
+                VKKeyboards.BackToMainMenu(),
+                cancellationToken);
             logger.LogInformation("VK-уведомление о заявке отправлено admin {AdminUserId}.", adminUserId);
         }
         catch (Exception ex)
