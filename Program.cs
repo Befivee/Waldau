@@ -6,6 +6,7 @@ using WaldauCastle.Data;
 using WaldauCastle.Options;
 using WaldauCastle.Services;
 using WaldauCastle.Services.Bot;
+using WaldauCastle.Services.Seo;
 using WaldauCastle.Services.Telegram;
 using WaldauCastle.Services.VK;
 
@@ -84,6 +85,9 @@ else
 }
 
 builder.Services.AddScoped<IBookingNotificationService, BookingNotificationService>();
+
+builder.Services.AddHttpClient("indexnow", client => client.Timeout = TimeSpan.FromSeconds(15));
+builder.Services.AddHostedService<IndexNowPingerService>();
 
 var vkOptions = VKOptions.Load(builder.Configuration);
 var vkValidation = vkOptions.Validate();

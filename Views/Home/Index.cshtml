@@ -1,20 +1,11 @@
 @model HomeIndexViewModel
-@{
-    ViewData["MetaTitle"] = SiteInfo.HomePageTitle;
-    ViewData["BodyClass"] = "page-home";
-    ViewData["MetaDescription"] =
-        "Официальный сайт замка Вальдау (Вальдау) — средневековая крепость XIII века в пос. Низовье, Калининградская область. Экскурсии с гидом и самостоятельно, мероприятия, записаться онлайн.";
-    ViewData["MetaKeywords"] =
-        "замок Вальдау, вальдау сайт, замок Вальдау официальный сайт, Вальдау, Waldau, музей, экскурсии, мероприятия, Калининград, Низовье, средневековый замок";
-    ViewData["OgImage"] = SiteInfo.LogoPngPath;
-}
 
-<section class="hero" aria-label="Замок Вальдау">
+<section class="hero" aria-label="Замок Вальдау — официальный сайт">
     <div class="hero__bg" data-parallax></div>
     <div class="hero__overlay"></div>
     <div class="hero__content container-xl reveal">
         <p class="hero__eyebrow">Калининградская область · пос. Низовье</p>
-        <h1 class="hero__title">@SiteInfo.CastleName</h1>
+        <h1 class="hero__title">@SiteInfo.CastleName<span class="visually-hidden"> — официальный сайт</span></h1>
         <p class="hero__subtitle">@SiteInfo.Tagline</p>
         <div class="hero__actions">
             <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться на экскурсию</button>

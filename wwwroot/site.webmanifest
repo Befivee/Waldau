@@ -1,0 +1,22 @@
+{
+  "name": "Замок Вальдау — Официальный сайт",
+  "short_name": "Вальдау",
+  "description": "Официальный сайт замка Вальдау в пос. Низовье, Калининградская область",
+  "lang": "ru",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#f8f6f3",
+  "theme_color": "#5c1f2e",
+  "icons": [
+    {
+      "src": "/images/favicon-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

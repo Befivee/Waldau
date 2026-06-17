@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WaldauCastle.Models;
 using WaldauCastle.Services;
 using WaldauCastle.ViewModels;
 
@@ -8,11 +9,14 @@ public class HomeController(IEventService events) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
+        ViewData["MetaTitle"] = SiteInfo.HomePageTitle;
         ViewData["MetaDescription"] =
-            "Замок Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, музей, запись онлайн.";
+            "Официальный сайт замка Вальдау (Вальдау) — средневековая крепость XIII века в пос. Низовье, Калининградская область. Экскурсии с гидом и самостоятельно, мероприятия, записаться онлайн.";
         ViewData["MetaKeywords"] =
-            "замок Вальдау, музей, экскурсии, мероприятия, Калининград, Низовье, средневековый замок";
+            "замок Вальдау, вальдау сайт, замок Вальдау официальный сайт, Вальдау, Waldau, музей, экскурсии, мероприятия, Калининград, Низовье, средневековый замок";
         ViewData["OgType"] = "website";
+        ViewData["OgImage"] = SiteInfo.LogoPngPath;
+        ViewData["BodyClass"] = "page-home";
 
         var model = new HomeIndexViewModel
         {
