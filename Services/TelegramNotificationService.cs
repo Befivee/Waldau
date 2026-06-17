@@ -8,12 +8,10 @@ using WaldauCastle.Services.Telegram;
 namespace WaldauCastle.Services;
 
 public class TelegramNotificationService(
-    IHttpClientFactory httpClientFactory,
+    ITelegramBotClient botClient,
     IOptions<TelegramBotOptions> options,
     ILogger<TelegramNotificationService> logger) : ITelegramNotificationService
 {
-    public const string HttpClientName = "telegram_notifications";
-
     public async Task NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
     {
         var telegram = options.Value;
@@ -25,33 +23,56 @@ public class TelegramNotificationService(
             return;
 
         var text = BookingNotificationText.Format(booking);
-        var bot = CreateBotClient(telegram);
 
         foreach (var chatId in adminChatIds)
         {
+            await SendWithRetryAsync(chatId, text, booking.Id, cancellationToken);
+        }
+    }
+
+    private async Task SendWithRetryAsync(
+        long chatId,
+        string text,
+        int bookingId,
+        CancellationToken cancellationToken)
+    {
+        const int maxAttempts = 3;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
             try
             {
-                await bot.SendMessage(
+                await botClient.SendMessage(
                     chatId: chatId,
                     text: text,
                     parseMode: ParseMode.None,
                     replyMarkup: TelegramKeyboards.BackToMainMenu(),
                     cancellationToken: cancellationToken);
+
+                logger.LogInformation(
+                    "Telegram-уведомление о заявке #{BookingId} отправлено в chat {ChatId}.",
+                    bookingId,
+                    chatId);
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts)
+            {
+                logger.LogWarning(
+                    ex,
+                    "Telegram-уведомление о заявке #{BookingId} не отправлено (попытка {Attempt}/{MaxAttempts}), повтор через 2 с.",
+                    bookingId,
+                    attempt,
+                    maxAttempts);
+                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Не удалось отправить уведомление о заявке в Telegram (chat {ChatId}).", chatId);
+                logger.LogError(
+                    ex,
+                    "Не удалось отправить уведомление о заявке #{BookingId} в Telegram (chat {ChatId}).",
+                    bookingId,
+                    chatId);
             }
         }
-    }
-
-    private ITelegramBotClient CreateBotClient(TelegramBotOptions telegram)
-    {
-        var token = telegram.BotToken.Trim();
-        var httpClient = httpClientFactory.CreateClient(HttpClientName);
-        var clientOptions = telegram.HasApiBaseUrl
-            ? new TelegramBotClientOptions(token, telegram.ApiBaseUrl.Trim()) { RetryCount = 1 }
-            : new TelegramBotClientOptions(token) { RetryCount = 1 };
-        return new TelegramBotClient(clientOptions, httpClient);
     }
 }

@@ -7,7 +7,7 @@ public class BookingNotificationService(
     IServiceScopeFactory scopeFactory,
     ILogger<BookingNotificationService> logger) : IBookingNotificationService
 {
-    private static readonly TimeSpan NotificationTimeout = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan NotificationTimeout = TimeSpan.FromSeconds(60);
 
     public void ScheduleNewBookingNotification(Booking booking)
     {
