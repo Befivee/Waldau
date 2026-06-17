@@ -5,7 +5,7 @@
         <input asp-for="PersonalDataConsent" type="checkbox" class="form-consent__checkbox" />
         <span>
             Я согласен(а) на
-            <a asp-controller="Privacy" asp-action="Index" target="_blank" rel="noopener">обработку персональных данных</a>
+            <a asp-controller="Privacy" asp-action="PersonalDataPolicy" target="_blank" rel="noopener">обработку персональных данных</a>
         </span>
     </label>
     <span asp-validation-for="PersonalDataConsent" class="text-danger field-validation-valid" data-valmsg-for="PersonalDataConsent"></span>

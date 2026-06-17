@@ -24,7 +24,8 @@ public class SitemapController(IOptions<SiteSettings> siteSettings) : Controller
             CreateUrl(ns, baseUrl, "/About", "monthly", "0.8", lastMod),
             CreateUrl(ns, baseUrl, "/Directions", "monthly", "0.8", lastMod),
             CreateUrl(ns, baseUrl, "/Contacts", "monthly", "0.7", lastMod),
-            CreateUrl(ns, baseUrl, "/privacy", "yearly", "0.5", lastMod)
+            CreateUrl(ns, baseUrl, "/privacy-policy", "yearly", "0.5", lastMod),
+            CreateUrl(ns, baseUrl, "/personal-data-policy", "yearly", "0.5", lastMod)
         };
 
         var document = new XDocument(

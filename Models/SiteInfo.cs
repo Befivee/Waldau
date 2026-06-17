@@ -5,6 +5,9 @@ namespace WaldauCastle.Models;
 public static class SiteInfo
 {
     public const string CastleName = "Замок Вальдау";
+    public const string OperatorName = "Музейный комплекс «Замок Вальдау»";
+    public const string PolicyPublishedDate = "30 мая 2026 г.";
+    public const string SiteUrl = "https://вальдау.рф";
     public const string HomePageTitle = "Замок Вальдау - Официальный сайт";
     public const string BrowserTitle = HomePageTitle;
     public const string LogoPath = "/images/logo.svg";

@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap-utilities.min.css" />
     <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    <partial name="_GoogleAnalytics" />
 </head>
 <body class="@(ViewData["BodyClass"] ?? "")">
     <partial name="_Header" />
@@ -25,6 +26,7 @@
     </main>
     <partial name="_Footer" />
     <partial name="_BookingModal" model="new WaldauCastle.ViewModels.BookingCreateViewModel()" />
+    <partial name="_CookieConsent" />
 
     <script src="~/js/main.js" asp-append-version="true"></script>
     <partial name="_ValidationScriptsPartial" />

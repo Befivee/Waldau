@@ -24,6 +24,8 @@ builder.Services.Configure<VKOptions>(
     builder.Configuration.GetSection(VKOptions.SectionName));
 builder.Services.Configure<SiteSettings>(
     builder.Configuration.GetSection(SiteSettings.SectionName));
+builder.Services.Configure<AnalyticsOptions>(
+    builder.Configuration.GetSection(AnalyticsOptions.SectionName));
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

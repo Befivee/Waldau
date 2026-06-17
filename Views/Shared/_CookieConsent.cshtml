@@ -1,0 +1,54 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<WaldauCastle.Options.AnalyticsOptions> AnalyticsOptions
+
+@{
+    var analytics = AnalyticsOptions.Value;
+}
+
+<div id="cookie-consent"
+     class="cookie-consent"
+     hidden
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="cookie-consent-title"
+     aria-describedby="cookie-consent-text"
+     data-ga-id="@analytics.GoogleMeasurementId"
+     data-ym-id="@analytics.YandexMetrikaId">
+    <div class="cookie-consent__panel">
+        <p id="cookie-consent-title" class="cookie-consent__title">Файлы cookie и аналитика</p>
+        <p id="cookie-consent-text" class="cookie-consent__text">
+            Мы используем необходимые cookie для работы сайта
+            @if (analytics.HasAny)
+            {
+                <text> и, с вашего согласия, сервисы веб-аналитики</text>
+                if (analytics.HasGoogle)
+                {
+                    <text> (Google Analytics)</text>
+                }
+                if (analytics.HasGoogle && analytics.HasYandex)
+                {
+                    <text> и</text>
+                }
+                if (analytics.HasYandex)
+                {
+                    <text> (Яндекс.Метрика)</text>
+                }
+                <text> для улучшения сайта</text>
+            }
+            . Подробнее — в
+            <a asp-controller="Privacy" asp-action="PrivacyPolicy">политике конфиденциальности</a>.
+        </p>
+        <div class="cookie-consent__actions">
+            @if (analytics.HasAny)
+            {
+                <button type="button" class="btn btn-primary btn-sm" data-cookie-accept-all>Принять</button>
+                <button type="button" class="btn btn-outline btn-sm" data-cookie-accept-necessary>Только необходимые</button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary btn-sm" data-cookie-accept-necessary>Понятно</button>
+            }
+        </div>
+    </div>
+</div>
+<script src="~/js/cookie-consent.js" asp-append-version="true"></script>

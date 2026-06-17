@@ -1,0 +1,32 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<WaldauCastle.Options.AnalyticsOptions> AnalyticsOptions
+
+@if (AnalyticsOptions.Value.HasGoogle)
+{
+    var gaId = AnalyticsOptions.Value.GoogleMeasurementId.Trim();
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        (function () {
+            var analyticsGranted = false;
+            try {
+                var saved = localStorage.getItem('waldau_cookie_consent_v1');
+                if (saved) {
+                    analyticsGranted = JSON.parse(saved).analytics === true;
+                }
+            } catch (_) { }
+            gtag('consent', 'default', {
+                analytics_storage: analyticsGranted ? 'granted' : 'denied',
+                ad_storage: 'denied',
+                wait_for_update: 500
+            });
+        })();
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=@gaId"></script>
+    <script>
+        gtag('js', new Date());
+        gtag('config', '@gaId');
+    </script>
+}
