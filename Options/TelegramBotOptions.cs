@@ -21,30 +21,6 @@ public partial class TelegramBotOptions
 
     public string SecondAdminChatId { get; set; } = string.Empty;
 
-    /// <summary>HTTP/SOCKS5 прокси для api.telegram.org (http://host:port или socks5://host:port). Не ссылка t.me/proxy.</summary>
-    public string ProxyUrl { get; set; } = string.Empty;
-
-    /// <summary>Локальный Telegram Bot API (http://127.0.0.1:8081) — если MTProxy на VPS.</summary>
-    public string ApiBaseUrl { get; set; } = string.Empty;
-
-    /// <summary>Таймаут подключения к API Telegram, секунды.</summary>
-    public int ConnectTimeoutSeconds { get; set; } = 15;
-
-    /// <summary>Если прокси не задан — подключение только по IPv4.</summary>
-    public bool PreferIpv4 { get; set; } = true;
-
-    public bool HasProxy =>
-        !string.IsNullOrWhiteSpace(ProxyUrl) &&
-        !IsPlaceholder(ProxyUrl) &&
-        !IsTelegramDeepLink(ProxyUrl);
-
-    public bool HasApiBaseUrl =>
-        !string.IsNullOrWhiteSpace(ApiBaseUrl) && !IsPlaceholder(ApiBaseUrl);
-
-    public static bool IsTelegramDeepLink(string? url) =>
-        !string.IsNullOrWhiteSpace(url) &&
-        url.Trim().Contains("t.me/proxy", StringComparison.OrdinalIgnoreCase);
-
     public bool HasValidBotToken =>
         !string.IsNullOrWhiteSpace(BotToken) &&
         !IsPlaceholder(BotToken) &&

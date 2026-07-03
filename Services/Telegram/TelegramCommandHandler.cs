@@ -33,12 +33,6 @@ public class TelegramCommandHandler(
         {
             using var cts = new CancellationTokenSource(UpdateTimeout);
 
-            if (update.CallbackQuery is { } callback)
-            {
-                await HandleCallbackQueryAsync(botClient, callback, cts.Token);
-                return;
-            }
-
             if (update.Message is { } message)
                 await HandleMessageAsync(botClient, message, cts.Token);
         }
@@ -98,7 +92,7 @@ public class TelegramCommandHandler(
 
     private async Task TrySendErrorAsync(ITelegramBotClient botClient, Update update, string text)
     {
-        var chatId = update.Message?.Chat.Id ?? update.CallbackQuery?.Message?.Chat.Id;
+        var chatId = update.Message?.Chat.Id;
         if (!chatId.HasValue)
             return;
 
@@ -191,27 +185,6 @@ public class TelegramCommandHandler(
 
         if ((int)session.State > (int)TelegramBotState.WaitingForNewImage)
             session.State = TelegramBotState.None;
-    }
-
-    private async Task HandleCallbackQueryAsync(
-        ITelegramBotClient botClient,
-        CallbackQuery callback,
-        CancellationToken cancellationToken)
-    {
-        var chatId = callback.Message?.Chat.Id;
-        if (chatId is null)
-            return;
-
-        await botClient.AnswerCallbackQuery(callback.Id, cancellationToken: cancellationToken);
-
-        if (!IsAdmin(chatId.Value))
-        {
-            await botClient.SendMessage(chatId.Value, "⛔ Доступ запрещён.", cancellationToken: cancellationToken);
-            return;
-        }
-
-        var data = callback.Data ?? string.Empty;
-        await WithManager(m => m.HandleCallbackAsync(botClient, chatId.Value, data, cancellationToken), cancellationToken);
     }
 
     private static bool IsStartCommand(string? text)

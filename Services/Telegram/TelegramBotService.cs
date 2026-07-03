@@ -21,20 +21,13 @@ public class TelegramBotService(
             return;
         }
 
-        if (!telegram.HasProxy && !telegram.HasApiBaseUrl)
-            logger.LogWarning(
-                "Telegram: ни ProxyUrl, ни ApiBaseUrl — на VPS в РФ бот может не отвечать.");
-
-        if (TelegramBotOptions.IsTelegramDeepLink(telegram.ProxyUrl))
-            logger.LogWarning("Telegram ProxyUrl — неверная ссылка t.me/proxy, параметр игнорируется.");
-
         var dropPendingUpdates = true;
 
         while (!stoppingToken.IsCancellationRequested)
         {
             var receiverOptions = new ReceiverOptions
             {
-                AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
+                AllowedUpdates = [UpdateType.Message],
                 DropPendingUpdates = dropPendingUpdates
             };
             dropPendingUpdates = false;
@@ -46,10 +39,8 @@ public class TelegramBotService(
                     await botClient.DeleteWebhook(dropPendingUpdates: false, cancellationToken: stoppingToken);
                     var me = await botClient.GetMe(stoppingToken);
                     logger.LogInformation(
-                        "Telegram CMS-бот @{BotUsername} запущен (long polling, proxy: {Proxy}, local API: {LocalApi}).",
-                        me.Username,
-                        telegram.HasProxy ? "задан" : "нет",
-                        telegram.HasApiBaseUrl ? telegram.ApiBaseUrl.Trim() : "нет");
+                        "Telegram CMS-бот @{BotUsername} запущен (long polling).",
+                        me.Username);
                 }
                 catch (Exception ex)
                 {
