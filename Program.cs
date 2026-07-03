@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using WaldauCastle.Data;
 using WaldauCastle.Options;
@@ -66,17 +67,31 @@ var telegramOptions = builder.Configuration
 if (telegramOptions.IsConfigured)
 {
     var botToken = telegramOptions.BotToken.Trim();
+    var clientOptions = new TelegramBotClientOptions(botToken) { RetryCount = 2 };
 
-    builder.Services.AddHttpClient("telegram_bot_client", client =>
+    builder.Services.AddHttpClient("telegram_polling", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(90);
         })
         .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
-            new TelegramBotClient(new TelegramBotClientOptions(botToken) { RetryCount = 2 }, httpClient));
+            new TelegramBotClient(clientOptions, httpClient));
+
+    builder.Services.AddHttpClient("telegram_notifications", client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(60);
+        });
+
+    builder.Services.AddSingleton<ITelegramNotificationService>(sp =>
+    {
+        var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("telegram_notifications");
+        return new TelegramNotificationService(
+            new TelegramBotClient(clientOptions, httpClient),
+            sp.GetRequiredService<IOptions<TelegramBotOptions>>(),
+            sp.GetRequiredService<ILogger<TelegramNotificationService>>());
+    });
 
     builder.Services.AddSingleton<TelegramCommandHandler>();
     builder.Services.AddHostedService<TelegramBotService>();
-    builder.Services.AddSingleton<ITelegramNotificationService, TelegramNotificationService>();
 }
 else
 {

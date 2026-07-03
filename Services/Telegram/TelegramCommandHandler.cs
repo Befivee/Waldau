@@ -127,7 +127,12 @@ public class TelegramCommandHandler(
 
             if (CastleAdminContentService.IsExcursionsRequest(message.Text))
             {
-                await WithContent(c => SendPublicExcursionsAsync(botClient, chatId, c, cancellationToken), cancellationToken);
+                await TelegramProcessingIndicator.RunAsync(
+                    botClient,
+                    chatId,
+                    logger,
+                    cancellationToken,
+                    () => WithContent(c => SendPublicExcursionsAsync(botClient, chatId, c, cancellationToken), cancellationToken));
                 return;
             }
 
@@ -141,7 +146,7 @@ public class TelegramCommandHandler(
         if (message.Text?.StartsWith("/start", StringComparison.OrdinalIgnoreCase) == true)
         {
             stateService.GetOrCreate(chatId).Reset();
-            await WithManager(m => m.SendMainMenuAsync(botClient, chatId, cancellationToken), cancellationToken);
+            await WithManager(botClient, chatId, m => m.SendMainMenuAsync(botClient, chatId, cancellationToken), cancellationToken);
             return;
         }
 
@@ -152,7 +157,7 @@ public class TelegramCommandHandler(
         {
             if (session.State is TelegramBotState.WaitingForEventImage or TelegramBotState.WaitingForNewImage)
             {
-                await WithManager(m => m.HandlePhotoMessageAsync(botClient, message, cancellationToken), cancellationToken);
+                await WithManager(botClient, chatId, m => m.HandlePhotoMessageAsync(botClient, message, cancellationToken), cancellationToken);
                 return;
             }
 
@@ -164,11 +169,11 @@ public class TelegramCommandHandler(
         {
             if (session.State != TelegramBotState.None)
             {
-                await WithManager(m => m.HandleTextMessageAsync(botClient, message, cancellationToken), cancellationToken);
+                await WithManager(botClient, chatId, m => m.HandleTextMessageAsync(botClient, message, cancellationToken), cancellationToken);
                 return;
             }
 
-            await WithManager(m => m.HandleMenuTextAsync(botClient, chatId, message.Text.Trim(), cancellationToken), cancellationToken);
+            await WithManager(botClient, chatId, m => m.HandleMenuTextAsync(botClient, chatId, message.Text.Trim(), cancellationToken), cancellationToken);
             return;
         }
 
@@ -220,10 +225,17 @@ public class TelegramCommandHandler(
 
     private string GetSiteUrl() => SiteSettings.DefaultBaseUrl;
 
-    private async Task WithManager(Func<TelegramEventManager, Task> action, CancellationToken cancellationToken)
+    private async Task WithManager(
+        ITelegramBotClient botClient,
+        long chatId,
+        Func<TelegramEventManager, Task> action,
+        CancellationToken cancellationToken)
     {
-        using var scope = scopeFactory.CreateScope();
-        var manager = scope.ServiceProvider.GetRequiredService<TelegramEventManager>();
-        await action(manager);
+        await TelegramProcessingIndicator.RunAsync(botClient, chatId, logger, cancellationToken, async () =>
+        {
+            using var scope = scopeFactory.CreateScope();
+            var manager = scope.ServiceProvider.GetRequiredService<TelegramEventManager>();
+            await action(manager);
+        });
     }
 }

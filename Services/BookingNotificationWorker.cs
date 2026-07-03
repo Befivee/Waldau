@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using WaldauCastle.Models;
 using WaldauCastle.Services.VK;
 
@@ -11,6 +12,7 @@ public class BookingNotificationWorker(
 {
     private static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(15);
     private readonly SemaphoreSlim _concurrency = new(3, 3);
+    private readonly ConcurrentDictionary<int, byte> _inFlight = new();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -83,6 +85,12 @@ public class BookingNotificationWorker(
 
     private async Task DispatchNotificationAsync(int bookingId, CancellationToken stoppingToken)
     {
+        if (!_inFlight.TryAdd(bookingId, 0))
+        {
+            logger.LogDebug("Заявка #{BookingId} уже обрабатывается — пропуск дубликата.", bookingId);
+            return;
+        }
+
         await _concurrency.WaitAsync(stoppingToken);
         try
         {
@@ -99,6 +107,7 @@ public class BookingNotificationWorker(
         finally
         {
             _concurrency.Release();
+            _inFlight.TryRemove(bookingId, out _);
         }
     }
 

@@ -7,20 +7,13 @@ using WaldauCastle.Services.Telegram;
 
 namespace WaldauCastle.Services;
 
-/// <summary>Отправка уведомлений через тот же ITelegramBotClient, что и CMS-бот (проверенное соединение).</summary>
+/// <summary>Отправка уведомлений через отдельный ITelegramBotClient (не блокируется long polling).</summary>
 public class TelegramNotificationService(
     ITelegramBotClient botClient,
     IOptions<TelegramBotOptions> options,
     ILogger<TelegramNotificationService> logger) : ITelegramNotificationService
 {
-    private static readonly TimeSpan PerAttemptTimeout = TimeSpan.FromSeconds(20);
-
-    private static readonly TimeSpan[] RetryDelays =
-    [
-        TimeSpan.FromSeconds(1),
-        TimeSpan.FromSeconds(2),
-        TimeSpan.FromSeconds(3)
-    ];
+    private static readonly TimeSpan SendTimeout = TimeSpan.FromSeconds(30);
 
     public async Task<bool> NotifyNewBookingAsync(Booking booking, CancellationToken cancellationToken = default)
     {
@@ -39,7 +32,7 @@ public class TelegramNotificationService(
             adminChatIds.Count);
 
         var results = await Task.WhenAll(adminChatIds.Select(chatId =>
-            SendWithRetryAsync(chatId, text, booking.Id, cancellationToken)));
+            SendOnceAsync(chatId, text, booking.Id, cancellationToken)));
 
         var anySent = results.Any(success => success);
         if (!anySent)
@@ -52,62 +45,49 @@ public class TelegramNotificationService(
         return anySent;
     }
 
-    private async Task<bool> SendWithRetryAsync(
+    private async Task<bool> SendOnceAsync(
         long chatId,
         string text,
         int bookingId,
         CancellationToken cancellationToken)
     {
-        var maxAttempts = RetryDelays.Length + 1;
+        cancellationToken.ThrowIfCancellationRequested();
 
-        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            attemptCts.CancelAfter(SendTimeout);
 
-            try
-            {
-                using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                attemptCts.CancelAfter(PerAttemptTimeout);
+            await botClient.SendMessage(
+                chatId: chatId,
+                text: text,
+                parseMode: ParseMode.None,
+                replyMarkup: TelegramKeyboards.BackToMainMenu(),
+                cancellationToken: attemptCts.Token);
 
-                await botClient.SendMessage(
-                    chatId: chatId,
-                    text: text,
-                    parseMode: ParseMode.None,
-                    replyMarkup: TelegramKeyboards.BackToMainMenu(),
-                    cancellationToken: attemptCts.Token);
-
-                logger.LogInformation(
-                    "Telegram-уведомление о заявке #{BookingId} отправлено в chat {ChatId} (попытка {Attempt}).",
-                    bookingId,
-                    chatId,
-                    attempt);
-                return true;
-            }
-            catch (Exception ex) when (attempt < maxAttempts)
-            {
-                var delay = RetryDelays[attempt - 1];
-                logger.LogWarning(
-                    ex,
-                    "Telegram-уведомление о заявке #{BookingId} → chat {ChatId}: попытка {Attempt}/{MaxAttempts}, повтор через {DelaySeconds} с.",
-                    bookingId,
-                    chatId,
-                    attempt,
-                    maxAttempts,
-                    delay.TotalSeconds);
-
-                await Task.Delay(delay, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(
-                    ex,
-                    "Telegram-уведомление о заявке #{BookingId} не отправлено в chat {ChatId} после {MaxAttempts} попыток.",
-                    bookingId,
-                    chatId,
-                    maxAttempts);
-            }
+            logger.LogInformation(
+                "Telegram-уведомление о заявке #{BookingId} отправлено в chat {ChatId}.",
+                bookingId,
+                chatId);
+            return true;
         }
-
-        return false;
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(
+                "Telegram-уведомление о заявке #{BookingId} → chat {ChatId}: таймаут {TimeoutSeconds} с (повтор через worker).",
+                bookingId,
+                chatId,
+                SendTimeout.TotalSeconds);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Telegram-уведомление о заявке #{BookingId} не отправлено в chat {ChatId}.",
+                bookingId,
+                chatId);
+            return false;
+        }
     }
 }
