@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +65,21 @@ var telegramOptions = builder.Configuration
     .GetSection(TelegramBotOptions.SectionName)
     .Get<TelegramBotOptions>() ?? new TelegramBotOptions();
 
-if (telegramOptions.IsConfigured)
+var botOnly = telegramOptions.BotOnly;
+var useTelegramRelay = !string.IsNullOrWhiteSpace(telegramOptions.RelayUrl);
+
+if (botOnly)
+    builder.WebHost.UseUrls("http://127.0.0.1:5000");
+
+if (useTelegramRelay)
+{
+    builder.Services.AddHttpClient("telegram_relay", client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(20);
+    });
+    builder.Services.AddSingleton<ITelegramNotificationService, RelayTelegramNotificationService>();
+}
+else if (telegramOptions.IsConfigured)
 {
     var botToken = telegramOptions.BotToken.Trim();
     var clientOptions = new TelegramBotClientOptions(botToken) { RetryCount = 2 };
@@ -73,13 +88,15 @@ if (telegramOptions.IsConfigured)
         {
             client.Timeout = TimeSpan.FromSeconds(90);
         })
+        .ConfigurePrimaryHttpMessageHandler(() => CreateTelegramHttpHandler(telegramOptions))
         .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
             new TelegramBotClient(clientOptions, httpClient));
 
     builder.Services.AddHttpClient("telegram_notifications", client =>
         {
             client.Timeout = TimeSpan.FromSeconds(60);
-        });
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => CreateTelegramHttpHandler(telegramOptions));
 
     builder.Services.AddSingleton<ITelegramNotificationService>(sp =>
     {
@@ -91,7 +108,8 @@ if (telegramOptions.IsConfigured)
     });
 
     builder.Services.AddSingleton<TelegramCommandHandler>();
-    builder.Services.AddHostedService<TelegramBotService>();
+    if (!telegramOptions.DisablePolling)
+        builder.Services.AddHostedService<TelegramBotService>();
 }
 else
 {
@@ -130,9 +148,17 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-if (!telegramOptions.IsConfigured)
+if (useTelegramRelay)
+{
+    app.Logger.LogInformation("Telegram-уведомления уходят на relay {RelayUrl}", telegramOptions.RelayUrl);
+}
+else if (!telegramOptions.IsConfigured)
 {
     app.Logger.LogWarning("Telegram-бот отключён: укажите корректные BotToken и AdminChatId.");
+}
+else if (telegramOptions.DisablePolling)
+{
+    app.Logger.LogInformation("Telegram long polling выключен (бот на другом сервере).");
 }
 
 if (!vkValidation.IsValid)
@@ -155,8 +181,11 @@ else
         vkOptions.ApiVersion);
 }
 
-Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "events"));
-Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "excursions"));
+if (!botOnly)
+{
+    Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "events"));
+    Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "excursions"));
+}
 Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data", "Backups"));
 
 try
@@ -183,13 +212,17 @@ catch (Exception ex)
 if (app.Environment.IsProduction())
 {
     app.UseForwardedHeaders();
-    app.UseExceptionHandler("/Home/ServerError");
-    app.UseHsts();
+    if (!botOnly)
+    {
+        app.UseExceptionHandler("/Home/ServerError");
+        app.UseHsts();
+    }
 }
 else
 {
     app.UseDeveloperExceptionPage();
-    app.UseHttpsRedirection();
+    if (!botOnly)
+        app.UseHttpsRedirection();
 }
 
 app.Use(async (context, next) =>
@@ -206,34 +239,61 @@ app.Use(async (context, next) =>
     }
 });
 
-app.UseStatusCodePagesWithReExecute("/Home/StatusCodeError/{0}");
-app.UseStaticFiles();
+if (!botOnly)
+    app.UseStatusCodePagesWithReExecute("/Home/StatusCodeError/{0}");
+
+if (!botOnly)
+    app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
-app.MapStaticAssets();
+if (telegramOptions.AcceptRelay)
+{
+    app.MapPost("/internal/telegram/booking", async (
+        HttpRequest request,
+        ITelegramNotificationService telegram,
+        IOptions<TelegramBotOptions> botOptions) =>
+    {
+        var expected = botOptions.Value.RelaySecret?.Trim() ?? "";
+        var provided = request.Headers["X-Relay-Secret"].ToString();
+        if (expected.Length == 0 || !CryptographicEquals(expected, provided))
+            return Results.Unauthorized();
 
-app.MapControllerRoute(
-    name: "legacy-tours",
-    pattern: "Tours/{action=Index}/{id?}",
-    defaults: new { controller = "Excursion", action = "Index" });
+        var payload = await request.ReadFromJsonAsync<BookingRelayPayload>();
+        if (payload is null)
+            return Results.BadRequest();
 
-app.MapControllerRoute(
-    name: "legacy-tours-book",
-    pattern: "Tours/Book",
-    defaults: new { controller = "Booking", action = "Create" });
+        var sent = await telegram.NotifyNewBookingAsync(payload.ToBooking());
+        return sent ? Results.Ok() : Results.StatusCode(502);
+    });
+}
 
-app.MapControllerRoute(
-    name: "legacy-events",
-    pattern: "Events/{action=Index}/{id?}",
-    defaults: new { controller = "Event", action = "Index" });
+if (!botOnly)
+{
+    app.MapStaticAssets();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    app.MapControllerRoute(
+        name: "legacy-tours",
+        pattern: "Tours/{action=Index}/{id?}",
+        defaults: new { controller = "Excursion", action = "Index" });
+
+    app.MapControllerRoute(
+        name: "legacy-tours-book",
+        pattern: "Tours/Book",
+        defaults: new { controller = "Booking", action = "Create" });
+
+    app.MapControllerRoute(
+        name: "legacy-events",
+        pattern: "Events/{action=Index}/{id?}",
+        defaults: new { controller = "Event", action = "Index" });
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}")
+        .WithStaticAssets();
+}
 
 app.Logger.LogInformation(
     "Запуск веб-сервера Kestrel (окружение: {Environment}, URLs: {Urls})",
@@ -276,3 +336,23 @@ static string ResolveSqliteConnectionString(IConfiguration configuration, IWebHo
     return $"Data Source={absolutePath}";
 }
 
+static bool CryptographicEquals(string expected, string provided)
+{
+    var a = System.Text.Encoding.UTF8.GetBytes(expected);
+    var b = System.Text.Encoding.UTF8.GetBytes(provided);
+    if (a.Length != b.Length)
+        return false;
+    return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(a, b);
+}
+
+static HttpMessageHandler CreateTelegramHttpHandler(TelegramBotOptions telegram)
+{
+    var handler = new HttpClientHandler();
+    if (telegram.TryGetProxyUri(out var proxyUri) && proxyUri is not null)
+    {
+        handler.Proxy = new WebProxy(proxyUri);
+        handler.UseProxy = true;
+    }
+
+    return handler;
+}

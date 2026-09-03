@@ -21,6 +21,34 @@ public partial class TelegramBotOptions
 
     public string SecondAdminChatId { get; set; } = string.Empty;
 
+    /// <summary>SOCKS/HTTP proxy URL when Telegram is blocked from the VPS.</summary>
+    public string ProxyUrl { get; set; } = string.Empty;
+
+    /// <summary>Timeweb: do not long-poll Telegram; Hostkey owns the bot.</summary>
+    public bool DisablePolling { get; set; }
+
+    /// <summary>Timeweb: POST booking notifications here (Cloudflare tunnel to Hostkey).</summary>
+    public string RelayUrl { get; set; } = string.Empty;
+
+    /// <summary>Shared secret for Timeweb → Hostkey relay.</summary>
+    public string RelaySecret { get; set; } = string.Empty;
+
+    /// <summary>Hostkey: accept POST /internal/telegram/booking from the site.</summary>
+    public bool AcceptRelay { get; set; }
+
+    /// <summary>Hostkey: Telegram/VK + relay API only, no public website.</summary>
+    public bool BotOnly { get; set; }
+
+    public bool TryGetProxyUri(out Uri? proxyUri)
+    {
+        proxyUri = null;
+        var raw = ProxyUrl?.Trim();
+        if (string.IsNullOrWhiteSpace(raw) || IsPlaceholder(raw))
+            return false;
+
+        return Uri.TryCreate(raw, UriKind.Absolute, out proxyUri);
+    }
+
     public bool HasValidBotToken =>
         !string.IsNullOrWhiteSpace(BotToken) &&
         !IsPlaceholder(BotToken) &&
