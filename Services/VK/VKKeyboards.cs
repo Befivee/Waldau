@@ -53,8 +53,11 @@ public static class VKKeyboards
             [
                 Text(BotReplyLabels.Number(1)),
                 Text(BotReplyLabels.Number(2)),
-                Text(BotReplyLabels.Number(3)),
-                Text(BotReplyLabels.Number(4))
+                Text(BotReplyLabels.Number(3))
+            ],
+            [
+                Text(BotReplyLabels.Number(4)),
+                Text(BotReplyLabels.Number(5))
             ],
             [Text(BotReplyLabels.Back)]
         ]);

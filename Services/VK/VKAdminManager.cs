@@ -95,11 +95,7 @@ public partial class VKAdminManager(
 
         await apiClient.SendMessageAsync(
             peerId,
-            content.BuildEventDetailsText(entity) +
-            "\n\n1. ✏ Изменить название\n" +
-            "2. 📝 Изменить описание\n" +
-            "3. 🖼 Изменить изображение\n" +
-            "4. 🗑 Удалить",
+            content.BuildEventDetailsText(entity) + CastleAdminContentService.EventManagementActions,
             VKKeyboards.EventManagement(eventId),
             cancellationToken);
     }
@@ -139,6 +135,27 @@ public partial class VKAdminManager(
         session.EventId = eventId;
 
         await apiClient.SendMessageAsync(peerId, "📝 Введите новое описание:", VKKeyboards.Remove(), cancellationToken);
+    }
+
+    public async Task StartEditDateAsync(long peerId, int eventId, CancellationToken cancellationToken)
+    {
+        var entity = await events.GetByIdAsync(eventId, cancellationToken);
+        if (entity is null)
+        {
+            await apiClient.SendMessageAsync(peerId, "Мероприятие не найдено.", cancellationToken: cancellationToken);
+            await SendEventsListAsync(peerId, cancellationToken);
+            return;
+        }
+
+        var session = stateService.GetOrCreate(peerId);
+        session.State = VKBotState.WaitingForNewDate;
+        session.EventId = eventId;
+
+        await apiClient.SendMessageAsync(
+            peerId,
+            $"📅 Введите новую дату (например: 14.06.2026).\nСейчас: {entity.EventDate.ToString("dd.MM.yyyy", RuCulture)}",
+            VKKeyboards.Remove(),
+            cancellationToken);
     }
 
     public async Task StartEditImageAsync(long peerId, int eventId, CancellationToken cancellationToken)
@@ -211,6 +228,8 @@ public partial class VKAdminManager(
                 StartEditTitleAsync(peerId, titleId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:edit_desc:", out var descId) =>
                 StartEditDescriptionAsync(peerId, descId, cancellationToken),
+            _ when BotCallbackData.TryParseEventId(payload, "evt:edit_date:", out var dateId) =>
+                StartEditDateAsync(peerId, dateId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:edit_img:", out var imgId) =>
                 StartEditImageAsync(peerId, imgId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:del:", out var delId) =>
@@ -330,6 +349,9 @@ public partial class VKAdminManager(
                     break;
                 case VKBotState.WaitingForNewDescription:
                     await HandleEditDescriptionAsync(peerId, text, cancellationToken);
+                    break;
+                case VKBotState.WaitingForNewDate:
+                    await HandleEditDateAsync(peerId, text, cancellationToken);
                     break;
                 case VKBotState.WaitingForEventImage:
                 case VKBotState.WaitingForNewImage:
@@ -542,6 +564,39 @@ public partial class VKAdminManager(
         session.Reset();
 
         await apiClient.SendMessageAsync(peerId, "✅ Описание обновлено.", cancellationToken: cancellationToken);
+        await SendEventDetailsAsync(peerId, eventId, cancellationToken);
+    }
+
+    private async Task HandleEditDateAsync(long peerId, string text, CancellationToken cancellationToken)
+    {
+        if (!TryParseDate(text, out var date))
+        {
+            await apiClient.SendMessageAsync(peerId, "Неверный формат даты. Пример: 14.06.2026", cancellationToken: cancellationToken);
+            return;
+        }
+
+        var session = stateService.GetOrCreate(peerId);
+        if (session.EventId is null)
+        {
+            session.Reset();
+            await SendMainMenuAsync(peerId, cancellationToken);
+            return;
+        }
+
+        var entity = await events.GetByIdAsync(session.EventId.Value, cancellationToken);
+        if (entity is null)
+        {
+            session.Reset();
+            await apiClient.SendMessageAsync(peerId, "Мероприятие не найдено.", cancellationToken: cancellationToken);
+            return;
+        }
+
+        entity.EventDate = date.Date;
+        await events.UpdateAsync(entity, cancellationToken);
+        var eventId = entity.Id;
+        session.Reset();
+
+        await apiClient.SendMessageAsync(peerId, "✅ Дата обновлена.", cancellationToken: cancellationToken);
         await SendEventDetailsAsync(peerId, eventId, cancellationToken);
     }
 

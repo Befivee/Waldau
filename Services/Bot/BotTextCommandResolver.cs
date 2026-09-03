@@ -4,7 +4,7 @@ namespace WaldauCastle.Services.Bot;
 
 public static class BotTextCommandResolver
 {
-    private const int EventDetailButtonCount = 4;
+    private const int EventDetailButtonCount = 5;
     private const int MainMenuButtonCount = 3;
 
     public static bool TryResolve(
@@ -73,8 +73,9 @@ public static class BotTextCommandResolver
                 {
                     1 => BotCallbackData.EventEditTitle(pageIds[0]),
                     2 => BotCallbackData.EventEditDescription(pageIds[0]),
-                    3 => BotCallbackData.EventEditImage(pageIds[0]),
-                    4 => BotCallbackData.EventDelete(pageIds[0]),
+                    3 => BotCallbackData.EventEditDate(pageIds[0]),
+                    4 => BotCallbackData.EventEditImage(pageIds[0]),
+                    5 => BotCallbackData.EventDelete(pageIds[0]),
                     _ => string.Empty
                 },
                 BotScreen.Main or BotScreen.None => index switch

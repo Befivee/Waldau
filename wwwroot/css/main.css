@@ -1157,6 +1157,10 @@ main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
   }
+
+  .excursion-pricing__grid--single {
+    grid-template-columns: minmax(0, 28rem);
+  }
 }
 
 .excursion-pricing__card {

@@ -27,6 +27,8 @@ public partial class TelegramEventManager
                 StartEditTitleAsync(bot, chatId, titleId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:edit_desc:", out var descId) =>
                 StartEditDescriptionAsync(bot, chatId, descId, cancellationToken),
+            _ when BotCallbackData.TryParseEventId(payload, "evt:edit_date:", out var dateId) =>
+                StartEditDateAsync(bot, chatId, dateId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:edit_img:", out var imgId) =>
                 StartEditImageAsync(bot, chatId, imgId, cancellationToken),
             _ when BotCallbackData.TryParseEventId(payload, "evt:del:", out var delId) =>

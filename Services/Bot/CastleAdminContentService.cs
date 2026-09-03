@@ -98,6 +98,13 @@ public class CastleAdminContentService(
         $"📅 {entity.EventDate.ToString("d MMMM yyyy", RuCulture)}\n\n" +
         $"{entity.Description}";
 
+    public static string EventManagementActions =>
+        "\n\n1. ✏ Изменить название\n" +
+        "2. 📝 Изменить описание\n" +
+        "3. 📅 Изменить дату\n" +
+        "4. 🖼 Изменить изображение\n" +
+        "5. 🗑 Удалить";
+
     public string BuildExcursionDetailsText(Excursion entity) =>
         $"🚶 {entity.Title}\n\n" +
         $"⏱ {entity.Duration}\n" +

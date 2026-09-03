@@ -32,7 +32,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
     public async Task<IActionResult> Create(BookingCreateViewModel model, CancellationToken cancellationToken)
     {
         NormalizePhone(model, ModelState);
-        await ValidateExcursionAsync(model, ModelState, cancellationToken);
+        ApplyWebsiteVisitType(model);
 
         if (!ModelState.IsValid)
         {
@@ -43,8 +43,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         }
 
         var isEventBooking = !string.IsNullOrWhiteSpace(model.EventTitle);
-        var excursion = ExcursionCatalog.Get(
-            isEventBooking ? ExcursionKind.SelfGuided : (ExcursionKind)model.ExcursionId!.Value);
+        var excursion = ExcursionCatalog.SelfGuided;
 
         var excursionTitle = isEventBooking
             ? $"{BookingNotificationText.EventBookingPrefix} {model.EventTitle!.Trim()}"
@@ -57,7 +56,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
             VisitDate = model.VisitDate!.Value.Date,
             ExcursionKind = excursion.Kind,
             ExcursionTitle = excursionTitle,
-            VisitTime = isEventBooking || !excursion.RequiresTimeSlot ? null : model.VisitTime,
+            VisitTime = null,
             PersonsCount = model.PersonsCount,
             PersonalDataConsent = model.PersonalDataConsent,
             CreatedAt = DateTime.UtcNow
@@ -89,49 +88,13 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
                     entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToArray())
         };
 
-    private async Task ValidateExcursionAsync(
-        BookingCreateViewModel model,
-        ModelStateDictionary modelState,
-        CancellationToken cancellationToken)
+    private static void ApplyWebsiteVisitType(BookingCreateViewModel model)
     {
-        if (!string.IsNullOrWhiteSpace(model.EventTitle))
-        {
-            model.ExcursionId = (int)ExcursionKind.SelfGuided;
-            model.VisitTime = null;
-            return;
-        }
+        model.ExcursionId = (int)ExcursionKind.SelfGuided;
+        model.VisitTime = null;
 
-        if (!ExcursionCatalog.TryGetById(model.ExcursionId, out var excursion))
-        {
-            modelState.AddModelError(nameof(BookingCreateViewModel.ExcursionId), "Выберите вид экскурсии");
-            return;
-        }
-
-        model.ExcursionTitle = excursion.Title;
-
-        if (!excursion.RequiresTimeSlot)
-        {
-            model.VisitTime = null;
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(model.VisitTime))
-        {
-            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите время визита");
-            return;
-        }
-
-        if (!ExcursionCatalog.GuidedTimeSlots.Contains(model.VisitTime))
-        {
-            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите доступное время с 10:00 до 17:00");
-            return;
-        }
-
-        if (model.VisitDate is null)
-            return;
-
-        if (!await bookings.IsGuidedSlotAvailableAsync(model.VisitDate.Value.Date, model.VisitTime, cancellationToken))
-            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Это время уже занято. Выберите другое.");
+        if (string.IsNullOrWhiteSpace(model.EventTitle))
+            model.ExcursionTitle = ExcursionCatalog.SelfGuided.Title;
     }
 
     private static void NormalizePhone(BookingCreateViewModel model, ModelStateDictionary modelState)

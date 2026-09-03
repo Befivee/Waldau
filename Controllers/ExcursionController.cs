@@ -8,10 +8,10 @@ public class ExcursionController : Controller
     public IActionResult Index()
     {
         ViewData["MetaDescription"] =
-            "Экскурсии по замку Вальдау: с гидом или самостоятельное посещение. Запись онлайн.";
-        ViewData["MetaKeywords"] = "экскурсии замок Вальдау, с гидом, самостоятельное посещение, Низовье";
+            "Посещение замка Вальдау с аудиогидом. Запись онлайн.";
+        ViewData["MetaKeywords"] = "экскурсии замок Вальдау, посещение с аудиогидом, аудиогид, Низовье";
         ViewData["OgType"] = "website";
 
-        return View(ExcursionCatalog.All);
+        return View(ExcursionCatalog.WebsiteOfferings);
     }
 }

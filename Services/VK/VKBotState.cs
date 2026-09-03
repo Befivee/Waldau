@@ -9,5 +9,6 @@ public enum VKBotState
     WaitingForEventImage,
     WaitingForNewTitle,
     WaitingForNewDescription,
+    WaitingForNewDate,
     WaitingForNewImage
 }

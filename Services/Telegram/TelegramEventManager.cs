@@ -102,8 +102,7 @@ public partial class TelegramEventManager(
 
         await bot.SendMessage(
             chatId,
-            content.BuildEventDetailsText(entity) +
-            "\n\n1. ✏ Изменить название\n2. 📝 Изменить описание\n3. 🖼 Изменить изображение\n4. 🗑 Удалить",
+            content.BuildEventDetailsText(entity) + CastleAdminContentService.EventManagementActions,
             replyMarkup: TelegramKeyboards.EventManagement(),
             cancellationToken: cancellationToken);
     }
@@ -142,6 +141,27 @@ public partial class TelegramEventManager(
         session.EventId = eventId;
 
         await bot.SendMessage(chatId, "📝 Введите новое описание:", replyMarkup: TelegramKeyboards.Remove(), cancellationToken: cancellationToken);
+    }
+
+    public async Task StartEditDateAsync(ITelegramBotClient bot, long chatId, int eventId, CancellationToken cancellationToken)
+    {
+        var entity = await events.GetByIdAsync(eventId, cancellationToken);
+        if (entity is null)
+        {
+            await bot.SendMessage(chatId, "Мероприятие не найдено.", cancellationToken: cancellationToken);
+            await SendEventsListAsync(bot, chatId, cancellationToken);
+            return;
+        }
+
+        var session = stateService.GetOrCreate(chatId);
+        session.State = TelegramBotState.WaitingForNewDate;
+        session.EventId = eventId;
+
+        await bot.SendMessage(
+            chatId,
+            $"📅 Введите новую дату (например: 14.06.2026).\nСейчас: {entity.EventDate.ToString("dd.MM.yyyy", RuCulture)}",
+            replyMarkup: TelegramKeyboards.Remove(),
+            cancellationToken: cancellationToken);
     }
 
     public async Task StartEditImageAsync(ITelegramBotClient bot, long chatId, int eventId, CancellationToken cancellationToken)
@@ -236,6 +256,9 @@ public partial class TelegramEventManager(
                     break;
                 case TelegramBotState.WaitingForNewDescription:
                     await HandleEditDescriptionAsync(bot, chatId, text, cancellationToken);
+                    break;
+                case TelegramBotState.WaitingForNewDate:
+                    await HandleEditDateAsync(bot, chatId, text, cancellationToken);
                     break;
                 case TelegramBotState.WaitingForEventImage:
                 case TelegramBotState.WaitingForNewImage:
@@ -438,6 +461,30 @@ public partial class TelegramEventManager(
         session.State = TelegramBotState.None;
 
         await bot.SendMessage(chatId, "✅ Описание обновлено.", cancellationToken: cancellationToken);
+        await SendEventDetailsAsync(bot, chatId, entity.Id, cancellationToken);
+    }
+
+    private async Task HandleEditDateAsync(ITelegramBotClient bot, long chatId, string text, CancellationToken cancellationToken)
+    {
+        if (!TryParseDate(text, out var date))
+        {
+            await bot.SendMessage(chatId, "Неверный формат даты. Пример: 14.06.2026", cancellationToken: cancellationToken);
+            return;
+        }
+
+        var session = stateService.GetOrCreate(chatId);
+        if (session.EventId is null)
+            return;
+
+        var entity = await events.GetByIdAsync(session.EventId.Value, cancellationToken);
+        if (entity is null)
+            return;
+
+        entity.EventDate = date.Date;
+        await events.UpdateAsync(entity, cancellationToken);
+        session.State = TelegramBotState.None;
+
+        await bot.SendMessage(chatId, "✅ Дата обновлена.", cancellationToken: cancellationToken);
         await SendEventDetailsAsync(bot, chatId, entity.Id, cancellationToken);
     }
 

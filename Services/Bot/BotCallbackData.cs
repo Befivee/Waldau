@@ -20,6 +20,7 @@ public static class BotCallbackData
     public static string EventView(int id) => $"evt:view:{id}";
     public static string EventEditTitle(int id) => $"evt:edit_title:{id}";
     public static string EventEditDescription(int id) => $"evt:edit_desc:{id}";
+    public static string EventEditDate(int id) => $"evt:edit_date:{id}";
     public static string EventEditImage(int id) => $"evt:edit_img:{id}";
     public static string EventDelete(int id) => $"evt:del:{id}";
     public static string EventDeleteYes(int id) => $"evt:del_yes:{id}";

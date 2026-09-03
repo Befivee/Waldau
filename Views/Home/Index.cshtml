@@ -8,7 +8,7 @@
         <h1 class="hero__title">@SiteInfo.CastleName<span class="visually-hidden"> — официальный сайт</span></h1>
         <p class="hero__subtitle">@SiteInfo.Tagline</p>
         <div class="hero__actions">
-            <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться на экскурсию</button>
+            <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться с аудиогидом</button>
             <a asp-controller="Directions" asp-action="Index" class="btn btn-outline btn-lg btn-outline--light">Как добраться</a>
         </div>
     </div>
@@ -79,12 +79,12 @@
         <header class="section-header section-header--row reveal">
             <div>
                 <h2 id="tours-title" class="section-header__title">Экскурсии</h2>
-                <p class="section-header__lead">Выберите программу и запишитесь онлайн</p>
+                <p class="section-header__lead">Посещение с аудиогидом — запишитесь онлайн</p>
             </div>
             <a asp-controller="Excursion" asp-action="Index" class="link-arrow">Подробнее</a>
         </header>
         <div class="excursion-types excursion-types--compact">
-            @foreach (var excursion in ExcursionCatalog.All)
+            @foreach (var excursion in ExcursionCatalog.WebsiteOfferings)
             {
                 <partial name="Components/_ExcursionTypeBlock" model="excursion" />
             }
@@ -165,12 +165,12 @@
     </div>
 </section>
 
-<section class="section section--cta-banner" aria-label="Запись на экскурсию">
+<section class="section section--cta-banner" aria-label="Запись на посещение с аудиогидом">
     <div class="container-xl">
         <div class="cta-banner reveal">
             <h2>Готовы к путешествию во времени?</h2>
-            <p>Запишитесь на экскурсию — места ограничены в сезон</p>
-            <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться на экскурсию</button>
+            <p>Запишитесь на посещение с аудиогидом — места ограничены в сезон</p>
+            <button type="button" class="btn btn-primary btn-lg" data-booking-open data-tour-kind="self">Записаться с аудиогидом</button>
         </div>
     </div>
 </section>

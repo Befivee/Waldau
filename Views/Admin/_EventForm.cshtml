@@ -26,7 +26,7 @@
 
     <div class="form-group mb-3">
         <label asp-for="EventDate" class="form-label"></label>
-        <input asp-for="EventDate" type="date" class="form-control" />
+        <input asp-for="EventDate" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" />
         <span asp-validation-for="EventDate" class="text-danger"></span>
     </div>
 

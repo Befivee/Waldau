@@ -52,8 +52,11 @@ public static class TelegramKeyboards
         [
             new KeyboardButton(BotReplyLabels.Number(1)),
             new KeyboardButton(BotReplyLabels.Number(2)),
-            new KeyboardButton(BotReplyLabels.Number(3)),
-            new KeyboardButton(BotReplyLabels.Number(4))
+            new KeyboardButton(BotReplyLabels.Number(3))
+        ],
+        [
+            new KeyboardButton(BotReplyLabels.Number(4)),
+            new KeyboardButton(BotReplyLabels.Number(5))
         ],
         [new KeyboardButton(BotReplyLabels.Back)]
     ]);

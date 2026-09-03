@@ -9,5 +9,6 @@ public enum TelegramBotState
     WaitingForEventImage,
     WaitingForNewTitle,
     WaitingForNewDescription,
+    WaitingForNewDate,
     WaitingForNewImage
 }

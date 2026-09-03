@@ -5,7 +5,7 @@
     var pageTitle = ViewData["Title"]?.ToString();
     var documentTitle = SiteInfo.GetDocumentTitle(pageTitle, ViewData["MetaTitle"]?.ToString());
     var description = ViewData["MetaDescription"]?.ToString()
-        ?? "Официальный сайт замка Вальдау — средневековая крепость XIII века в пос. Низовье. Экскурсии, мероприятия, записаться онлайн.";
+        ?? "Официальный сайт замка Вальдау — средневековая крепость XIII века в пос. Низовье. Посещение с аудиогидом, мероприятия, записаться онлайн.";
     var keywords = ViewData["MetaKeywords"]?.ToString() ?? site.DefaultKeywords;
     var ogType = ViewData["OgType"]?.ToString() ?? "website";
     var ogImage = ViewData["OgImage"]?.ToString() ?? SiteInfo.LogoPngPath;

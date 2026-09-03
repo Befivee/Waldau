@@ -413,10 +413,6 @@
     resetBookingFormState();
   }
 
-  function isGuidedKind(kind) {
-    return kind === 'guided';
-  }
-
   function setBookingTimeVisible(show) {
     if (!timeWrap) return;
     timeWrap.hidden = !show;
@@ -448,13 +444,11 @@
     if (!dateInput || !pendingEvent.date) return;
     dateInput.min = pendingEvent.date < defaultDateMin ? pendingEvent.date : defaultDateMin;
     dateInput.value = pendingEvent.date;
-    refreshOccupiedSlots();
   }
 
-  function setExcursionKind(kind) {
-    const normalized = isGuidedKind(kind) ? 'guided' : 'self';
+  function setExcursionKind() {
     const activeBtn =
-      typeButtons.find((btn) => btn.dataset.excursionKind === normalized) || typeButtons[0];
+      typeButtons.find((btn) => btn.dataset.excursionKind === 'self') || typeButtons[0];
 
     if (!activeBtn) return;
 
@@ -464,7 +458,7 @@
 
     if (tourIdInput) tourIdInput.value = activeBtn.dataset.excursionId || '';
     if (tourNameInput) tourNameInput.value = activeBtn.dataset.excursionTitle || '';
-    setBookingTimeVisible(activeBtn.dataset.excursionGuided === '1');
+    setBookingTimeVisible(false);
   }
 
   function setBookingMode(mode) {
