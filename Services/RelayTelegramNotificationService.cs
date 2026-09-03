@@ -74,6 +74,9 @@ public sealed class BookingRelayPayload
     [JsonPropertyName("personsCount")]
     public int PersonsCount { get; set; }
 
+    [JsonPropertyName("excursionKind")]
+    public int ExcursionKind { get; set; }
+
     public static BookingRelayPayload From(Booking booking) => new()
     {
         FullName = booking.FullName,
@@ -81,7 +84,8 @@ public sealed class BookingRelayPayload
         VisitDate = booking.VisitDate,
         ExcursionTitle = booking.ExcursionTitle,
         VisitTime = booking.VisitTime,
-        PersonsCount = booking.PersonsCount
+        PersonsCount = booking.PersonsCount,
+        ExcursionKind = (int)booking.ExcursionKind
     };
 
     public Booking ToBooking() => new()
@@ -91,6 +95,8 @@ public sealed class BookingRelayPayload
         VisitDate = VisitDate,
         ExcursionTitle = ExcursionTitle,
         VisitTime = VisitTime,
-        PersonsCount = PersonsCount
+        PersonsCount = PersonsCount,
+        ExcursionKind = (ExcursionKind)ExcursionKind,
+        PersonalDataConsent = true
     };
 }
