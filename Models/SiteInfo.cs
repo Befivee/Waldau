@@ -8,6 +8,11 @@ public static class SiteInfo
     public const string OperatorName = "Музейный комплекс «Замок Вальдау»";
     public const string PolicyPublishedDate = "30 мая 2026 г.";
     public const string SiteUrl = "https://вальдау.рф";
+    public const string PartnerName = "IZOTOFF";
+    public const string PartnerUrl = "https://изотофф39.рф";
+    public const string PartnerLead =
+        "Первый виноградник Калининградской области — сыроварня, дегустации и экскурсии на эко-ферме.";
+    public const string PartnerCta = "Перейти на сайт фермы";
     public const string HomePageTitle = "Замок Вальдау - Официальный сайт";
     public const string BrowserTitle = HomePageTitle;
     public const string LogoPath = "/images/logo.svg";

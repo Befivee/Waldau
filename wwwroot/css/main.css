@@ -919,6 +919,59 @@ main {
   }
 }
 
+.partner-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22rem;
+  padding: 5rem 1.5rem;
+  text-align: center;
+  color: #fff;
+  overflow: hidden;
+  background-color: #1c3b2e;
+  background-image: url("/images/partners/izotoff.jpg");
+  background-size: cover;
+  background-position: center;
+}
+.partner-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(16, 28, 22, 0.35), rgba(16, 24, 20, 0.72));
+}
+.partner-banner__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+}
+.partner-banner__eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.partner-banner__title {
+  color: #fff;
+  margin: 0 0 1rem;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+.partner-banner__lead {
+  margin: 0 0 2rem;
+  font-size: 1.125rem;
+  opacity: 0.92;
+}
+.partner-banner .btn-primary {
+  background: #fff;
+  color: #1c3b2e;
+  border-color: #fff;
+}
+.partner-banner .btn-primary:hover {
+  background: #f3f5f0;
+  border-color: #f3f5f0;
+}
+
 .why-grid {
   display: grid;
   gap: 1.5rem;
