@@ -6,7 +6,7 @@
     <partial name="_PageHeroPhoto" model="@(new PageHeroPhotoViewModel("images/All/Контакты", "page-hero__bg--contacts"))" />
     <div class="container-xl page-hero__content reveal">
         <h1 id="page-title" class="page-hero__title">Контакты</h1>
-        <p class="page-hero__lead">Свяжитесь с нами или запишитесь на посещение с аудиогидом</p>
+        <p class="page-hero__lead">Свяжитесь с нами или запишитесь на экскурсию</p>
     </div>
 </section>
 
@@ -31,7 +31,7 @@
                     <p class="contact-block__value">@SiteInfo.WorkingHours</p>
                 </div>
                 <partial name="_SocialLinks" />
-                <button type="button" class="btn btn-primary btn-lg contacts-info__cta" data-booking-open data-tour-kind="self">Записаться с аудиогидом</button>
+                <button type="button" class="btn btn-primary btn-lg contacts-info__cta" data-booking-open data-tour-kind="self">Записаться на экскурсию</button>
             </div>
             <div class="contacts-map reveal">
                 <partial name="_YandexMap" model="@("lg")" />

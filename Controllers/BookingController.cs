@@ -23,6 +23,9 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         if (date is null || date.Value.Date < DateTime.Today.AddDays(1))
             return Ok(Array.Empty<string>());
 
+        if (!ExcursionCatalog.IsGuidedVisitDay(date.Value.Date))
+            return Ok(Array.Empty<string>());
+
         var slots = await bookings.GetOccupiedGuidedSlotsAsync(date.Value.Date, cancellationToken);
         return Ok(slots);
     }
@@ -32,7 +35,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
     public async Task<IActionResult> Create(BookingCreateViewModel model, CancellationToken cancellationToken)
     {
         NormalizePhone(model, ModelState);
-        ApplyWebsiteVisitType(model);
+        await ValidateExcursionAsync(model, ModelState, cancellationToken);
 
         if (!ModelState.IsValid)
         {
@@ -43,7 +46,8 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
         }
 
         var isEventBooking = !string.IsNullOrWhiteSpace(model.EventTitle);
-        var excursion = ExcursionCatalog.SelfGuided;
+        var excursion = ExcursionCatalog.Get(
+            isEventBooking ? ExcursionKind.SelfGuided : (ExcursionKind)model.ExcursionId!.Value);
 
         var excursionTitle = isEventBooking
             ? $"{BookingNotificationText.EventBookingPrefix} {model.EventTitle!.Trim()}"
@@ -56,7 +60,7 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
             VisitDate = model.VisitDate!.Value.Date,
             ExcursionKind = excursion.Kind,
             ExcursionTitle = excursionTitle,
-            VisitTime = null,
+            VisitTime = isEventBooking || !excursion.RequiresTimeSlot ? null : model.VisitTime,
             PersonsCount = model.PersonsCount,
             PersonalDataConsent = model.PersonalDataConsent,
             CreatedAt = DateTime.UtcNow
@@ -88,13 +92,57 @@ public class BookingController(IBookingService bookings, IBookingNotificationSer
                     entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToArray())
         };
 
-    private static void ApplyWebsiteVisitType(BookingCreateViewModel model)
+    private async Task ValidateExcursionAsync(
+        BookingCreateViewModel model,
+        ModelStateDictionary modelState,
+        CancellationToken cancellationToken)
     {
-        model.ExcursionId = (int)ExcursionKind.SelfGuided;
-        model.VisitTime = null;
+        if (!string.IsNullOrWhiteSpace(model.EventTitle))
+        {
+            model.ExcursionId = (int)ExcursionKind.SelfGuided;
+            model.VisitTime = null;
+            return;
+        }
 
-        if (string.IsNullOrWhiteSpace(model.EventTitle))
-            model.ExcursionTitle = ExcursionCatalog.SelfGuided.Title;
+        if (!ExcursionCatalog.TryGetById(model.ExcursionId, out var excursion))
+        {
+            modelState.AddModelError(nameof(BookingCreateViewModel.ExcursionId), "Выберите вид экскурсии");
+            return;
+        }
+
+        model.ExcursionTitle = excursion.Title;
+
+        if (!excursion.RequiresTimeSlot)
+        {
+            model.VisitTime = null;
+            return;
+        }
+
+        if (model.VisitDate is not null && !ExcursionCatalog.IsGuidedVisitDay(model.VisitDate.Value.Date))
+        {
+            modelState.AddModelError(
+                nameof(BookingCreateViewModel.VisitDate),
+                ExcursionCatalog.GuidedVisitDaysMessage);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(model.VisitTime))
+        {
+            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите время визита");
+            return;
+        }
+
+        if (!ExcursionCatalog.GuidedTimeSlots.Contains(model.VisitTime))
+        {
+            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Выберите доступное время с 10:00 до 17:00");
+            return;
+        }
+
+        if (model.VisitDate is null)
+            return;
+
+        if (!await bookings.IsGuidedSlotAvailableAsync(model.VisitDate.Value.Date, model.VisitTime, cancellationToken))
+            modelState.AddModelError(nameof(BookingCreateViewModel.VisitTime), "Это время уже занято. Выберите другое.");
     }
 
     private static void NormalizePhone(BookingCreateViewModel model, ModelStateDictionary modelState)

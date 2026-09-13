@@ -235,6 +235,9 @@
     if (!dateInput?.value) {
       setFieldError(form.querySelector('[data-valmsg-for="VisitDate"]'), 'Выберите дату визита');
       valid = false;
+    } else if (isGuidedBooking() && !isGuidedVisitDay(dateInput.value)) {
+      setFieldError(form.querySelector('[data-valmsg-for="VisitDate"]'), GUIDED_VISIT_DAYS_MESSAGE);
+      valid = false;
     }
 
     const timeField = form.querySelector('#booking-time');
@@ -413,6 +416,23 @@
     resetBookingFormState();
   }
 
+  const GUIDED_VISIT_DAYS_MESSAGE =
+    'Экскурсия с гидом доступна только в пятницу, субботу и воскресенье.';
+
+  function isGuidedKind(kind) {
+    return kind === 'guided';
+  }
+
+  function isGuidedBooking() {
+    return Boolean(timeWrap && !timeWrap.hidden);
+  }
+
+  function isGuidedVisitDay(isoDate) {
+    if (!isoDate) return false;
+    const day = new Date(`${isoDate}T12:00:00`).getDay();
+    return day === 0 || day === 5 || day === 6;
+  }
+
   function setBookingTimeVisible(show) {
     if (!timeWrap) return;
     timeWrap.hidden = !show;
@@ -420,9 +440,29 @@
       if (!show) timeInput.value = '';
       timeInput.required = show;
     }
-    if (show) {
-      refreshOccupiedSlots();
+    const hint = document.getElementById('booking-guided-days-hint');
+    if (hint) hint.hidden = !show;
+    if (!show) {
+      const errorSpan = bookingForm?.querySelector('[data-valmsg-for="VisitDate"]');
+      if (errorSpan?.textContent === GUIDED_VISIT_DAYS_MESSAGE) {
+        errorSpan.textContent = '';
+        errorSpan.classList.add('field-validation-valid');
+        errorSpan.classList.remove('field-validation-error');
+      }
+      return;
     }
+    refreshOccupiedSlots();
+    validateGuidedVisitDate();
+  }
+
+  function validateGuidedVisitDate() {
+    if (!bookingForm || !dateInput) return true;
+    const errorSpan = bookingForm.querySelector('[data-valmsg-for="VisitDate"]');
+    if (!isGuidedBooking()) return true;
+    if (!dateInput.value) return true;
+    if (isGuidedVisitDay(dateInput.value)) return true;
+    setFieldError(errorSpan, GUIDED_VISIT_DAYS_MESSAGE);
+    return false;
   }
 
   function clearEventContext() {
@@ -444,11 +484,13 @@
     if (!dateInput || !pendingEvent.date) return;
     dateInput.min = pendingEvent.date < defaultDateMin ? pendingEvent.date : defaultDateMin;
     dateInput.value = pendingEvent.date;
+    refreshOccupiedSlots();
   }
 
-  function setExcursionKind() {
+  function setExcursionKind(kind) {
+    const normalized = isGuidedKind(kind) ? 'guided' : 'self';
     const activeBtn =
-      typeButtons.find((btn) => btn.dataset.excursionKind === 'self') || typeButtons[0];
+      typeButtons.find((btn) => btn.dataset.excursionKind === normalized) || typeButtons[0];
 
     if (!activeBtn) return;
 
@@ -458,7 +500,7 @@
 
     if (tourIdInput) tourIdInput.value = activeBtn.dataset.excursionId || '';
     if (tourNameInput) tourNameInput.value = activeBtn.dataset.excursionTitle || '';
-    setBookingTimeVisible(false);
+    setBookingTimeVisible(activeBtn.dataset.excursionGuided === '1');
   }
 
   function setBookingMode(mode) {
@@ -486,6 +528,7 @@
 
   async function refreshOccupiedSlots() {
     if (!timeInput || !dateInput?.value || timeWrap?.hidden) return;
+    if (!isGuidedVisitDay(dateInput.value)) return;
 
     const previousValue = timeInput.value;
 
@@ -571,6 +614,15 @@
   });
 
   dateInput?.addEventListener('change', () => {
+    if (bookingForm) {
+      const errorSpan = bookingForm.querySelector('[data-valmsg-for="VisitDate"]');
+      if (errorSpan) {
+        errorSpan.textContent = '';
+        errorSpan.classList.add('field-validation-valid');
+        errorSpan.classList.remove('field-validation-error');
+      }
+    }
+    validateGuidedVisitDate();
     refreshOccupiedSlots();
   });
 

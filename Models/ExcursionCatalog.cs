@@ -13,7 +13,7 @@ public sealed class ExcursionTypeInfo
 
     public int Id => (int)Kind;
     public string KindKey => Kind == ExcursionKind.Guided ? "guided" : "self";
-    public string FormLabel => Kind == ExcursionKind.Guided ? "С гидом" : "С аудиогидом";
+    public string FormLabel => Kind == ExcursionKind.Guided ? "С гидом" : "Самостоятельно";
     public string DisplayPrice => $"от {ConcessionPrice:0} ₽";
     public string PriceDetail => $"{RegularPrice:0} ₽ / {ConcessionPrice:0} ₽ льготный";
     public string FormPriceLabel => $"{RegularPrice:0} ₽ / {ConcessionPrice:0} ₽ льгот.";
@@ -24,6 +24,8 @@ public static class ExcursionCatalog
     public const decimal ConcessionPrice = 650;
     public const decimal GuidedRegularPrice = 1000;
     public const decimal SelfGuidedRegularPrice = 800;
+    public const string GuidedVisitDaysMessage =
+        "Экскурсия с гидом доступна только в пятницу, субботу и воскресенье.";
 
     public static readonly ExcursionTypeInfo Guided = new()
     {
@@ -41,10 +43,10 @@ public static class ExcursionCatalog
     public static readonly ExcursionTypeInfo SelfGuided = new()
     {
         Kind = ExcursionKind.SelfGuided,
-        Title = "Посещение с аудиогидом",
+        Title = "Самостоятельное посещение",
         Description =
-            "Осмотр замка с аудиогидом в часы работы: экспозиции, двор, " +
-            "фотозоны и история крепости в вашем темпе.",
+            "Свободный осмотр замка в часы работы: экспозиции, двор, " +
+            "фотозоны и атмосфера средневековой крепости без сопровождения гида.",
         Duration = "без ограничения",
         RegularPrice = SelfGuidedRegularPrice,
         ImagePath = "/images/excursion-self.webp",
@@ -53,11 +55,14 @@ public static class ExcursionCatalog
 
     public static IReadOnlyList<ExcursionTypeInfo> All { get; } = [Guided, SelfGuided];
 
-    /// <summary>Форматы, которые показываются на сайте. Бот по-прежнему видит <see cref="All"/>.</summary>
-    public static IReadOnlyList<ExcursionTypeInfo> WebsiteOfferings { get; } = [SelfGuided];
-
     public static string[] GuidedTimeSlots { get; } =
         ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+
+    public static bool IsGuidedVisitDay(DateTime date)
+    {
+        var day = date.DayOfWeek;
+        return day is DayOfWeek.Friday or DayOfWeek.Saturday or DayOfWeek.Sunday;
+    }
 
     public static bool TryGetById(int? id, out ExcursionTypeInfo info)
     {

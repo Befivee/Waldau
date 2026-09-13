@@ -2124,6 +2124,12 @@ main {
   margin-top: 0.35rem;
 }
 
+.booking-form__hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
 .booking-success {
   text-align: center;
   padding: 1.5rem 0;

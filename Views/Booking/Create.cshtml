@@ -1,13 +1,13 @@
 @model BookingCreateViewModel
 @{
-    ViewData["Title"] = "Запись на посещение с аудиогидом";
-    ViewData["MetaDescription"] = "Онлайн-запись на посещение замка Вальдау с аудиогидом. Оставьте заявку — мы свяжемся для подтверждения.";
+    ViewData["Title"] = "Запись на экскурсию";
+    ViewData["MetaDescription"] = "Онлайн-запись на экскурсию в замок Вальдау. Оставьте заявку — мы свяжемся для подтверждения.";
 }
 
 <section class="page-hero page-hero--compact" aria-labelledby="page-title">
     <div class="page-hero__bg"></div>
     <div class="container-xl page-hero__content reveal">
-        <h1 id="page-title" class="page-hero__title">Запись на посещение с аудиогидом</h1>
+        <h1 id="page-title" class="page-hero__title">Запись на экскурсию</h1>
         <p class="page-hero__lead">Оставьте заявку — мы перезвоним для подтверждения</p>
     </div>
 </section>
@@ -18,10 +18,13 @@
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger validation-summary" role="alert"></div>
 
-            <input type="hidden" asp-for="ExcursionId" value="@ExcursionCatalog.SelfGuided.Id" />
-            <input type="hidden" asp-for="ExcursionTitle" value="@ExcursionCatalog.SelfGuided.Title" />
+            <input type="hidden" asp-for="ExcursionId" />
+            <input type="hidden" asp-for="ExcursionTitle" />
 
-            <p class="booking-form__tour-label">Формат: <strong>@ExcursionCatalog.SelfGuided.Title</strong></p>
+            @if (!string.IsNullOrEmpty(Model.ExcursionTitle))
+            {
+                <p class="booking-form__tour-label">Экскурсия: <strong>@Model.ExcursionTitle</strong></p>
+            }
 
             <div class="form-group">
                 <label asp-for="FullName"></label>
