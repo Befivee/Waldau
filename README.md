@@ -101,8 +101,8 @@ VK__AdminUserId=...
 
 | Направление | Что |
 |-------------|-----|
-| Сайт → бот | заявки (`POST /internal/telegram/booking`) |
-| Бот → сайт | мероприятия + фото (`GET /internal/events`, `/internal/events/files/...`) |
+| Сайт → бот | заявки (`POST /internal/waldau/telegram/booking` через общий Cloudflare-туннель Izotoff) |
+| Бот → сайт | мероприятия + фото (`GET /internal/waldau/events`, `/internal/waldau/events/files/...` → прокси на Waldau-бот) |
 
 Экскурсии на сайте берутся из `ExcursionCatalog` (статический каталог), не из БД бота.
 

@@ -52,7 +52,7 @@ public class EventController(
             var client = httpClientFactory.CreateClient("telegram_relay");
             using var request = new HttpRequestMessage(
                 HttpMethod.Get,
-                origin.TrimEnd('/') + "/internal/events/files/" + Uri.EscapeDataString(fileName));
+                origin.TrimEnd('/') + "/internal/waldau/events/files/" + Uri.EscapeDataString(fileName));
             if (!string.IsNullOrWhiteSpace(telegram.RelaySecret))
                 request.Headers.TryAddWithoutValidation("X-Relay-Secret", telegram.RelaySecret.Trim());
 

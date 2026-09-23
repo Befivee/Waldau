@@ -48,7 +48,8 @@ public class PublicEventCatalog(
         try
         {
             var client = httpClientFactory.CreateClient("telegram_relay");
-            using var request = new HttpRequestMessage(HttpMethod.Get, origin.TrimEnd('/') + "/internal/events");
+            // Shared Cloudflare tunnel terminates on Izotoff, which proxies Waldau under /internal/waldau/...
+            using var request = new HttpRequestMessage(HttpMethod.Get, origin.TrimEnd('/') + "/internal/waldau/events");
             if (!string.IsNullOrWhiteSpace(telegram.RelaySecret))
                 request.Headers.TryAddWithoutValidation("X-Relay-Secret", telegram.RelaySecret.Trim());
 
