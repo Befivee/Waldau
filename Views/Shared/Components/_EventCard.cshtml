@@ -7,7 +7,19 @@
             @Model.EventDate.ToString("d MMMM yyyy", new System.Globalization.CultureInfo("ru-RU"))
         </time>
         <h3 class="event-card__title">@Model.Title</h3>
-        <p class="event-card__desc">@Model.Description</p>
+        <div class="event-card__desc-wrap" data-event-desc>
+            <p class="event-card__desc">@Model.Description</p>
+            <button type="button"
+                    class="event-card__more"
+                    data-event-more
+                    aria-expanded="false"
+                    aria-label="Показать больше"
+                    hidden>
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+                </svg>
+            </button>
+        </div>
         <button type="button"
                 class="btn btn-primary btn-sm"
                 data-booking-open

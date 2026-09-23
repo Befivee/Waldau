@@ -1310,12 +1310,54 @@ main {
   font-size: 1.35rem;
   margin-bottom: 1rem;
 }
+.event-card__desc-wrap {
+  margin-bottom: 1rem;
+}
 .event-card__desc {
   font-size: 0.9375rem;
   color: #5c5c62;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0;
   line-height: 1.5;
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
   flex: 1;
+}
+.event-card__desc-wrap.is-expanded .event-card__desc {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+.event-card__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0.5rem auto 0;
+  padding: 0;
+  border: 1px solid rgba(42, 42, 46, 0.1);
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2d4a3e;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.event-card__more:hover {
+  border-color: #2d4a3e;
+  background: rgba(45, 74, 62, 0.06);
+}
+.event-card__more svg {
+  display: block;
+  transition: transform 0.25s ease;
+}
+.event-card__desc-wrap.is-expanded .event-card__more svg {
+  transform: rotate(180deg);
+}
+.event-card__more[hidden] {
+  display: none;
 }
 
 .event-card__body .btn {

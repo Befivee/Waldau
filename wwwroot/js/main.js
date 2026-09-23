@@ -693,6 +693,23 @@
     );
   }
 
+  // Event description collapse (5 lines + round expand button)
+  document.querySelectorAll('[data-event-desc]').forEach((wrap) => {
+    const desc = wrap.querySelector('.event-card__desc');
+    const btn = wrap.querySelector('[data-event-more]');
+    if (!desc || !btn) return;
+
+    const needsMore = desc.scrollHeight > desc.clientHeight + 1;
+    if (!needsMore) return;
+
+    btn.hidden = false;
+    btn.addEventListener('click', () => {
+      const expanded = wrap.classList.toggle('is-expanded');
+      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      btn.setAttribute('aria-label', expanded ? 'Свернуть' : 'Показать больше');
+    });
+  });
+
   window.WaldauApp = {
     openBooking,
     closeBooking,
