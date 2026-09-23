@@ -122,6 +122,11 @@
     height: 100%;
   }
 
+  > .event-card {
+    align-self: start;
+    height: auto;
+  }
+
   &--2 {
     @include respond-to(md) {
       grid-template-columns: repeat(2, 1fr);

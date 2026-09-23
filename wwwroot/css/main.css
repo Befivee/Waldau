@@ -836,9 +836,12 @@ main {
   gap: 1.5rem;
   align-items: stretch;
 }
-.cards-grid > .tour-card,
-.cards-grid > .event-card {
+.cards-grid > .tour-card {
   height: 100%;
+}
+.cards-grid > .event-card {
+  align-self: start;
+  height: auto;
 }
 @media (min-width: 768px) {
   .cards-grid--2 {
