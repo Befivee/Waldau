@@ -53,6 +53,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IExcursionService, ExcursionService>();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IPublicEventCatalog, PublicEventCatalog>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddHostedService<BookingCleanupService>();
 builder.Services.AddScoped<IEventImageService, EventImageService>();
@@ -181,11 +182,8 @@ else
         vkOptions.ApiVersion);
 }
 
-if (!botOnly)
-{
-    Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "events"));
-    Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "excursions"));
-}
+Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "events"));
+Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads", "excursions"));
 Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data", "Backups"));
 
 try
@@ -269,6 +267,41 @@ if (telegramOptions.AcceptRelay)
         var booking = await bookings.CreateAsync(payload.ToBooking());
         notifications.ScheduleNewBookingNotification(booking);
         return Results.Ok();
+    });
+
+    app.MapGet("/internal/events", async (
+        HttpRequest request,
+        IEventService events,
+        IOptions<TelegramBotOptions> botOptions) =>
+    {
+        var expected = botOptions.Value.RelaySecret?.Trim() ?? "";
+        var provided = request.Headers["X-Relay-Secret"].ToString();
+        if (expected.Length == 0 || !CryptographicEquals(expected, provided))
+            return Results.Unauthorized();
+
+        var list = await events.GetAllAsync();
+        return Results.Ok(list.Select(EventRelayDto.From));
+    });
+
+    app.MapGet("/internal/events/files/{fileName}", (
+        string fileName,
+        HttpRequest request,
+        IWebHostEnvironment env,
+        IOptions<TelegramBotOptions> botOptions) =>
+    {
+        var expected = botOptions.Value.RelaySecret?.Trim() ?? "";
+        var provided = request.Headers["X-Relay-Secret"].ToString();
+        if (expected.Length == 0 || !CryptographicEquals(expected, provided))
+            return Results.Unauthorized();
+
+        if (!EventMediaPath.IsSafeFileName(fileName))
+            return Results.NotFound();
+
+        var physicalPath = Path.Combine(env.WebRootPath, "uploads", "events", fileName);
+        if (!System.IO.File.Exists(physicalPath))
+            return Results.NotFound();
+
+        return Results.File(physicalPath, EventMediaPath.ContentType(fileName));
     });
 }
 

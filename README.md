@@ -73,7 +73,7 @@ Telegram- и VK-боты включаются только при коррект
 - `Telegram:BotToken`, `AdminChatId`, `SecondAdminChatId`
 - `VK:AccessToken`, `GroupId`, `AdminUserId`
 
-**Сайт (Timeweb)** не ходит в Telegram API: заявки POST-ятся на Hostkey (`Telegram__RelayUrl`). Long poll Telegram/VK на Timeweb не запускать.
+**Сайт (Timeweb)** не ходит в Telegram API: заявки POST-ятся на Hostkey (`Telegram__RelayUrl`). Мероприятия и их изображения сайт **читает** с Hostkey (`GET /internal/events`, прокси `/event-media/...`). Long poll Telegram/VK на Timeweb не запускать.
 
 ```
 Telegram__DisablePolling=true
@@ -83,7 +83,7 @@ Telegram__RelaySecret=...
 
 Токены Telegram и VK в `/etc/waldau.env` на Timeweb лучше не задавать (или закомментировать), иначе два бота будут отвечать параллельно.
 
-**Бот (Hostkey)** — `Telegram__BotOnly=true`, слушает `127.0.0.1:5000`, принимает релей:
+**Бот (Hostkey)** — `Telegram__BotOnly=true`, слушает `127.0.0.1:5000`, принимает релей заявок и отдаёт каталог мероприятий:
 
 ```
 Telegram__BotToken=...
@@ -96,6 +96,15 @@ VK__AccessToken=...
 VK__GroupId=...
 VK__AdminUserId=...
 ```
+
+Синхронизация Timeweb ↔ Hostkey:
+
+| Направление | Что |
+|-------------|-----|
+| Сайт → бот | заявки (`POST /internal/telegram/booking`) |
+| Бот → сайт | мероприятия + фото (`GET /internal/events`, `/internal/events/files/...`) |
+
+Экскурсии на сайте берутся из `ExcursionCatalog` (статический каталог), не из БД бота.
 
 Скрипт консоли Hostkey: `deploy/hostkey-bot-only.sh` (quick tunnel `cloudflared-waldau`). URL туннеля прописать в Timeweb `Telegram__RelayUrl`.
 

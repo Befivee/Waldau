@@ -5,7 +5,7 @@ using WaldauCastle.ViewModels;
 
 namespace WaldauCastle.Controllers;
 
-public class HomeController(IEventService events) : Controller
+public class HomeController(IPublicEventCatalog events) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
