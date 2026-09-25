@@ -27,6 +27,9 @@ public class Event
     [Display(Name = "Дата мероприятия")]
     public DateTime EventDate { get; set; }
 
+    [Display(Name = "Коллаборация")]
+    public bool IsCollaboration { get; set; }
+
     [Display(Name = "Дата создания")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

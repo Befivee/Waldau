@@ -24,6 +24,10 @@ public class TelegramUserSession
 
     public DateTime? DraftEventDate { get; set; }
 
+    public string? DraftImagePath { get; set; }
+
+    public bool DraftIsCollaboration { get; set; }
+
     public void Reset()
     {
         State = TelegramBotState.None;
@@ -36,5 +40,7 @@ public class TelegramUserSession
         DraftTitle = null;
         DraftDescription = null;
         DraftEventDate = null;
+        DraftImagePath = null;
+        DraftIsCollaboration = false;
     }
 }

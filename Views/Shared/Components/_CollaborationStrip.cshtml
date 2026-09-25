@@ -1,0 +1,12 @@
+@model bool
+@if (Model)
+{
+    <div class="collab-strip collab-strip--partner" role="note">
+        <span class="collab-strip__text">@SiteInfo.CollaborationLabel</span>
+        <a href="@SiteInfo.PartnerUrl"
+           class="collab-strip__btn"
+           target="_blank"
+           rel="noopener"
+           aria-label="@SiteInfo.PartnerCta">↗</a>
+    </div>
+}

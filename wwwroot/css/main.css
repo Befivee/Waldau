@@ -1363,6 +1363,45 @@ main {
   display: none;
 }
 
+.collab-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.85rem;
+  margin: 0;
+  color: #fff;
+  background: #1c3b2e;
+}
+.collab-strip__text {
+  flex: 1;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+.collab-strip__btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: transparent;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.875rem;
+  line-height: 1;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.collab-strip__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #fff;
+  color: #fff;
+}
+
 .event-card__body .btn {
   margin-top: auto;
   align-self: flex-start;

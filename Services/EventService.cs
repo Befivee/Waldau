@@ -8,7 +8,8 @@ public class EventService(ApplicationDbContext context) : IEventService
 {
     public async Task<IReadOnlyList<Event>> GetAllAsync(CancellationToken cancellationToken = default) =>
         await context.Events
-            .OrderBy(e => e.EventDate)
+            .OrderByDescending(e => e.IsCollaboration)
+            .ThenBy(e => e.EventDate)
             .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<Event>> GetUpcomingAsync(int count, CancellationToken cancellationToken = default)
@@ -16,7 +17,8 @@ public class EventService(ApplicationDbContext context) : IEventService
         var today = DateTime.Today;
         return await context.Events
             .Where(e => e.EventDate >= today)
-            .OrderBy(e => e.EventDate)
+            .OrderByDescending(e => e.IsCollaboration)
+            .ThenBy(e => e.EventDate)
             .Take(count)
             .ToListAsync(cancellationToken);
     }

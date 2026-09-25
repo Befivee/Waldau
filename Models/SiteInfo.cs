@@ -13,6 +13,7 @@ public static class SiteInfo
     public const string PartnerLead =
         "Первый виноградник Калининградской области — сыроварня, дегустации и экскурсии на эко-ферме.";
     public const string PartnerCta = "Перейти на сайт фермы";
+    public const string CollaborationLabel = "Совместно с экофермой Изотов";
     public const string HomePageTitle = "Замок Вальдау - Официальный сайт";
     public const string BrowserTitle = HomePageTitle;
     public const string LogoPath = "/images/logo.svg";
